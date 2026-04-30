@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Tag/étiquette noire (forme de l'identité Sellia) -->
+  <path d="M 4 8 L 38 8 L 56 26 L 56 56 L 4 56 Z" fill="#0E1116"/>
+
+  <!-- Petit cercle blanc (trou de l'étiquette) -->
+  <circle cx="14" cy="18" r="3" fill="#FAFAF7"/>
+
+  <!-- "S" stylisé en orange ember -->
+  <path d="M 42 30 L 24 30 L 24 38 L 42 38 L 42 48 L 24 48"
+        stroke="#E84B1F"
+        stroke-width="4"
+        fill="none"
+        stroke-linecap="square"
+        stroke-linejoin="miter"/>
+</svg>
