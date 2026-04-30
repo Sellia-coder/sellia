@@ -787,10 +787,10 @@ export default function Home() {
       <div className="footer-col">
         <h5>Légal</h5>
         <ul>
-          <li><a href="#">Conditions d&apos;utilisation</a></li>
-          <li><a href="#">Politique de confidentialité</a></li>
-          <li><a href="#">Mentions légales</a></li>
-          <li><a href="#">Politique de cookies</a></li>
+          <li><a href="/conditions">Conditions d&apos;utilisation</a></li>
+          <li><a href="/confidentialite">Politique de confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+          <li><a href="/cookies">Politique de cookies</a></li>
         </ul>
       </div>
     </div>
@@ -798,7 +798,7 @@ export default function Home() {
     {/* Section sécurité & confiance */}
     <div className="footer-security">
       <div className="footer-security-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
         <span>Sécurité & Infrastructure</span>
       </div>
       <div className="footer-security-badges">
