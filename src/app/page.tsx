@@ -47,6 +47,8 @@ function detectTemplate(prompt: string): string {
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string[]>([]);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -121,70 +123,173 @@ export default function Home() {
           </div>
         </div>
         <div className="demo-body">
-          <div className="demo-prompt-wrap">
-            {/* Header du prompt avec icône et label */}
-            <div className="demo-prompt-header">
-              <div className="demo-prompt-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
-              </div>
-              <span className="demo-prompt-label">Décrivez votre activité — Sellia génère votre boutique</span>
-              <span className="demo-prompt-counter">{prompt.length} / 500</span>
-            </div>
-
-            {/* Zone de saisie principale */}
-            <textarea
-              className="demo-prompt-textarea"
-              placeholder="Exemple : Je vends des bijoux faits main pour femmes à Dakar. Ma cible : jeunes femmes 25-40 ans urbaines qui aiment le style afro-moderne. Je veux accepter Wave, Orange Money et cartes bancaires. Livraison Dakar et environs sous 48h."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value.slice(0, 500))}
-              rows={5}
-              maxLength={500}
-            />
-
-            {/* Footer avec hints et CTA */}
-            <div className="demo-prompt-footer">
-              <div className="demo-prompt-quality">
-                <div className={`quality-bar ${prompt.length >= 50 ? "active" : ""}`} />
-                <div className={`quality-bar ${prompt.length >= 150 ? "active" : ""}`} />
-                <div className={`quality-bar ${prompt.length >= 250 ? "active" : ""}`} />
-                <span className="quality-label">
-                  {prompt.length === 0 && "Commencez à écrire"}
-                  {prompt.length > 0 && prompt.length < 50 && "Ajoutez plus de détails"}
-                  {prompt.length >= 50 && prompt.length < 150 && "Bien — précisez votre cible"}
-                  {prompt.length >= 150 && prompt.length < 250 && "Très bien — mentionnez les paiements"}
-                  {prompt.length >= 250 && "Parfait — prêt à générer"}
+          <div className="demo-form-v4">
+            {/* SECTION 01 — Description */}
+            <div className="form-section">
+              <div className="form-section-head">
+                <span className="form-num">01</span>
+                <span className="form-section-label">Décrivez votre activité</span>
+                <span className="form-counter" data-state={
+                  prompt.length === 0 ? "empty" :
+                  prompt.length < 250 ? "filling" :
+                  prompt.length < 450 ? "good" : "full"
+                }>
+                  {prompt.length}<span className="form-counter-sep">/</span>500
                 </span>
               </div>
-              <button
-                className="demo-prompt-btn"
-                type="button"
-                onClick={() => runDemo()}
-                disabled={loading || prompt.trim().length === 0}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span>Générer ma boutique</span>
-              </button>
+              <textarea
+                className="form-textarea"
+                placeholder="Exemple : Je vends des bijoux faits main pour femmes à Dakar. Ma cible : jeunes femmes 25-40 ans urbaines qui aiment le style afro-moderne. Je veux accepter Wave, Orange Money et cartes bancaires. Livraison Dakar et environs sous 48h."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value.slice(0, 500))}
+                rows={5}
+                maxLength={500}
+              />
+              <div className="form-quality">
+                <div className={`quality-pip ${prompt.length >= 50 ? "active" : ""}`} />
+                <div className={`quality-pip ${prompt.length >= 150 ? "active" : ""}`} />
+                <div className={`quality-pip ${prompt.length >= 250 ? "active" : ""}`} />
+                <div className={`quality-pip ${prompt.length >= 350 ? "active" : ""}`} />
+                <span className="quality-text">
+                  {prompt.length === 0 && "Commencez à écrire votre description"}
+                  {prompt.length > 0 && prompt.length < 50 && "Continuez, ajoutez plus de détails"}
+                  {prompt.length >= 50 && prompt.length < 150 && "Bien — précisez votre cible"}
+                  {prompt.length >= 150 && prompt.length < 250 && "Très bien — mentionnez les paiements"}
+                  {prompt.length >= 250 && prompt.length < 350 && "Excellent — décrivez la livraison"}
+                  {prompt.length >= 350 && "Parfait — votre description est complète"}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="demo-suggestions">
-            <span className="demo-suggestions-label">Inspirations rapides :</span>
-            <button className="demo-suggestion" type="button" onClick={() => { const p = "Je vends des bijoux faits main au Sénégal, livraison Dakar, paiement Mobile Money. Style afro-moderne pour femmes 25-40 ans."; setPrompt(p); runDemo(p); }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
-              Bijoux faits main
-            </button>
-            <button className="demo-suggestion" type="button" onClick={() => { const p = "Je vends des cosmétiques bio naturels au Cameroun. Paiement carte et MoMo, livraison Douala et Yaoundé. Cible jeunes femmes soucieuses de la nature."; setPrompt(p); runDemo(p); }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 3v12a6 6 0 0 0 12 0V3"/><path d="M9 7h6"/><path d="M12 13v8"/><path d="M9 21h6"/></svg>
-              Cosmétiques bio
-            </button>
-            <button className="demo-suggestion" type="button" onClick={() => { const p = "Je vends une formation en ligne pour entrepreneurs africains qui veulent lancer leur business. Vidéos + accompagnement WhatsApp. Paiement carte et Mobile Money."; setPrompt(p); runDemo(p); }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Formation en ligne
-            </button>
-            <button className="demo-suggestion" type="button" onClick={() => { const p = "Je vends des vêtements féminins tendance en Côte d'Ivoire. Robes, ensembles, accessoires. Paiement Wave et Orange Money. Livraison Abidjan et villes secondaires."; setPrompt(p); runDemo(p); }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
-              Mode féminine
-            </button>
+            {/* SECTION 02 — Nom de boutique */}
+            <div className="form-section">
+              <div className="form-section-head">
+                <span className="form-num">02</span>
+                <span className="form-section-label">Nommez votre boutique</span>
+                <span className="form-counter" data-state={
+                  shopName.length === 0 ? "empty" :
+                  shopName.length < 30 ? "filling" :
+                  shopName.length < 38 ? "good" : "full"
+                }>
+                  {shopName.length}<span className="form-counter-sep">/</span>40
+                </span>
+              </div>
+              <input
+                type="text"
+                className="form-input-name"
+                placeholder="Maison Aïda, Studio Bouba, Chez Mama Awa..."
+                value={shopName}
+                onChange={(e) => setShopName(e.target.value.slice(0, 40))}
+                maxLength={40}
+              />
+              {shopName.trim().length >= 2 && (
+                <div className="form-slug-preview">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <span className="form-slug-url">
+                    {shopName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "ma-boutique"}
+                    <span className="form-slug-suffix">.getsellia.com</span>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* CTA SECTION */}
+            <div className="form-cta-zone">
+              <button
+                className="form-cta"
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("sellia_prompt", prompt);
+                    localStorage.setItem("sellia_shop_name", shopName);
+                    const params = new URLSearchParams({
+                      description: prompt,
+                      name: shopName,
+                    });
+                    window.location.href = `/generation?${params.toString()}`;
+                  }
+                }}
+                disabled={
+                  prompt.trim().length < 10 ||
+                  shopName.trim().length < 2
+                }
+              >
+                <span className="form-cta-glow"></span>
+                <span className="form-cta-content">
+                  <span>Générer ma boutique</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </span>
+              </button>
+              <p className="form-cta-status">
+                {prompt.trim().length === 0 && shopName.trim().length === 0 && "Commencez par décrire votre activité"}
+                {prompt.trim().length > 0 && prompt.trim().length < 10 && "Décrivez votre activité plus en détail"}
+                {prompt.trim().length >= 10 && shopName.trim().length === 0 && "Plus qu'à choisir un nom pour votre boutique"}
+                {prompt.trim().length >= 10 && shopName.trim().length > 0 && shopName.trim().length < 2 && "Ajoutez quelques caractères au nom"}
+                {prompt.trim().length >= 10 && shopName.trim().length >= 2 && (
+                  <span className="form-cta-status-ready">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                    Prêt à générer · cela prend 8 secondes
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* SUGGESTIONS RAPIDES */}
+            <div className="form-suggestions">
+              <span className="form-suggestions-label">Inspirations rapides :</span>
+              <div className="form-suggestions-grid">
+                <button
+                  className="form-suggestion"
+                  type="button"
+                  onClick={() => {
+                    setPrompt("Je vends des bijoux faits main au Sénégal, livraison Dakar, paiement Mobile Money. Style afro-moderne pour femmes 25-40 ans.");
+                    setShopName("Maison Aïda");
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
+                  <span>Bijoux faits main</span>
+                </button>
+                <button
+                  className="form-suggestion"
+                  type="button"
+                  onClick={() => {
+                    setPrompt("Je vends des cosmétiques bio naturels au Cameroun. Paiement carte et MoMo, livraison Douala et Yaoundé. Cible jeunes femmes soucieuses de la nature.");
+                    setShopName("Naturélle");
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 3v12a6 6 0 0 0 12 0V3"/><path d="M9 7h6"/><path d="M12 13v8"/><path d="M9 21h6"/></svg>
+                  <span>Cosmétiques bio</span>
+                </button>
+                <button
+                  className="form-suggestion"
+                  type="button"
+                  onClick={() => {
+                    setPrompt("Je vends une formation en ligne pour entrepreneurs africains qui veulent lancer leur business. Vidéos + accompagnement WhatsApp. Paiement carte et Mobile Money.");
+                    setShopName("Studio Bouba");
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  <span>Formation en ligne</span>
+                </button>
+                <button
+                  className="form-suggestion"
+                  type="button"
+                  onClick={() => {
+                    setPrompt("Je vends des vêtements féminins tendance en Côte d'Ivoire. Robes, ensembles, accessoires. Paiement Wave et Orange Money. Livraison Abidjan et villes secondaires.");
+                    setShopName("Chez Mama Awa");
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                  <span>Mode féminine</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className={`demo-loading ${loading ? "visible" : ""}`}>
@@ -232,73 +337,143 @@ export default function Home() {
 </section>
 
 {/* PARTNERS / MOYENS DE PAIEMENT */}
-<section className="partners">
+{/* PAYMENTS — Style Linear/Vercel monochrome */}
+<section className="payments-mono">
   <div className="container">
-    <div className="partners-label">Compatible avec tous les moyens de paiement de vos clients</div>
-    <div className="partners-grid">
-      {/* MTN MoMo */}
-      <div className="partner">
-        <svg width="44" height="32" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+    {/* Header minimaliste */}
+    <div className="payments-mono-header">
+      <span className="payments-mono-eyebrow">— Paiements</span>
+      <h2 className="payments-mono-title">
+        Acceptez les paiements de <em>tous vos clients</em>.
+      </h2>
+      <p className="payments-mono-subtitle">
+        Mobile Money, cartes bancaires internationales, virements. Tout est intégré, configuré et sécurisé.
+      </p>
+    </div>
+
+    {/* Logo grid monochrome */}
+    <div className="payments-mono-grid">
+      {/* MTN */}
+      <div className="payment-mono-cell" data-name="MTN MoMo">
+        <svg className="payment-mono-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg" width="90" height="60" rx="30" />
+          <text x="45" y="38" textAnchor="middle" fontSize="22" fontWeight="900" fontFamily="Arial Black, sans-serif" letterSpacing="-0.5" className="payment-mono-text">MTN</text>
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
           <rect width="90" height="60" rx="30" fill="#FFCB05"/>
           <text x="45" y="38" textAnchor="middle" fontSize="22" fontWeight="900" fill="#0033A0" fontFamily="Arial Black, sans-serif" letterSpacing="-0.5">MTN</text>
         </svg>
-        <span>MTN MoMo</span>
       </div>
 
-      {/* Orange Money */}
-      <div className="partner">
-        <svg width="44" height="32" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+      {/* Orange */}
+      <div className="payment-mono-cell" data-name="Orange Money">
+        <svg className="payment-mono-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg" width="90" height="60" rx="6" />
+          <text x="45" y="38" textAnchor="middle" fontSize="20" fontWeight="900" fontFamily="Arial Black, sans-serif" letterSpacing="-0.3" className="payment-mono-text-light">orange</text>
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
           <rect width="90" height="60" rx="6" fill="#FF7900"/>
           <text x="45" y="38" textAnchor="middle" fontSize="20" fontWeight="900" fill="white" fontFamily="Arial Black, sans-serif" letterSpacing="-0.3">orange</text>
         </svg>
-        <span>Orange Money</span>
       </div>
 
       {/* Wave */}
-      <div className="partner">
-        <svg width="44" height="32" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+      <div className="payment-mono-cell" data-name="Wave">
+        <svg className="payment-mono-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg" width="90" height="60" rx="30" />
+          <path d="M 18 38 Q 27 22, 36 38 T 54 38 T 72 38" strokeWidth="4" fill="none" strokeLinecap="round" className="payment-mono-stroke" />
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
           <rect width="90" height="60" rx="30" fill="#1DC8FF"/>
           <path d="M 18 38 Q 27 22, 36 38 T 54 38 T 72 38" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round"/>
         </svg>
-        <span>Wave</span>
       </div>
 
-      {/* Moov Money */}
-      <div className="partner">
-        <svg width="44" height="32" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+      {/* Moov */}
+      <div className="payment-mono-cell" data-name="Moov Money">
+        <svg className="payment-mono-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg" width="90" height="60" rx="6" />
+          <text x="45" y="38" textAnchor="middle" fontSize="18" fontWeight="900" fontFamily="Arial Black, sans-serif" className="payment-mono-text-light">moov</text>
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
           <rect width="90" height="60" rx="6" fill="#0066CC"/>
           <text x="45" y="38" textAnchor="middle" fontSize="18" fontWeight="900" fill="white" fontFamily="Arial Black, sans-serif">moov</text>
         </svg>
-        <span>Moov Money</span>
       </div>
 
       {/* Free Money */}
-      <div className="partner">
-        <svg width="44" height="32" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+      <div className="payment-mono-cell" data-name="Free Money">
+        <svg className="payment-mono-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg" width="90" height="60" rx="6" />
+          <text x="45" y="38" textAnchor="middle" fontSize="18" fontWeight="900" fontFamily="Arial Black, sans-serif" className="payment-mono-text-light">FREE</text>
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
           <rect width="90" height="60" rx="6" fill="#0E1116"/>
           <text x="45" y="38" textAnchor="middle" fontSize="18" fontWeight="900" fill="#E84B1F" fontFamily="Arial Black, sans-serif">FREE</text>
         </svg>
-        <span>Free Money</span>
       </div>
 
       {/* Visa */}
-      <div className="partner">
-        <svg width="56" height="32" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+      <div className="payment-mono-cell" data-name="Visa">
+        <svg className="payment-mono-logo" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg-light" width="100" height="60" rx="6" />
+          <text x="50" y="42" textAnchor="middle" fontSize="22" fontWeight="900" fontFamily="Arial, sans-serif" fontStyle="italic" letterSpacing="-0.5" className="payment-mono-text">VISA</text>
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
           <rect width="100" height="60" rx="6" fill="white" stroke="#E5E5E5" strokeWidth="1"/>
           <text x="50" y="42" textAnchor="middle" fontSize="22" fontWeight="900" fill="#1A1F71" fontFamily="Arial, sans-serif" fontStyle="italic" letterSpacing="-0.5">VISA</text>
         </svg>
-        <span>Visa</span>
       </div>
 
       {/* Mastercard */}
-      <div className="partner">
-        <svg width="56" height="32" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+      <div className="payment-mono-cell" data-name="Mastercard">
+        <svg className="payment-mono-logo" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg-light" width="100" height="60" rx="6" />
+          <circle cx="40" cy="30" r="14" className="payment-mono-circle-1" />
+          <circle cx="60" cy="30" r="14" className="payment-mono-circle-2" />
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
           <rect width="100" height="60" rx="6" fill="white" stroke="#E5E5E5" strokeWidth="1"/>
           <circle cx="40" cy="30" r="14" fill="#EB001B"/>
           <circle cx="60" cy="30" r="14" fill="#F79E1B"/>
           <path d="M 50 19 A 14 14 0 0 1 50 41 A 14 14 0 0 1 50 19 Z" fill="#FF5F00"/>
         </svg>
-        <span>Mastercard</span>
+      </div>
+
+      {/* American Express */}
+      <div className="payment-mono-cell" data-name="American Express">
+        <svg className="payment-mono-logo" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+          <rect className="payment-mono-bg" width="100" height="60" rx="6" />
+          <text x="50" y="38" textAnchor="middle" fontSize="13" fontWeight="900" fontFamily="Arial Black, sans-serif" letterSpacing="0" className="payment-mono-text-light">AMEX</text>
+        </svg>
+        <svg className="payment-color-logo" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="60" rx="6" fill="#006FCF"/>
+          <text x="50" y="38" textAnchor="middle" fontSize="13" fontWeight="900" fill="white" fontFamily="Arial Black, sans-serif" letterSpacing="0">AMEX</text>
+        </svg>
+      </div>
+    </div>
+
+    {/* Footer minimaliste */}
+    <div className="payments-mono-footer">
+      <div className="payments-mono-stats">
+        <div className="payments-mono-stat">
+          <span className="payments-mono-stat-num">15+</span>
+          <span className="payments-mono-stat-lbl">moyens de paiement</span>
+        </div>
+        <div className="payments-mono-stat">
+          <span className="payments-mono-stat-num">6</span>
+          <span className="payments-mono-stat-lbl">pays couverts</span>
+        </div>
+        <div className="payments-mono-stat">
+          <span className="payments-mono-stat-num">99.8%</span>
+          <span className="payments-mono-stat-lbl">taux de réussite</span>
+        </div>
+      </div>
+      <div className="payments-mono-trust">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>PCI-DSS Niveau 1 · TLS 1.3 · 3D Secure</span>
       </div>
     </div>
   </div>
@@ -533,80 +708,220 @@ export default function Home() {
 </section>
 
 {/* TARIFS */}
-<section className="block" id="tarifs">
+<section id="tarifs" className="block pricing-v2">
   <div className="container">
-    <div className="container-narrow" style={{ padding: 0 }}>
-      <div className="section-tag">Tarifs</div>
-      <h2 className="section-title">Commencez <em>gratuitement.</em><br />Grandissez à votre rythme.</h2>
-      <p className="section-intro">Quatre plans pour quatre étapes de votre commerce. Pas d&apos;engagement, changement à tout moment.</p>
+    {/* Header */}
+    <div className="pricing-v2-header">
+      <span className="pricing-v2-eyebrow">— Tarifs simples</span>
+      <h2 className="pricing-v2-title">
+        Commencez <em>gratuitement</em>.<br />
+        Évoluez quand vous êtes prêt.
+      </h2>
+      <p className="pricing-v2-subtitle">
+        Pas de carte bancaire requise. Pas d&apos;engagement. Annulez à tout moment.
+      </p>
+
+      {/* Toggle mensuel/annuel */}
+      <div className="pricing-v2-toggle">
+        <button
+          type="button"
+          className={`pricing-v2-toggle-btn ${billingCycle === "monthly" ? "active" : ""}`}
+          onClick={() => setBillingCycle("monthly")}
+        >
+          Mensuel
+        </button>
+        <button
+          type="button"
+          className={`pricing-v2-toggle-btn ${billingCycle === "yearly" ? "active" : ""}`}
+          onClick={() => setBillingCycle("yearly")}
+        >
+          Annuel
+          <span className="pricing-v2-toggle-badge">-20%</span>
+        </button>
+      </div>
     </div>
 
-    <div className="pricing">
-      <div className="plan">
-        <div className="plan-name">Free</div>
-        <div className="plan-tagline">Pour tester sans risque</div>
-        <div className="plan-amount">0<span className="currency">FCFA</span></div>
-        <div className="plan-period">Toujours gratuit</div>
-        <ul className="plan-features">
-          <li>1 boutique générée par IA</li>
-          <li>Jusqu&apos;à 10 produits</li>
-          <li>Sous-domaine getsellia.com</li>
-          <li>Mobile Money + cartes</li>
-          <li>Commission 4% par vente</li>
-          <li>Support communautaire</li>
-        </ul>
-        <a href="#cta-final" className="plan-cta">Commencer gratuitement</a>
-      </div>
+    {/* 2 Cards */}
+    <div className="pricing-v2-grid">
+      {/* PLAN GRATUIT */}
+      <article className="pricing-v2-card">
+        <div className="pricing-v2-card-head">
+          <div className="pricing-v2-plan-name">
+            <h3>Découverte</h3>
+            <span className="pricing-v2-plan-tag">Pour tester</span>
+          </div>
+          <p className="pricing-v2-plan-desc">
+            Lancez votre boutique gratuitement et commencez à vendre dès aujourd&apos;hui.
+          </p>
+        </div>
 
-      <div className="plan">
-        <div className="plan-name">Starter</div>
-        <div className="plan-tagline">Pour vendeurs qui décollent</div>
-        <div className="plan-amount">9 900<span className="currency">FCFA</span></div>
-        <div className="plan-period">par mois</div>
-        <ul className="plan-features">
-          <li>Jusqu&apos;à 100 produits</li>
-          <li>Domaine personnalisé</li>
-          <li>Templates IA avancés</li>
-          <li>Commission 2,5%</li>
-          <li>Email + WhatsApp client</li>
-          <li>Statistiques de base</li>
-        </ul>
-        <a href="#cta-final" className="plan-cta">Choisir Starter</a>
-      </div>
+        <div className="pricing-v2-price">
+          <span className="pricing-v2-price-amount">0</span>
+          <span className="pricing-v2-price-currency">FCFA</span>
+          <span className="pricing-v2-price-period">/ pour toujours</span>
+        </div>
 
-      <div className="plan featured">
-        <div className="plan-name">Pro</div>
-        <div className="plan-tagline">Pour commerces actifs et créateurs</div>
-        <div className="plan-amount">29 900<span className="currency">FCFA</span></div>
-        <div className="plan-period">par mois</div>
-        <ul className="plan-features">
-          <li>2 boutiques · produits illimités</li>
-          <li>Produits digitaux · livraison auto</li>
-          <li>Espace membre & abonnements</li>
-          <li>Commission 1,5%</li>
-          <li>Assistant IA client 24/7</li>
-          <li>Génération marketing illimitée</li>
-          <li>Support prioritaire</li>
-        </ul>
-        <a href="#cta-final" className="plan-cta">Choisir Pro</a>
-      </div>
+        <div className="pricing-v2-commission">
+          <span className="pricing-v2-commission-num">4%</span>
+          <span className="pricing-v2-commission-label">de commission par vente</span>
+        </div>
 
-      <div className="plan">
-        <div className="plan-name">Business</div>
-        <div className="plan-tagline">Pour commerces établis et PME</div>
-        <div className="plan-amount">39 900<span className="currency">FCFA</span></div>
-        <div className="plan-period">par mois</div>
-        <ul className="plan-features">
-          <li>5 boutiques · multi-utilisateurs</li>
-          <li>Multi-entrepôts & stock avancé</li>
-          <li>API & intégrations sur mesure</li>
-          <li>Commission 0,9%</li>
-          <li>Onboarding dédié</li>
-          <li>Account manager</li>
-          <li>Reporting comptable</li>
+        <button className="pricing-v2-cta pricing-v2-cta-ghost" type="button">
+          <span>Commencer gratuitement</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+
+        <div className="pricing-v2-divider"></div>
+
+        <span className="pricing-v2-features-label">Ce qui est inclus</span>
+        <ul className="pricing-v2-features">
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Boutique illimitée générée par IA</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Sous-domaine .getsellia.com</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Mobile Money (MTN, Orange, Wave, Moov)</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Cartes Visa &amp; Mastercard</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Jusqu&apos;à 50 produits</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Support par email (48h)</span>
+          </li>
         </ul>
-        <a href="#cta-final" className="plan-cta">Choisir Business</a>
+      </article>
+
+      {/* PLAN PRO - HIGHLIGHTED */}
+      <article className="pricing-v2-card pricing-v2-card-featured">
+        <div className="pricing-v2-badge-popular">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          <span>Le plus populaire</span>
+        </div>
+
+        <div className="pricing-v2-card-head">
+          <div className="pricing-v2-plan-name">
+            <h3>Pro</h3>
+            <span className="pricing-v2-plan-tag pricing-v2-plan-tag-pro">Pour grandir</span>
+          </div>
+          <p className="pricing-v2-plan-desc">
+            Pour les entrepreneurs sérieux qui veulent maximiser leur revenu et leur image.
+          </p>
+        </div>
+
+        <div className="pricing-v2-price">
+          <span className="pricing-v2-price-amount">
+            {billingCycle === "yearly" ? "23 920" : "29 900"}
+          </span>
+          <span className="pricing-v2-price-currency">FCFA</span>
+          <span className="pricing-v2-price-period">/ mois</span>
+        </div>
+
+        {billingCycle === "yearly" && (
+          <span className="pricing-v2-price-saving">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Vous économisez 71 760 FCFA / an
+          </span>
+        )}
+
+        <div className="pricing-v2-commission pricing-v2-commission-pro">
+          <span className="pricing-v2-commission-num">1.5%</span>
+          <span className="pricing-v2-commission-label">de commission par vente</span>
+        </div>
+
+        <button className="pricing-v2-cta pricing-v2-cta-primary" type="button">
+          <span className="pricing-v2-cta-content">
+            <span>Passer Pro maintenant</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </span>
+        </button>
+
+        <div className="pricing-v2-divider"></div>
+
+        <span className="pricing-v2-features-label">Tout du plan Découverte, plus :</span>
+        <ul className="pricing-v2-features pricing-v2-features-pro">
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span><strong>Domaine personnalisé</strong> (votremarque.com)</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span><strong>Produits illimités</strong></span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span><strong>Commission réduite à 1.5%</strong> par vente</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Personnalisation avancée (couleurs, typo, logo)</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Statistiques détaillées &amp; rapports IA</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Codes promo &amp; cagnottes</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Support prioritaire WhatsApp (4h)</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Suppression du badge &quot;Propulsé par Sellia&quot;</span>
+          </li>
+        </ul>
+      </article>
+    </div>
+
+    {/* Trust footer */}
+    <div className="pricing-v2-trust">
+      <div className="pricing-v2-trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+        <span>Paiement sécurisé · SSL TLS 1.3</span>
       </div>
+      <div className="pricing-v2-trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
+        <span>Annulation en 1 clic, à tout moment</span>
+      </div>
+      <div className="pricing-v2-trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+        <span>Garantie satisfait ou remboursé 30 jours</span>
+      </div>
+    </div>
+
+    {/* FAQ rapide */}
+    <div className="pricing-v2-faq">
+      <span className="pricing-v2-faq-label">Une question sur les tarifs ?</span>
+      <a href="#faq" className="pricing-v2-faq-link">
+        Consultez la FAQ
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </a>
     </div>
   </div>
 </section>
