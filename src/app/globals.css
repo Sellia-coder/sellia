@@ -9458,4 +9458,585 @@ footer{
   }
 }
 
-   
+/* ============================================
+   SELLIA — NAV MOBILE & RESPONSIVE FIXES
+============================================ */
+
+/* === MOBILE MENU === */
+
+@media (max-width: 980px) {
+  /* Cache la nav desktop par défaut sur mobile */
+  nav .nav-links {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(250, 250, 247, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    flex-direction: column;
+    padding: 32px 24px;
+    gap: 4px;
+    align-items: stretch;
+    overflow-y: auto;
+    z-index: 99;
+    animation: mobileMenuFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Affiche la nav quand mobile-open est actif */
+  nav.mobile-open .nav-links {
+    display: flex;
+  }
+
+  @keyframes mobileMenuFadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Style des liens dans le menu mobile */
+  nav .nav-links a {
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: background 0.15s ease;
+    text-align: left;
+    border: 1px solid transparent;
+  }
+
+  nav .nav-links a:hover {
+    background: rgba(14, 17, 22, 0.04);
+  }
+
+  /* Login link */
+  nav .nav-links .nav-login {
+    margin-top: 16px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(14, 17, 22, 0.08);
+    border-radius: 0;
+    color: rgba(14, 17, 22, 0.6);
+    font-size: 14px;
+  }
+
+  nav .nav-links .nav-login:hover {
+    background: transparent;
+    color: var(--ink);
+  }
+
+  /* CTA principal en mobile */
+  nav .nav-links .nav-cta {
+    background: var(--ember);
+    color: white;
+    text-align: center;
+    margin-top: 8px;
+    padding: 16px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(232, 75, 31, 0.25);
+  }
+
+  nav .nav-links .nav-cta:hover {
+    background: #d63d12;
+  }
+
+  /* Affiche le bouton hamburger */
+  .nav-mobile-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid rgba(14, 17, 22, 0.08);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .nav-mobile-toggle:hover {
+    background: rgba(14, 17, 22, 0.04);
+  }
+
+  /* Empêche le scroll quand le menu est ouvert */
+  nav.mobile-open + * {
+    overflow: hidden;
+  }
+}
+
+/* Sur desktop, masque le bouton hamburger */
+@media (min-width: 981px) {
+  .nav-mobile-toggle {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   RESPONSIVE FIXES — TOUTES SECTIONS
+============================================ */
+
+/* === HERO FORM RESPONSIVE === */
+@media (max-width: 768px) {
+  .hero {
+    padding: 100px 0 48px;
+  }
+
+  .hero-content {
+    padding: 0 4px;
+  }
+
+  .hero-badge {
+    font-size: 10px;
+    padding: 5px 12px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    margin-bottom: 32px;
+    padding: 0 8px;
+  }
+
+  .demo {
+    margin: 0 -4px 32px;
+    border-radius: 14px;
+  }
+
+  .demo-header {
+    padding: 12px 16px;
+  }
+
+  .demo-label {
+    font-size: 9px;
+  }
+
+  .demo-body {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 88px 0 32px;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 9vw, 44px);
+    letter-spacing: -1.5px;
+  }
+
+  .hero-sub {
+    font-size: 15px;
+  }
+
+  .hero-stats {
+    gap: 20px;
+  }
+
+  .hero-stat-num {
+    font-size: 24px;
+  }
+
+  .hero-stat-lbl {
+    font-size: 9px;
+  }
+
+  .demo-body {
+    padding: 12px 8px;
+  }
+
+  .demo-label span:last-child {
+    display: none;
+  }
+}
+
+/* === PRICING RESPONSIVE === */
+@media (max-width: 980px) {
+  .pricing-v2-grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    gap: 24px;
+  }
+
+  .pricing-v2-card-featured {
+    margin-top: 8px;
+  }
+
+  .pricing-v2-title {
+    font-size: clamp(28px, 6vw, 38px);
+  }
+}
+
+@media (max-width: 480px) {
+  .pricing-v2 {
+    padding: 56px 0;
+  }
+
+  .pricing-v2-header {
+    margin-bottom: 32px;
+  }
+
+  .pricing-v2-card {
+    padding: 24px 20px;
+  }
+
+  .pricing-v2-toggle-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .pricing-v2-toggle-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .pricing-v2-trust {
+    gap: 12px;
+  }
+
+  .pricing-v2-trust-item {
+    font-size: 11px;
+  }
+}
+
+/* === PAYMENTS MONO RESPONSIVE === */
+@media (max-width: 980px) {
+  .payments-mono {
+    padding: 64px 0;
+  }
+
+  .payments-mono-header {
+    margin-bottom: 40px;
+  }
+
+  .payments-mono-title {
+    font-size: clamp(22px, 5vw, 30px);
+  }
+
+  .payments-mono-subtitle {
+    font-size: 14px;
+  }
+
+  .payments-mono-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .payment-mono-cell {
+    min-height: 100px;
+    padding: 24px 16px;
+  }
+
+  .payment-mono-logo,
+  .payment-color-logo {
+    width: 56px;
+    height: 34px;
+  }
+}
+
+@media (max-width: 640px) {
+  .payments-mono-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .payment-mono-cell {
+    min-height: 88px;
+    padding: 20px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payments-mono {
+    padding: 48px 0;
+  }
+
+  .payments-mono-header {
+    margin-bottom: 28px;
+  }
+
+  .payment-mono-logo,
+  .payment-color-logo {
+    width: 48px;
+    height: 28px;
+  }
+
+  .payments-mono-stats {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .payments-mono-stat {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .payments-mono-stat-num {
+    font-size: 18px;
+  }
+
+  .payments-mono-trust {
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.5;
+  }
+}
+
+/* === SECTIONS GÉNÉRALES RESPONSIVE === */
+@media (max-width: 768px) {
+  section.block {
+    padding: 64px 0;
+  }
+
+  .section-tag {
+    font-size: 10px;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: clamp(26px, 5vw, 34px);
+    margin-bottom: 16px;
+  }
+
+  .section-intro {
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+}
+
+/* === PROBLEM CARDS === */
+@media (max-width: 640px) {
+  .problem-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .problem-card {
+    padding: 24px;
+  }
+
+  .problem-card h4 {
+    font-size: 18px;
+  }
+}
+
+/* === FEATURES === */
+@media (max-width: 640px) {
+  .features {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .feature {
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .feature-text h4 {
+    font-size: 17px;
+  }
+
+  .feature-text p {
+    font-size: 13px;
+  }
+}
+
+/* === STEPS === */
+@media (max-width: 768px) {
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .step {
+    padding: 24px 22px;
+  }
+}
+
+/* === PERSONAS === */
+@media (max-width: 768px) {
+  .personas {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .persona {
+    padding: 28px 24px;
+  }
+
+  .persona-name {
+    font-size: 18px;
+  }
+
+  .persona-quote {
+    font-size: 15px;
+  }
+}
+
+/* === TESTIMONIALS === */
+@media (max-width: 768px) {
+  .testimonials {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .testimonial {
+    padding: 24px 22px;
+  }
+
+  .testimonial-quote {
+    font-size: 16px;
+  }
+}
+
+/* === FAQ === */
+@media (max-width: 480px) {
+  .faq-question {
+    padding: 16px 18px;
+    font-size: 14.5px;
+    gap: 12px;
+  }
+
+  .faq-answer-inner {
+    padding: 0 18px 18px;
+    font-size: 14px;
+  }
+}
+
+/* === CTA FINAL === */
+@media (max-width: 768px) {
+  .cta-final {
+    padding: 80px 0;
+  }
+
+  .cta-final h2 {
+    font-size: clamp(32px, 7vw, 48px);
+    margin-bottom: 20px;
+  }
+
+  .cta-final p {
+    font-size: 16px;
+    margin-bottom: 28px;
+  }
+
+  .cta-final-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    justify-content: center;
+    padding: 14px 24px;
+  }
+}
+
+/* === FOOTER === */
+@media (max-width: 768px) {
+  footer {
+    padding: 48px 0 24px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 20px;
+    margin-bottom: 32px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+
+  .footer-security-badges {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .security-badge {
+    padding: 8px 12px;
+  }
+
+  .security-badge-name {
+    font-size: 10.5px;
+  }
+
+  .security-badge-detail {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footer-brand {
+    grid-column: auto;
+  }
+}
+
+/* ============================================
+   SELLIA — TESTIMONIAL AVATAR PHOTO
+============================================ */
+
+.testimonial-avatar-photo {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  position: relative;
+  overflow: visible;
+  flex-shrink: 0;
+  background: rgba(14, 17, 22, 0.04);
+  border: 2px solid var(--ivory);
+  box-shadow:
+    0 1px 3px rgba(14, 17, 22, 0.08),
+    0 4px 12px rgba(14, 17, 22, 0.06),
+    0 0 0 1px rgba(14, 17, 22, 0.06);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.testimonial-avatar-photo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.testimonial:hover .testimonial-avatar-photo {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow:
+    0 2px 6px rgba(14, 17, 22, 0.1),
+    0 8px 20px rgba(14, 17, 22, 0.12),
+    0 0 0 2px rgba(232, 75, 31, 0.2);
+}
+
+.testimonial:hover .testimonial-avatar-photo img {
+  transform: scale(1.08);
+}
+
+/* Le badge vérifié reste comme avant, juste assurer qu'il est au-dessus */
+.testimonial-avatar-photo .testimonial-avatar-verify {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  z-index: 2;
+}

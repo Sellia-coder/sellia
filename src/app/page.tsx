@@ -46,6 +46,7 @@ function detectTemplate(prompt: string): string {
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [shopName, setShopName] = useState("");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
@@ -76,7 +77,7 @@ export default function Home() {
   return (
     <>
 {/* NAV */}
-<nav className={scrolled ? "scrolled" : ""}>
+<nav className={`${scrolled ? "scrolled" : ""} ${mobileMenuOpen ? "mobile-open" : ""}`}>
   <div className="nav-inner">
     <a href="/" className="nav-logo" aria-label="Sellia">
       <svg width="148" height="40" viewBox="0 0 220 60" fill="none">
@@ -87,15 +88,30 @@ export default function Home() {
       </svg>
     </a>
     <div className="nav-links">
-      <a href="#comment">Comment ça marche</a>
-      <a href="#pour-qui">Pour qui</a>
-      <a href="#tarifs">Tarifs</a>
-      <a href="#faq">FAQ</a>
-      <a href="/login" className="nav-login">Connexion</a>
-      <a href="#cta-final" className="nav-cta">Créer ma boutique</a>
+      <a href="#comment" onClick={() => setMobileMenuOpen(false)}>Comment ça marche</a>
+      <a href="#pour-qui" onClick={() => setMobileMenuOpen(false)}>Pour qui</a>
+      <a href="#tarifs" onClick={() => setMobileMenuOpen(false)}>Tarifs</a>
+      <a href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+      <a href="/connexion" className="nav-login">Connexion</a>
+      <a href="#hero-form" className="nav-cta" onClick={() => setMobileMenuOpen(false)}>Créer ma boutique</a>
     </div>
-    <button className="nav-mobile-toggle" aria-label="Menu">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <button
+      className="nav-mobile-toggle"
+      aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+    >
+      {mobileMenuOpen ? (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      ) : (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      )}
     </button>
   </div>
 </nav>
@@ -123,7 +139,7 @@ export default function Home() {
           </div>
         </div>
         <div className="demo-body">
-          <div className="demo-form-v4">
+          <div className="demo-form-v4" id="hero-form">
             {/* SECTION 01 — Description */}
             <div className="form-section">
               <div className="form-section-head">
@@ -937,8 +953,8 @@ export default function Home() {
       <div className="testimonial">
         <p className="testimonial-quote">J&apos;ai créé ma boutique en parlant à mon téléphone. Première vente trois jours après. C&apos;est bluffant.</p>
         <div className="testimonial-author">
-          <div className="testimonial-avatar testimonial-avatar-1">
-            M
+          <div className="testimonial-avatar testimonial-avatar-photo">
+            <img src="/testimonials/marie-claire.jpg" alt="Marie-Claire N." width="52" height="52" loading="lazy" />
             <span className="testimonial-avatar-verify">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </span>
@@ -952,8 +968,8 @@ export default function Home() {
       <div className="testimonial">
         <p className="testimonial-quote">Je passais 5 heures par jour sur WhatsApp. Sellia me les a rendues. Mes ventes ont doublé en deux mois.</p>
         <div className="testimonial-author">
-          <div className="testimonial-avatar testimonial-avatar-2">
-            I
+          <div className="testimonial-avatar testimonial-avatar-photo">
+            <img src="/testimonials/ibrahim.jpg" alt="Ibrahim D." width="52" height="52" loading="lazy" />
             <span className="testimonial-avatar-verify">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </span>
@@ -967,8 +983,8 @@ export default function Home() {
       <div className="testimonial">
         <p className="testimonial-quote">Enfin une plateforme qui parle français et qui comprend Mobile Money. Mes clients sont rassurés, je suis tranquille.</p>
         <div className="testimonial-author">
-          <div className="testimonial-avatar testimonial-avatar-3">
-            A
+          <div className="testimonial-avatar testimonial-avatar-photo">
+            <img src="/testimonials/awa.jpg" alt="Awa K." width="52" height="52" loading="lazy" />
             <span className="testimonial-avatar-verify">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </span>
@@ -1055,7 +1071,7 @@ export default function Home() {
       <h2>Décrivez ce que vous vendez.<br /><em>Commencez à gagner aujourd&apos;hui.</em></h2>
       <p>Créez votre boutique en moins d&apos;une minute. Aucune carte bancaire requise. Vous gardez 100% de vos ventes en plan Free.</p>
       <div className="cta-final-buttons">
-        <a href="#hero" className="btn-primary">
+        <a href="#hero-form" className="btn-primary">
           <span>Créer ma boutique</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
