@@ -10040,3 +10040,872 @@ footer{
   right: -2px;
   z-index: 2;
 }
+
+/* ============================================
+   SELLIA — GENERATION LIGHT MODE
+============================================ */
+
+.gen-light-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FAFAF7 0%, #F5F1EA 100%);
+  color: #0E1116;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+}
+
+/* Background subtil */
+.gen-light-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gen-light-glow {
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(232, 75, 31, 0.06) 0%, transparent 70%);
+}
+
+.gen-light-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(14, 17, 22, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 17, 22, 0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+/* Logo */
+.gen-light-logo {
+  position: fixed;
+  top: 32px;
+  left: 32px;
+  z-index: 50;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.gen-light-logo:hover {
+  opacity: 1;
+}
+
+/* Container */
+.gen-light-container {
+  position: relative;
+  z-index: 10;
+  max-width: 720px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Header */
+.gen-light-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gen-light-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(232, 75, 31, 0.08);
+  border: 1px solid rgba(232, 75, 31, 0.2);
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #E84B1F;
+  font-weight: 500;
+  align-self: center;
+}
+
+.gen-light-eyebrow-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #E84B1F;
+  animation: genLightPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes genLightPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.gen-light-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.1;
+  font-weight: 400;
+  color: #0E1116;
+  margin: 0;
+  letter-spacing: -1.4px;
+}
+
+.gen-light-title em {
+  font-style: italic;
+  color: #E84B1F;
+}
+
+.gen-light-subtitle {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(14, 17, 22, 0.6);
+  margin: 0 auto;
+  max-width: 540px;
+}
+
+/* Progress bar globale */
+.gen-light-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid rgba(14, 17, 22, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(14, 17, 22, 0.04);
+}
+
+.gen-light-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(14, 17, 22, 0.06);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+}
+
+.gen-light-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #E84B1F, #ff7849);
+  border-radius: 100px;
+  transition: width 0.2s ease;
+  box-shadow: 0 0 12px rgba(232, 75, 31, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.gen-light-progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: genLightShine 1.6s linear infinite;
+}
+
+@keyframes genLightShine {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.gen-light-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gen-light-progress-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(14, 17, 22, 0.5);
+  font-weight: 500;
+}
+
+.gen-light-progress-value {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #E84B1F;
+  letter-spacing: -0.4px;
+}
+
+/* Steps */
+.gen-light-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: white;
+  border: 1px solid rgba(14, 17, 22, 0.06);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow:
+    0 1px 3px rgba(14, 17, 22, 0.04),
+    0 8px 24px rgba(14, 17, 22, 0.04);
+}
+
+.gen-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.gen-step.is-pending {
+  opacity: 0.45;
+}
+
+.gen-step.is-done {
+  background: rgba(34, 197, 94, 0.04);
+}
+
+.gen-step.is-active {
+  background: rgba(232, 75, 31, 0.04);
+  border: 1px solid rgba(232, 75, 31, 0.15);
+}
+
+.gen-step-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gen-step.is-pending .gen-step-icon {
+  background: rgba(14, 17, 22, 0.04);
+  border: 1px solid rgba(14, 17, 22, 0.08);
+  color: rgba(14, 17, 22, 0.4);
+}
+
+.gen-step.is-active .gen-step-icon {
+  background: rgba(232, 75, 31, 0.1);
+  border: 1px solid rgba(232, 75, 31, 0.3);
+  color: #E84B1F;
+}
+
+.gen-step.is-done .gen-step-icon {
+  background: rgb(34, 197, 94);
+  border: 1px solid rgb(34, 197, 94);
+  color: white;
+}
+
+.gen-step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.gen-step-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(232, 75, 31, 0.25);
+  border-top-color: #E84B1F;
+  border-radius: 50%;
+  animation: genLightSpin 0.7s linear infinite;
+}
+
+@keyframes genLightSpin {
+  to { transform: rotate(360deg); }
+}
+
+.gen-step-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gen-step-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0E1116;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
+}
+
+.gen-step-detail {
+  font-size: 12px;
+  color: rgba(14, 17, 22, 0.55);
+  line-height: 1.4;
+}
+
+.gen-step.is-done .gen-step-label {
+  color: rgba(14, 17, 22, 0.65);
+}
+
+.gen-step.is-active .gen-step-label {
+  color: #0E1116;
+  font-weight: 600;
+}
+
+/* Progress par étape */
+.gen-step-progress {
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: rgba(232, 75, 31, 0.08);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.gen-step-progress-fill {
+  height: 100%;
+  background: #E84B1F;
+  box-shadow: 0 0 6px rgba(232, 75, 31, 0.5);
+  transition: width 0.05s linear;
+}
+
+.gen-step-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: rgb(21, 128, 61);
+  font-weight: 600;
+  flex-shrink: 0;
+  padding: 3px 8px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 4px;
+}
+
+/* Footer info pills */
+.gen-light-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gen-light-info-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(14, 17, 22, 0.06);
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(14, 17, 22, 0.6);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(10px);
+}
+
+.gen-light-info-pill svg {
+  color: #E84B1F;
+  flex-shrink: 0;
+}
+
+/* Fallback Suspense */
+.gen-light-spinner-fallback {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(232, 75, 31, 0.25);
+  border-top-color: #E84B1F;
+  border-radius: 50%;
+  animation: genLightSpin 0.7s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gen-light-page {
+    padding: 48px 16px;
+    align-items: flex-start;
+    padding-top: 80px;
+  }
+
+  .gen-light-logo {
+    top: 20px;
+    left: 20px;
+  }
+
+  .gen-light-logo svg {
+    width: 100px;
+    height: 28px;
+  }
+
+  .gen-light-container {
+    gap: 28px;
+  }
+
+  .gen-light-title {
+    font-size: clamp(24px, 7vw, 32px);
+    letter-spacing: -1px;
+  }
+
+  .gen-light-subtitle {
+    font-size: 14px;
+  }
+
+  .gen-light-progress {
+    padding: 14px 16px;
+  }
+
+  .gen-light-steps {
+    padding: 12px;
+    gap: 6px;
+  }
+
+  .gen-step {
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .gen-step-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .gen-step-label {
+    font-size: 13.5px;
+  }
+
+  .gen-step-detail {
+    font-size: 11.5px;
+  }
+
+  .gen-step-status {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .gen-light-page {
+    padding: 40px 12px 32px;
+  }
+
+  .gen-light-logo {
+    top: 16px;
+    left: 16px;
+  }
+
+  .gen-light-logo svg {
+    width: 88px;
+    height: 24px;
+  }
+
+  .gen-light-eyebrow {
+    font-size: 10px;
+    padding: 5px 12px;
+  }
+
+  .gen-step-detail {
+    display: none;
+  }
+
+  .gen-step-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .gen-step-num {
+    font-size: 10px;
+  }
+
+  .gen-light-footer {
+    gap: 8px;
+  }
+
+  .gen-light-info-pill {
+    font-size: 10px;
+    padding: 6px 12px;
+  }
+}
+
+/* ============================================
+   FIX — Menu mobile au-dessus des sections
+============================================ */
+
+/* Le nav doit être au-dessus de tout */
+nav {
+  z-index: 1000 !important;
+}
+
+/* Le menu mobile encore plus haut */
+nav.mobile-open .nav-links {
+  z-index: 999 !important;
+}
+
+/* Empêche les sections suivantes de passer devant */
+section,
+.partners,
+.payments-mono,
+.payments-v2,
+.cta-final,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Le hero doit aussi avoir un z-index propre */
+.hero {
+  position: relative;
+  z-index: 1;
+}
+
+/* Quand le menu mobile est ouvert, désactive le scroll body */
+@media (max-width: 980px) {
+  body:has(nav.mobile-open) {
+    overflow: hidden;
+  }
+}
+
+/* ============================================
+   FIX — Apercu responsive complet + sidebar mobile en grille
+============================================ */
+
+/* Sur tablette/mobile, la sidebar passe en grille rectangulaire 2x2 */
+@media (max-width: 1024px) {
+  .apercu-v2-main {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+    gap: 20px;
+  }
+
+  .apercu-v2-sidebar {
+    position: static;
+    order: 2;
+    transform: none;
+    opacity: 1;
+  }
+
+  /* Card principale en grille 2x2 sur tablette/mobile */
+  .apercu-v2-sidebar-main {
+    padding: 20px;
+  }
+
+  /* La timeline (temps de génération + checks) en 2 colonnes propres */
+  .apercu-v2-timeline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+  }
+
+  .apercu-v2-timeline::before {
+    display: none;
+  }
+
+  .apercu-v2-timeline-item {
+    background: rgba(14, 17, 22, 0.025);
+    border: 1px solid rgba(14, 17, 22, 0.05);
+    border-radius: 10px;
+    padding: 10px 12px;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .apercu-v2-timeline-dot {
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+  }
+
+  .apercu-v2-timeline-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .apercu-v2-timeline-title {
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  .apercu-v2-timeline-desc {
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+
+  .apercu-v2-timeline-time {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .apercu-v2-hero {
+    padding: 32px 20px 16px;
+  }
+
+  .apercu-v2-hero-title {
+    font-size: clamp(28px, 6vw, 36px);
+    letter-spacing: -1px;
+  }
+
+  .apercu-v2-hero-subtitle {
+    font-size: 14px;
+  }
+
+  /* Stats premium en grille 2x2 sur mobile */
+  .apercu-v2-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .apercu-v2-stat {
+    align-items: flex-start;
+    background: rgba(14, 17, 22, 0.025);
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(14, 17, 22, 0.04);
+  }
+
+  .apercu-v2-stat-value {
+    font-size: 22px;
+    letter-spacing: -0.6px;
+  }
+
+  .apercu-v2-stat-unit {
+    font-size: 12px;
+  }
+
+  .apercu-v2-stat-label {
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+
+  .apercu-v2-stat-divider {
+    display: none !important;
+  }
+
+  /* Topbar */
+  .apercu-v2-topbar {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .apercu-v2-topbar-status {
+    display: none;
+  }
+
+  .apercu-v2-btn-ghost,
+  .apercu-v2-btn-primary {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Browser mockup */
+  .apercu-v2-browser {
+    border-radius: 12px;
+  }
+
+  .apercu-v2-browser-bar {
+    padding: 10px 12px;
+  }
+
+  .apercu-v2-browser-url {
+    font-size: 10.5px;
+    padding: 5px 10px;
+  }
+
+  /* Boutique simulée */
+  .apercu-v2-shop-nav {
+    padding: 14px 16px;
+  }
+
+  .apercu-v2-shop-nav ul {
+    display: none;
+  }
+
+  .apercu-v2-shop-brand {
+    font-size: 18px;
+  }
+
+  .apercu-v2-shop-hero {
+    padding: 32px 20px;
+    gap: 24px;
+  }
+
+  .apercu-v2-shop-title {
+    font-size: 28px;
+    letter-spacing: -0.8px;
+  }
+
+  .apercu-v2-shop-desc {
+    font-size: 13px;
+  }
+
+  .apercu-v2-shop-products {
+    padding: 32px 20px;
+  }
+
+  .apercu-v2-shop-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .apercu-v2-shop-product-info h4 {
+    font-size: 15px;
+  }
+
+  .apercu-v2-shop-product-price {
+    font-size: 16px;
+  }
+
+  /* Sidebar card */
+  .apercu-v2-sidebar-main {
+    padding: 18px;
+  }
+
+  .apercu-v2-sidebar-title {
+    font-size: 22px;
+  }
+
+  .apercu-v2-sidebar-subtitle {
+    font-size: 12.5px;
+  }
+
+  .apercu-v2-cta-primary {
+    padding: 13px 20px;
+    font-size: 13.5px;
+  }
+
+  /* Compare bars en mobile */
+  .apercu-v2-compare {
+    padding: 16px;
+  }
+
+  .apercu-v2-compare-row {
+    grid-template-columns: 70px 1fr 50px;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .apercu-v2-compare-time {
+    font-size: 10.5px;
+  }
+
+  /* Cache annotations sur mobile */
+  .apercu-v2-annotation {
+    display: none !important;
+  }
+
+  /* Témoignage flottant en mobile */
+  .apercu-v2-testimonial {
+    bottom: 88px;
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    padding: 12px 14px;
+  }
+
+  .apercu-v2-testimonial-text {
+    font-size: 12px;
+  }
+
+  /* After section */
+  .apercu-v2-after {
+    padding: 48px 20px;
+  }
+
+  .apercu-v2-after-title {
+    font-size: clamp(24px, 6vw, 32px);
+  }
+
+  .apercu-v2-after-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .apercu-v2-after-card {
+    padding: 18px 14px;
+  }
+
+  .apercu-v2-after-card h3 {
+    font-size: 15px;
+  }
+
+  .apercu-v2-after-card p {
+    font-size: 12px;
+  }
+
+  /* Mobile CTA sticky */
+  .apercu-v2-mobile-cta {
+    display: block;
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 90;
+  }
+}
+
+@media (max-width: 480px) {
+  .apercu-v2-shop-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .apercu-v2-after-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stats restent en 2x2 même très petit */
+  .apercu-v2-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .apercu-v2-stat {
+    padding: 10px 12px;
+  }
+
+  .apercu-v2-stat-value {
+    font-size: 18px;
+  }
+
+  /* Timeline reste en 2x2 */
+  .apercu-v2-timeline {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px;
+  }
+
+  .apercu-v2-timeline-item {
+    padding: 8px 10px;
+  }
+
+  .apercu-v2-timeline-title {
+    font-size: 11px;
+  }
+
+  .apercu-v2-timeline-desc {
+    font-size: 10px;
+  }
+
+  /* Hero shop */
+  .apercu-v2-shop-hero-card {
+    width: 200px;
+  }
+
+  .apercu-v2-shop-hero-card-secondary {
+    width: 130px;
+    right: -16px;
+    top: 20px;
+  }
+}

@@ -21,18 +21,46 @@ export default function Apercu() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Priorité 1 : Lire les paramètres URL (venant de /generation)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlDescription = urlParams.get("description");
+      const urlName = urlParams.get("name");
+
+      if (urlDescription && urlName) {
+        // Construire l'objet shop depuis les URL params
+        const shopFromUrl: GeneratedShop = {
+          description: urlDescription,
+          name: urlName,
+          tagline: `Découvrez ${urlName}, votre boutique générée par Sellia.`,
+          generatedAt: new Date().toISOString(),
+        };
+        setShop(shopFromUrl);
+
+        // Sauvegarder en localStorage pour compatibilité future
+        try {
+          localStorage.setItem("sellia_generated_shop", JSON.stringify(shopFromUrl));
+        } catch {
+          // ignore localStorage errors
+        }
+
+        setTimeout(() => setLoaded(true), 100);
+        return;
+      }
+
+      // Priorité 2 : Fallback sur localStorage (anciens utilisateurs)
       const stored = localStorage.getItem("sellia_generated_shop");
       if (stored) {
         try {
           setShop(JSON.parse(stored));
+          setTimeout(() => setLoaded(true), 100);
+          return;
         } catch {
-          // fallback
+          // fallback below
         }
-      } else {
-        window.location.href = "/";
-        return;
       }
-      setTimeout(() => setLoaded(true), 100);
+
+      // Priorité 3 : Si rien, rediriger vers landing
+      window.location.href = "/";
     }
   }, []);
 
