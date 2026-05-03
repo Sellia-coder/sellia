@@ -12028,36 +12028,56 @@ footer {
 .dash-user-menu-logout:hover { background: var(--dash-danger-bg); color: var(--dash-danger); }
 .dash-user-menu-logout:hover svg { color: var(--dash-danger); }
 
-/* FOOTER */
+/* DASHBOARD FOOTER (no black background, subtle copyright) */
 .dash-footer {
-  margin-top: 48px;
-  padding: 24px 0 16px;
+  background: transparent !important;
   border-top: 1px solid var(--dash-border);
+  padding: 20px 32px;
+  margin-top: 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   flex-wrap: wrap;
-  gap: 12px;
+  color: var(--dash-text-tertiary);
 }
 .dash-footer-copyright {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--dash-text-tertiary);
   font-weight: 500;
 }
 .dash-footer-links {
   display: flex;
-  gap: 6px;
+  gap: 16px;
   align-items: center;
-  font-size: 11.5px;
+  flex-wrap: wrap;
 }
 .dash-footer-links a {
+  font-size: 12px;
   color: var(--dash-text-tertiary);
   text-decoration: none;
   transition: color 0.15s;
-  font-weight: 500;
 }
-.dash-footer-links a:hover { color: var(--dash-text-secondary); }
-.dash-footer-links span { color: var(--dash-text-tertiary); opacity: 0.5; }
+.dash-footer-links a:hover {
+  color: var(--dash-text-secondary);
+}
+
+/* Override any global footer styling that might leak into dashboard */
+.dash-shell footer {
+  background: transparent !important;
+}
+.dash-shell .dash-footer {
+  background: transparent !important;
+  color: var(--dash-text-tertiary) !important;
+}
+
+@media (max-width: 768px) {
+  .dash-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+}
 
 /* RESPONSIVE COMMERCE */
 @media (max-width: 768px) {
@@ -12075,7 +12095,6 @@ footer {
   .dash-ai-title { font-size: 17px; }
   .dash-ai-card-header { flex-direction: column; gap: 10px; }
   .dash-table-search input { width: 100%; }
-  .dash-footer { flex-direction: column; align-items: flex-start; }
 }
 
 /* ============================================
