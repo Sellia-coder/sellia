@@ -11322,3 +11322,143 @@ footer {
   .dash-page-actions { flex-wrap: wrap; }
   .dash-page-actions .dash-btn { flex: 1; }
 }
+
+/* ============================================
+   SELLIA — VERIFY EMAIL CODE INPUTS (Stripe-style)
+============================================ */
+
+.auth-code-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.auth-code-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink, #0E1116);
+  letter-spacing: -0.1px;
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-code-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.auth-code-input {
+  flex: 1;
+  min-width: 0;
+  height: 56px;
+  border: 1.5px solid rgba(14, 17, 22, 0.12);
+  border-radius: 10px;
+  background: white;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: #0E1116;
+  letter-spacing: -0.5px;
+  outline: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  -moz-appearance: textfield;
+}
+
+.auth-code-input::-webkit-inner-spin-button,
+.auth-code-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.auth-code-input:hover {
+  border-color: rgba(14, 17, 22, 0.25);
+}
+
+.auth-code-input:focus {
+  border-color: #E84B1F;
+  box-shadow: 0 0 0 3px rgba(232, 75, 31, 0.12);
+  background: white;
+}
+
+.auth-code-input.filled {
+  border-color: rgba(232, 75, 31, 0.45);
+  background: rgba(232, 75, 31, 0.02);
+}
+
+.auth-code-input.has-error {
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+  animation: codeShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes codeShake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+
+.auth-code-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #DC2626;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.auth-code-error svg {
+  flex-shrink: 0;
+  color: #DC2626;
+}
+
+.auth-code-help {
+  font-size: 11.5px;
+  color: rgba(14, 17, 22, 0.5);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.auth-code-tips {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(14, 17, 22, 0.08);
+}
+
+.auth-spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(14, 17, 22, 0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive code inputs */
+@media (max-width: 480px) {
+  .auth-code-inputs {
+    gap: 6px;
+  }
+  .auth-code-input {
+    height: 52px;
+    font-size: 22px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-code-input {
+    height: 48px;
+    font-size: 20px;
+  }
+}

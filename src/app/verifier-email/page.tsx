@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export default function VerifierEmail() {
+function VerifierEmailContent() {
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "votre adresse email";
+
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [resendCount, setResendCount] = useState(0);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isResending, setIsResending] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -14,6 +22,71 @@ export default function VerifierEmail() {
       return () => clearTimeout(timer);
     }
   }, [resendCooldown]);
+
+  // Auto-focus premier input
+  useEffect(() => {
+    inputRefs.current[0]?.focus();
+  }, []);
+
+  const handleCodeChange = (index: number, value: string) => {
+    // Accepter uniquement chiffres
+    if (value && !/^\d$/.test(value)) return;
+
+    const newCode = [...code];
+    newCode[index] = value;
+    setCode(newCode);
+    setError(null);
+
+    // Auto-focus suivant
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Backspace : retour au précédent si vide
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+    // ArrowLeft / ArrowRight pour navigation
+    if (e.key === "ArrowLeft" && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+    if (e.key === "ArrowRight" && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 6) {
+      setCode(pasted.split(""));
+      inputRefs.current[5]?.focus();
+    } else if (pasted.length > 0) {
+      const newCode = [...code];
+      pasted.split("").forEach((char, i) => {
+        if (i < 6) newCode[i] = char;
+      });
+      setCode(newCode);
+      inputRefs.current[Math.min(pasted.length, 5)]?.focus();
+    }
+  };
+
+  const handleVerify = () => {
+    const fullCode = code.join("");
+    if (fullCode.length !== 6) {
+      setError("Veuillez saisir les 6 chiffres du code");
+      return;
+    }
+    setIsVerifying(true);
+    setError(null);
+    // Mode bêta : n'importe quel code 6 chiffres marche.
+    // Quand le backend sera prêt, remplacer par un vrai appel API.
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 800);
+  };
 
   const handleResend = () => {
     if (resendCooldown > 0) return;
@@ -24,6 +97,8 @@ export default function VerifierEmail() {
       setResendCooldown(60);
     }, 1500);
   };
+
+  const codeFilled = code.every(c => c !== "");
 
   return (
     <div className="auth-page">
@@ -37,18 +112,15 @@ export default function VerifierEmail() {
               <text x="68" y="44" fontFamily="Inter, system-ui, sans-serif" fontSize="32" fontWeight="600" fill="#FAFAF7" letterSpacing="-1.2">sellia</text>
             </svg>
           </Link>
-
           <div className="auth-editorial-quote">
             <span className="auth-editorial-tag">— Une dernière étape</span>
             <h2 className="auth-editorial-headline">
-              Vérifiez votre boîte mail. <em>Et c&apos;est parti.</em>
+              Vérifiez votre identité. <em>Et c&apos;est parti.</em>
             </h2>
             <p className="auth-editorial-sub">
-              Nous protégeons votre compte dès le premier instant. Confirmez votre email pour activer votre boutique Sellia.
+              Nous protégeons votre compte dès le premier instant. Saisissez le code à 6 chiffres reçu par email pour activer votre boutique Sellia.
             </p>
           </div>
-
-          {/* Steps progression */}
           <div className="auth-steps">
             <div className="auth-step auth-step-done">
               <div className="auth-step-marker">
@@ -67,7 +139,7 @@ export default function VerifierEmail() {
               </div>
               <div className="auth-step-content">
                 <span className="auth-step-title">Vérification email</span>
-                <span className="auth-step-desc">Confirmez votre adresse</span>
+                <span className="auth-step-desc">Saisissez le code reçu</span>
               </div>
             </div>
             <div className="auth-step-line"></div>
@@ -78,21 +150,6 @@ export default function VerifierEmail() {
                 <span className="auth-step-desc">Décrivez ce que vous vendez</span>
               </div>
             </div>
-            <div className="auth-step-line"></div>
-            <div className="auth-step">
-              <div className="auth-step-marker">4</div>
-              <div className="auth-step-content">
-                <span className="auth-step-title">Configuration paiements</span>
-                <span className="auth-step-desc">MTN, Orange, Wave, cartes</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="auth-security">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-            <span>Sécurisé par Cloudflare · SSL TLS 1.3 · AES-256</span>
           </div>
         </div>
       </aside>
@@ -110,22 +167,102 @@ export default function VerifierEmail() {
         <div className="auth-form-container">
           <div className="auth-verify-icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <span className="auth-verify-pulse"></span>
           </div>
 
           <div className="auth-form-header">
             <span className="auth-form-eyebrow">Étape 2 sur 4</span>
-            <h1 className="auth-form-title">Vérifiez votre <em>email</em>.</h1>
+            <h1 className="auth-form-title">Saisissez votre <em>code</em>.</h1>
             <p className="auth-form-subtitle">
-              Nous venons de vous envoyer un lien de confirmation. Cliquez dessus pour activer votre compte.
+              Nous avons envoyé un code à 6 chiffres à <strong>{email}</strong>. Saisissez-le ci-dessous pour confirmer votre adresse.
             </p>
           </div>
 
-          {/* Tips */}
-          <div className="auth-tips">
+          {/* Code input 6 chiffres */}
+          <div className="auth-code-wrap">
+            <label className="auth-code-label">Code de vérification</label>
+            <div className="auth-code-inputs">
+              {code.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => { inputRefs.current[index] = el; }}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleCodeChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={index === 0 ? handlePaste : undefined}
+                  className={`auth-code-input ${error ? "has-error" : ""} ${digit ? "filled" : ""}`}
+                  aria-label={`Chiffre ${index + 1}`}
+                  autoComplete={index === 0 ? "one-time-code" : "off"}
+                />
+              ))}
+            </div>
+            {error && (
+              <div className="auth-code-error">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{error}</span>
+              </div>
+            )}
+            <p className="auth-code-help">
+              Vous pouvez coller le code en entier dans le premier champ.
+            </p>
+          </div>
+
+          {resendCount > 0 && (
+            <div className="auth-success-banner">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+              <span>Email renvoyé avec succès</span>
+            </div>
+          )}
+
+          <div className="auth-actions-stack">
+            <button
+              onClick={handleVerify}
+              disabled={!codeFilled || isVerifying}
+              className="auth-submit-btn"
+            >
+              {isVerifying ? (
+                <>
+                  <span className="auth-spinner"></span>
+                  <span>Vérification...</span>
+                </>
+              ) : (
+                <>
+                  <span>Vérifier mon email</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleResend}
+              disabled={isResending || resendCooldown > 0}
+              className="auth-secondary-btn"
+            >
+              {isResending ? (
+                <>
+                  <span className="auth-spinner-sm"></span>
+                  <span>Envoi en cours...</span>
+                </>
+              ) : resendCooldown > 0 ? (
+                <span>Renvoyer le code dans {resendCooldown}s</span>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+                  <span>Renvoyer le code</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Tips minimaliste */}
+          <div className="auth-code-tips">
             <h3 className="auth-tips-title">L&apos;email n&apos;arrive pas ?</h3>
             <ul className="auth-tips-list">
               <li>
@@ -143,44 +280,11 @@ export default function VerifierEmail() {
             </ul>
           </div>
 
-          {resendCount > 0 && (
-            <div className="auth-success-banner">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-              <span>Email renvoyé avec succès</span>
-            </div>
-          )}
-
-          <div className="auth-actions-stack">
-            <button
-              onClick={handleResend}
-              disabled={isResending || resendCooldown > 0}
-              className="auth-submit-btn"
-            >
-              {isResending ? (
-                <>
-                  <span className="auth-spinner"></span>
-                  <span>Envoi en cours...</span>
-                </>
-              ) : resendCooldown > 0 ? (
-                <span>Renvoyer dans {resendCooldown}s</span>
-              ) : (
-                <>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
-                  <span>Renvoyer l&apos;email</span>
-                </>
-              )}
-            </button>
-
-            <Link href="/inscription" className="auth-secondary-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
-              <span>Modifier mon adresse email</span>
-            </Link>
-          </div>
-
           <p className="auth-alt-link">
-            Besoin d&apos;aide ?{" "}
+            <Link href="/inscription" className="auth-link">Modifier mon adresse email</Link>
+            {" · "}
             <a href="mailto:support@getsellia.com" className="auth-link auth-link-strong">
-              Contactez le support
+              Contacter le support
             </a>
           </p>
         </div>
@@ -192,5 +296,13 @@ export default function VerifierEmail() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function VerifierEmail() {
+  return (
+    <Suspense fallback={<div className="auth-page"><div className="auth-spinner" /></div>}>
+      <VerifierEmailContent />
+    </Suspense>
   );
 }
