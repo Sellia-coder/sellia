@@ -25,11 +25,10 @@ export default function Connexion() {
     if (Object.keys(newErrors).length > 0) return;
 
     setIsLoading(true);
-    // Mock API call
+    // Pour l'instant, redirection directe (auth fake)
     setTimeout(() => {
-      setIsLoading(false);
-      setErrors({ form: "Email ou mot de passe incorrect" });
-    }, 1500);
+      window.location.href = "/dashboard";
+    }, 600);
   };
 
   const handleGoogleLogin = () => {

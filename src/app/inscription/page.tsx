@@ -61,7 +61,7 @@ export default function Inscription() {
 
     setIsLoading(true);
     setTimeout(() => {
-      window.location.href = "/verifier-email";
+      window.location.href = "/dashboard";
     }, 1500);
   };
 
