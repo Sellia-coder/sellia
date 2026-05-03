@@ -110,35 +110,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <div className="dash-nav-section">
           <div className="dash-nav-section-label">Boutique</div>
-          <a className="dash-nav-item">
+          <Link className={`dash-nav-item ${pathname.startsWith("/dashboard/apparence") ? "active" : ""}`} href="/dashboard/apparence">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
             </svg>
             Apparence
-          </a>
-          <a className="dash-nav-item">
+          </Link>
+          <Link className={`dash-nav-item ${pathname.startsWith("/dashboard/pages") ? "active" : ""}`} href="/dashboard/pages">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             Pages & Contenu
-          </a>
-          <a className="dash-nav-item">
+          </Link>
+          <Link className={`dash-nav-item ${pathname.startsWith("/dashboard/domaine") ? "active" : ""}`} href="/dashboard/domaine">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             SEO & Domaine
-          </a>
+          </Link>
         </div>
 
         <div className="dash-nav-section">
           <div className="dash-nav-section-label">Paramètres</div>
-          <a className="dash-nav-item">
+          <Link className={`dash-nav-item ${pathname.startsWith("/dashboard/reglages") ? "active" : ""}`} href="/dashboard/reglages">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
               <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
             Réglages
-          </a>
+          </Link>
         </div>
 
         <div className="dash-sidebar-bottom">
@@ -162,18 +162,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {userMenuOpen && (
             <div className="dash-user-menu">
-              <a href="#" className="dash-user-menu-item">
+              <Link href="/dashboard/profil" className="dash-user-menu-item">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 Mon profil
-              </a>
-              <a href="#" className="dash-user-menu-item">
+              </Link>
+              <Link href="/dashboard/parametres" className="dash-user-menu-item">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Paramètres compte
-              </a>
-              <a href="#" className="dash-user-menu-item">
+              </Link>
+              <Link href="/dashboard/aide" className="dash-user-menu-item">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 Aide & support
-              </a>
+              </Link>
               <div className="dash-user-menu-divider"></div>
               <button
                 className="dash-user-menu-item dash-user-menu-logout"
