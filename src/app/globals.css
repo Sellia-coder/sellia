@@ -9469,19 +9469,22 @@ footer{
   nav .nav-links {
     display: none;
     position: fixed;
-    top: 64px;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(250, 250, 247, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: #FAFAF7;
     flex-direction: column;
-    padding: 32px 24px;
-    gap: 4px;
+    padding: 80px 24px 40px;
+    gap: 6px;
     align-items: stretch;
+    justify-content: flex-start;
     overflow-y: auto;
-    z-index: 99;
+    -webkit-overflow-scrolling: touch;
+    z-index: 9999;
     animation: mobileMenuFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -9497,28 +9500,34 @@ footer{
 
   /* Style des liens dans le menu mobile */
   nav .nav-links a {
-    padding: 16px 20px;
+    display: block;
+    padding: 18px 20px;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 500;
     color: var(--ink);
     transition: background 0.15s ease;
     text-align: left;
     border: 1px solid transparent;
+    width: 100%;
   }
 
-  nav .nav-links a:hover {
+  nav .nav-links a:hover,
+  nav .nav-links a:active {
     background: rgba(14, 17, 22, 0.04);
   }
 
   /* Login link */
   nav .nav-links .nav-login {
-    margin-top: 16px;
-    padding-top: 24px;
+    margin-top: 20px;
+    padding-top: 28px;
     border-top: 1px solid rgba(14, 17, 22, 0.08);
     border-radius: 0;
     color: rgba(14, 17, 22, 0.6);
     font-size: 14px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 16px;
   }
 
   nav .nav-links .nav-login:hover {
@@ -9531,15 +9540,17 @@ footer{
     background: var(--ember);
     color: white;
     text-align: center;
-    margin-top: 8px;
-    padding: 16px 24px;
-    font-size: 15px;
+    margin-top: 12px;
+    padding: 18px 24px;
+    font-size: 16px;
     font-weight: 600;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(232, 75, 31, 0.25);
+    border: none;
   }
 
-  nav .nav-links .nav-cta:hover {
+  nav .nav-links .nav-cta:hover,
+  nav .nav-links .nav-cta:active {
     background: #d63d12;
   }
 
@@ -9556,15 +9567,24 @@ footer{
     color: var(--ink);
     cursor: pointer;
     transition: background 0.15s ease;
+    position: relative;
+    z-index: 10000;
   }
 
   .nav-mobile-toggle:hover {
     background: rgba(14, 17, 22, 0.04);
   }
 
-  /* Empêche le scroll quand le menu est ouvert */
-  nav.mobile-open + * {
+  /* Empêche le scroll de la page quand le menu est ouvert */
+  body:has(nav.mobile-open) {
     overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Le logo aussi doit être au-dessus du menu */
+  nav .nav-logo {
+    position: relative;
+    z-index: 10000;
   }
 }
 
