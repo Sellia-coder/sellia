@@ -1,10 +1,15 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { signInAction } from "@/app/actions/auth";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Connexion() {
+function ConnexionContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const resetSuccess = searchParams.get("reset") === "success";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,21 +19,39 @@ export default function Connexion() {
 
   const isValidEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
-
-    if (!isValidEmail) newErrors.email = "Veuillez entrer une adresse email valide";
-    if (!password) newErrors.password = "Veuillez entrer votre mot de passe";
-
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (!email.includes("@")) {
+      setErrors((prev) => ({ ...prev, form: "Email invalide." }));
+      return;
+    }
+    if (!password) {
+      setErrors((prev) => ({ ...prev, form: "Mot de passe requis." }));
+      return;
+    }
 
     setIsLoading(true);
-    // Pour l'instant, redirection directe (auth fake)
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 600);
+    setErrors((prev) => ({ ...prev, form: "" }));
+
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+
+    const result = await signInAction(formData);
+
+    if (result.success) {
+      router.push("/dashboard");
+    } else if ("requiresVerification" in result && result.requiresVerification && result.email) {
+      router.push(`/verifier-email?email=${encodeURIComponent(result.email)}&flow=verification`);
+    } else if ("requiresLoginOTP" in result && result.requiresLoginOTP && result.email) {
+      router.push(`/verifier-email?email=${encodeURIComponent(result.email)}&flow=login`);
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        form: "error" in result && result.error ? result.error : "Connexion impossible.",
+      }));
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -155,6 +178,12 @@ export default function Connexion() {
             <span>ou avec votre email</span>
           </div>
 
+          {resetSuccess && (
+            <div style={{padding:"12px 16px",background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:"8px",color:"#15803d",fontSize:"13px",marginBottom:"16px"}}>
+              ✓ Mot de passe modifié avec succès. Connectez-vous avec votre nouveau mot de passe.
+            </div>
+          )}
+
           {/* Erreur globale */}
           {errors.form && (
             <div className="auth-form-error">
@@ -195,9 +224,6 @@ export default function Connexion() {
             <div className={`auth-field ${errors.password ? "auth-field-error" : ""}`}>
               <div className="auth-field-label-row">
                 <label htmlFor="password">Mot de passe</label>
-                <Link href="/mot-de-passe-oublie" className="auth-link auth-link-small">
-                  Oublié ?
-                </Link>
               </div>
               <div className="auth-input-wrapper">
                 <input
@@ -231,6 +257,12 @@ export default function Connexion() {
                 </button>
               </div>
               {errors.password && <span className="auth-field-message">{errors.password}</span>}
+            </div>
+
+            <div style={{textAlign:"right",marginTop:"-8px",marginBottom:"4px"}}>
+              <Link href="/mot-de-passe-oublie" style={{fontSize:"13px",color:"#8B8E94",textDecoration:"none",fontWeight:500}}>
+                Mot de passe oublié ?
+              </Link>
             </div>
 
             <label className="auth-checkbox">
@@ -279,5 +311,13 @@ export default function Connexion() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function Connexion() {
+  return (
+    <Suspense fallback={<div className="auth-page" />}>
+      <ConnexionContent />
+    </Suspense>
   );
 }

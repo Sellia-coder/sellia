@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { currentShop, currentUser } from "@/lib/mock-data";
+import { signOutAction } from "@/app/actions/auth";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -175,13 +176,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 Aide & support
               </Link>
               <div className="dash-user-menu-divider"></div>
-              <button
-                className="dash-user-menu-item dash-user-menu-logout"
-                onClick={() => { window.location.href = "/connexion"; }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                Se déconnecter
-              </button>
+              <form action={signOutAction} style={{ margin: 0 }}>
+                <button
+                  type="submit"
+                  className="dash-user-menu-item dash-user-menu-logout"
+                  style={{ width: "100%", border: "none", background: "transparent", textAlign: "left", cursor: "pointer" }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                  Se déconnecter
+                </button>
+              </form>
             </div>
           )}
         </div>

@@ -3,8 +3,12 @@
 import type { FormEvent } from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { signUpAction } from "@/app/actions/auth";
+import { useRouter } from "next/navigation";
 
 export default function Inscription() {
+  const router = useRouter();
+  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -48,10 +52,11 @@ export default function Inscription() {
 
   const isValidEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
+    if (!firstName || firstName.length < 2) newErrors.form = "Veuillez entrer votre prénom.";
     if (!isValidEmail) newErrors.email = "Veuillez entrer une adresse email valide";
     if (passwordStrength < 2) newErrors.password = "Mot de passe trop faible (8 caractères, majuscule, chiffre)";
     if (!acceptTerms) newErrors.terms = "Veuillez accepter les conditions";
@@ -60,9 +65,24 @@ export default function Inscription() {
     if (Object.keys(newErrors).length > 0) return;
 
     setIsLoading(true);
-    setTimeout(() => {
-      window.location.href = `/verifier-email?email=${encodeURIComponent(email)}`;
-    }, 1500);
+    setErrors((prev) => ({ ...prev, form: "" }));
+
+    const formData = new FormData();
+    formData.append("firstName", firstName);
+    formData.append("email", email);
+    formData.append("password", password);
+
+    const result = await signUpAction(formData);
+
+    if (result.success) {
+      router.push(`/verifier-email?email=${encodeURIComponent(result.email!)}`);
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        form: result.error || "Une erreur est survenue.",
+      }));
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignup = () => {
@@ -191,6 +211,25 @@ export default function Inscription() {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form" noValidate>
+            <div className={`auth-field ${errors.form ? "auth-field-error" : ""}`}>
+              <label htmlFor="firstName">Prénom</label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="firstName"
+                  type="text"
+                  placeholder="Votre prénom"
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    if (errors.form) setErrors({ ...errors, form: "" });
+                  }}
+                  autoComplete="given-name"
+                  required
+                  autoFocus
+                />
+              </div>
+            </div>
+
             <div className={`auth-field ${errors.email ? "auth-field-error" : ""}`}>
               <label htmlFor="email">Email</label>
               <div className="auth-input-wrapper">
@@ -204,7 +243,6 @@ export default function Inscription() {
                   }}
                   placeholder="vous@entreprise.com"
                   autoComplete="email"
-                  autoFocus
                 />
                 {isValidEmail && (
                   <span className="auth-input-icon-success">
@@ -283,6 +321,7 @@ export default function Inscription() {
               </span>
             </label>
             {errors.terms && <span className="auth-field-message">{errors.terms}</span>}
+            {errors.form && <span className="auth-field-message">{errors.form}</span>}
 
             <button
               type="submit"

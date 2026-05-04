@@ -3,8 +3,11 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { forgotPasswordAction } from "@/app/actions/auth";
 
 export default function MotDePasseOublie() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -12,17 +15,26 @@ export default function MotDePasseOublie() {
 
   const isValidEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!isValidEmail) {
       setError("Veuillez entrer une adresse email valide");
       return;
     }
     setIsLoading(true);
-    setTimeout(() => {
+    setError("");
+
+    const formData = new FormData();
+    formData.append("email", email);
+
+    const result = await forgotPasswordAction(formData);
+
+    if (result.success) {
+      router.push(`/verifier-email?email=${encodeURIComponent(result.email!)}&flow=password_reset`);
+    } else {
+      setError(result.error || "Une erreur est survenue.");
       setIsLoading(false);
-      setSubmitted(true);
-    }, 1500);
+    }
   };
 
   return (

@@ -2,11 +2,18 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { verifyOTPAction, resendOTPAction } from "@/app/actions/auth";
 
 function VerifierEmailContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "votre adresse email";
+  const email = searchParams.get("email") || "";
+  const flowParam = searchParams.get("flow");
+  let flow: "EMAIL_VERIFICATION" | "LOGIN" | "PASSWORD_RESET" = "EMAIL_VERIFICATION";
+  if (flowParam === "login") flow = "LOGIN";
+  else if (flowParam === "password_reset") flow = "PASSWORD_RESET";
 
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -73,29 +80,80 @@ function VerifierEmailContent() {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const fullCode = code.join("");
     if (fullCode.length !== 6) {
-      setError("Veuillez saisir les 6 chiffres du code");
+      setError("Entrez les 6 chiffres.");
       return;
     }
+
     setIsVerifying(true);
     setError(null);
-    // Mode bêta : n'importe quel code 6 chiffres marche.
-    // Quand le backend sera prêt, remplacer par un vrai appel API.
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 800);
+
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("code", fullCode);
+
+    if (flow === "PASSWORD_RESET") {
+      const { verifyPasswordResetCodeAction } = await import("@/app/actions/auth");
+      const result = await verifyPasswordResetCodeAction(formData);
+      if (result.success && "resetToken" in result && result.resetToken) {
+        router.push(`/reinitialiser-mot-de-passe?token=${encodeURIComponent(result.resetToken)}`);
+      } else {
+        setError((result as { error?: string }).error || "Code invalide.");
+        setIsVerifying(false);
+      }
+      return;
+    }
+
+    formData.append("flow", flow);
+    const result = await verifyOTPAction(formData);
+
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      setError(result.error || "Code invalide.");
+      setIsVerifying(false);
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (resendCooldown > 0) return;
+
     setIsResending(true);
-    setTimeout(() => {
+    setError("");
+
+    if (flow === "PASSWORD_RESET") {
+      const { forgotPasswordAction } = await import("@/app/actions/auth");
+      const formData = new FormData();
+      formData.append("email", email);
+      const result = await forgotPasswordAction(formData);
+      if (!result.success) {
+        setError(result.error || "Impossible de renvoyer le code.");
+      } else {
+        setResendCount(resendCount + 1);
+        setResendCooldown(60);
+        setError(null);
+      }
       setIsResending(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("flow", flow === "LOGIN" ? "LOGIN" : "EMAIL_VERIFICATION");
+
+    const result = await resendOTPAction(formData);
+
+    if (result.success) {
       setResendCount(resendCount + 1);
       setResendCooldown(60);
-    }, 1500);
+      setError(null);
+    } else {
+      setError(result.error || "Impossible de renvoyer le code.");
+    }
+
+    setIsResending(false);
   };
 
   const codeFilled = code.every(c => c !== "");
@@ -175,9 +233,21 @@ function VerifierEmailContent() {
 
           <div className="auth-form-header">
             <span className="auth-form-eyebrow">Étape 2 sur 4</span>
-            <h1 className="auth-form-title">Saisissez votre <em>code</em>.</h1>
+            <h1 className="auth-form-title">
+              {flow === "PASSWORD_RESET"
+                ? "Réinitialisation du mot de passe"
+                : flow === "LOGIN"
+                ? "Vérification de connexion"
+                : "Vérifiez votre email"
+              }
+            </h1>
             <p className="auth-form-subtitle">
-              Nous avons envoyé un code à 6 chiffres à <strong>{email}</strong>. Saisissez-le ci-dessous pour confirmer votre adresse.
+              {flow === "PASSWORD_RESET"
+                ? "Entrez le code à 6 chiffres reçu par email pour valider votre identité et choisir un nouveau mot de passe."
+                : flow === "LOGIN"
+                ? <>Pour votre sécurité, nous avons envoyé un code à 6 chiffres à <strong>{email || "votre adresse email"}</strong>. Entrez-le ci-dessous pour finaliser la connexion.</>
+                : <>Nous avons envoyé un code à 6 chiffres à <strong>{email || "votre adresse email"}</strong>. Entrez-le ci-dessous pour activer votre compte.</>
+              }
             </p>
           </div>
 
