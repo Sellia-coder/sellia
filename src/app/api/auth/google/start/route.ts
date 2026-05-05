@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(authUrl);
   } catch (err) {
     console.error("[/api/auth/google/start] Error:", err);
-    return NextResponse.redirect(new URL("/connexion?error=google_init_failed", req.url));
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+    return NextResponse.redirect(`${appUrl}/connexion?error=google_init_failed`);
   }
 }

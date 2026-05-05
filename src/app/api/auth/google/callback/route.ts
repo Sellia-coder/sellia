@@ -6,6 +6,7 @@ import { trustCurrentDevice } from "@/lib/auth/trustedDevice";
 import { sendWelcomeEmail } from "@/lib/email/send";
 
 export async function GET(req: NextRequest) {
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
@@ -13,19 +14,19 @@ export async function GET(req: NextRequest) {
 
   // L'utilisateur a refusé ou une erreur s'est produite côté Google
   if (error || !code || !state) {
-    return NextResponse.redirect(new URL("/connexion?error=google_cancelled", req.url));
+    return NextResponse.redirect(`${appUrl}/connexion?error=google_cancelled`);
   }
 
   // Vérifier le state token (anti-CSRF)
   const stateResult = await verifyGoogleState(state);
   if (!stateResult.valid) {
-    return NextResponse.redirect(new URL("/connexion?error=google_invalid_state", req.url));
+    return NextResponse.redirect(`${appUrl}/connexion?error=google_invalid_state`);
   }
 
   // Échanger le code contre les infos user
   const userInfo = await exchangeGoogleCode(code);
   if (!userInfo) {
-    return NextResponse.redirect(new URL("/connexion?error=google_exchange_failed", req.url));
+    return NextResponse.redirect(`${appUrl}/connexion?error=google_exchange_failed`);
   }
 
   const email = userInfo.email.toLowerCase();
@@ -116,5 +117,5 @@ export async function GET(req: NextRequest) {
   }
 
   // Redirect vers le dashboard
-  return NextResponse.redirect(new URL("/dashboard", req.url));
+  return NextResponse.redirect(`${appUrl}/dashboard`);
 }
