@@ -196,7 +196,7 @@ export default function Inscription() {
           </a>
 
           <div className="auth-divider">
-            <span className="auth-divider-text">ou</span>
+            <span className="auth-divider-text">OU AVEC VOTRE EMAIL</span>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form" noValidate>

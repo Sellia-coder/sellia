@@ -3967,6 +3967,7 @@ footer{
   display: flex;
   flex-direction: column;
   gap: 14px;
+  margin-top: -10px;
 }
 
 .auth-field {
@@ -13382,7 +13383,7 @@ footer {
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-bottom: 0;
+  margin-bottom: -10px;
   box-shadow: 0 1px 2px rgba(14, 17, 22, 0.04);
 }
 
@@ -13405,7 +13406,10 @@ footer {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 12px 0;
+  margin: -10px 0;
+  font-family: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+  font-size: 11px;
+  letter-spacing: 1.4px;
 }
 
 .auth-divider::before,
@@ -13417,11 +13421,12 @@ footer {
 }
 
 .auth-divider-text {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--dash-text-tertiary, #8B8E94);
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 1.4px;
+  white-space: nowrap;
 }
 
 /* ============================================
