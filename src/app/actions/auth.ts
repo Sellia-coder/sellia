@@ -167,6 +167,14 @@ export async function signInAction(formData: FormData) {
     return { success: false, error: "Email ou mot de passe incorrect." };
   }
 
+  // Cas Google-only : user créé via Google sans password
+  if (!user.passwordHash) {
+    return {
+      success: false,
+      error: "Ce compte utilise Google. Cliquez sur 'Continuer avec Google' pour vous connecter."
+    };
+  }
+
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) {
     return { success: false, error: "Email ou mot de passe incorrect." };

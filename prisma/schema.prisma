@@ -12,7 +12,10 @@ model User {
   id               String    @id @default(cuid())
   email            String    @unique
   emailVerified    DateTime?
-  passwordHash     String
+  passwordHash     String?
+
+  googleId         String?   @unique
+  authProvider     String    @default("email")
 
   firstName        String?
   lastName         String?
@@ -33,6 +36,7 @@ model User {
   lastLoginAt      DateTime?
 
   @@index([email])
+  @@index([googleId])
 }
 
 // ============= SHOP =============

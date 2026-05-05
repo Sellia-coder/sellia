@@ -3962,63 +3962,11 @@ footer{
   margin: 0;
 }
 
-/* Bouton Google */
-.auth-google-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  padding: 14px 20px;
-  background: white;
-  border: 1.5px solid rgba(14, 17, 22, 0.12);
-  border-radius: 10px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.auth-google-btn:hover {
-  border-color: rgba(14, 17, 22, 0.3);
-  background: rgba(14, 17, 22, 0.02);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(14, 17, 22, 0.06);
-}
-
-.auth-google-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Divider */
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: rgba(14, 17, 22, 0.4);
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(14, 17, 22, 0.1);
-}
-
 /* Form fields */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .auth-field {
@@ -13411,4 +13359,106 @@ footer {
   .dash-profile-avatar { width: 64px; height: 64px; font-size: 24px; }
   .dash-profile-name { font-size: 22px; }
   .dash-help-hero { padding: 24px 16px; }
+}
+
+/* ============================================
+   GOOGLE OAUTH BUTTON & DIVIDER
+============================================ */
+
+.auth-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 20px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--dash-border, #E5E2DA);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dash-text-primary, #0E1116);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 0;
+  box-shadow: 0 1px 2px rgba(14, 17, 22, 0.04);
+}
+
+.auth-google-btn:hover {
+  border-color: var(--dash-text-tertiary, #B5B7BC);
+  background: #FAFAF7;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(14, 17, 22, 0.08);
+}
+
+.auth-google-btn:active {
+  transform: translateY(0);
+}
+
+.auth-google-btn svg {
+  flex-shrink: 0;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--dash-border, #E5E2DA);
+}
+
+.auth-divider-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dash-text-tertiary, #8B8E94);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* ============================================
+   DASHBOARD WIDTH FIX — Large screens
+   Max-width 1800px centered for comfortable reading
+   on 27" / 32" / ultra-wide displays
+============================================ */
+
+.dash-shell {
+  max-width: 100%;
+  width: 100%;
+}
+
+.dash-main {
+  max-width: 100%;
+  width: 100%;
+}
+
+.dash-content {
+  max-width: 1800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.dash-topbar,
+.dash-page-header {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+@media (min-width: 1900px) {
+  .dash-content,
+  .dash-topbar,
+  .dash-page-header {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
 }
