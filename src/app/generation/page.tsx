@@ -23,29 +23,66 @@ const STEPS: Step[] = [
 
 function GenerationContent() {
   const searchParams = useSearchParams();
-  const description = searchParams.get("description") || "";
-  const shopName = searchParams.get("name") || "Ma boutique";
+  const draftShopId = searchParams.get("id");
+  const fallbackDescription = searchParams.get("description") || "";
+  const fallbackName = searchParams.get("name") || "Ma boutique";
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [stepProgress, setStepProgress] = useState(0);
   const [globalProgress, setGlobalProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [aiStatus, setAiStatus] = useState<"pending" | "ready" | "failed" | "expired">("pending");
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [draftShopName, setDraftShopName] = useState<string | null>(null);
   const totalDuration = useRef(STEPS.reduce((sum, s) => sum + s.duration, 0));
+
+  // Nom saisi sur la landing (disponible tant que le draft API est encore pending)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const cached = localStorage.getItem("sellia_shop_name");
+    if (cached) setDraftShopName(cached);
+  }, []);
+
+  // Récupérer le vrai shopName depuis le draft (réussi quand la génération est ready)
+  useEffect(() => {
+    if (!draftShopId) return;
+
+    let isMounted = true;
+    const fetchShopName = async () => {
+      try {
+        const response = await fetch(`/api/shop/draft/${draftShopId}`);
+        const result = await response.json();
+
+        if (!isMounted) return;
+
+        if (result.success && result.data?.shopName) {
+          setDraftShopName(result.data.shopName);
+        }
+      } catch (err) {
+        console.error("[generation] fetch shopName error:", err);
+      }
+    };
+
+    fetchShopName();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [draftShopId]);
+
+  // Sans draft ID (anciens liens) : pas de polling, on considère l'IA OK pour la redirection legacy
+  useEffect(() => {
+    if (!draftShopId) {
+      setAiStatus("ready");
+    }
+  }, [draftShopId]);
 
   // Simulation progressive
   useEffect(() => {
     if (currentStep >= STEPS.length) {
       setIsComplete(true);
-      // Redirection vers /apercu après 800ms
-      const redirect = setTimeout(() => {
-        const params = new URLSearchParams({
-          description,
-          name: shopName,
-        });
-        window.location.href = `/apercu?${params.toString()}`;
-      }, 800);
-      return () => clearTimeout(redirect);
+      return;
     }
 
     const step = STEPS[currentStep];
@@ -73,7 +110,86 @@ function GenerationContent() {
 
     rafId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafId);
-  }, [currentStep, description, shopName]);
+  }, [currentStep]);
+
+  // Polling du statut de la génération IA en parallèle de l'animation
+  useEffect(() => {
+    if (!draftShopId) {
+      return;
+    }
+
+    let isMounted = true;
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const pollStatus = async () => {
+      try {
+        const response = await fetch(`/api/shop/status/${draftShopId}`);
+        const result = await response.json();
+
+        if (!isMounted) return;
+
+        if (!result.success) {
+          if (response.status === 410) {
+            setAiStatus("expired");
+          } else if (response.status === 404) {
+            setAiError("Boutique introuvable. Recommencez.");
+            setAiStatus("failed");
+          } else {
+            setAiError(result.error || "Erreur de vérification.");
+            setAiStatus("failed");
+          }
+          return;
+        }
+
+        if (result.status === "ready") {
+          setAiStatus("ready");
+          return;
+        }
+
+        if (result.status === "failed") {
+          setAiError(result.errorMessage || "Échec de la génération.");
+          setAiStatus("failed");
+          return;
+        }
+
+        pollTimer = setTimeout(pollStatus, 1500);
+      } catch (err) {
+        console.error("[polling] Error:", err);
+        if (isMounted) {
+          pollTimer = setTimeout(pollStatus, 3000);
+        }
+      }
+    };
+
+    pollTimer = setTimeout(pollStatus, 1000);
+
+    return () => {
+      isMounted = false;
+      if (pollTimer) clearTimeout(pollTimer);
+    };
+  }, [draftShopId]);
+
+  // Redirection finale : quand l'animation est finie ET que l'IA a fini
+  useEffect(() => {
+    if (!isComplete) return;
+
+    if (aiStatus === "ready") {
+      if (draftShopId) {
+        const redirect = setTimeout(() => {
+          window.location.href = `/apercu?id=${draftShopId}`;
+        }, 600);
+        return () => clearTimeout(redirect);
+      }
+      const redirect = setTimeout(() => {
+        const params = new URLSearchParams({
+          description: fallbackDescription,
+          name: fallbackName,
+        });
+        window.location.href = `/apercu?${params.toString()}`;
+      }, 600);
+      return () => clearTimeout(redirect);
+    }
+  }, [isComplete, aiStatus, draftShopId, fallbackDescription, fallbackName]);
 
   return (
     <div className="gen-light-page">
@@ -101,7 +217,7 @@ function GenerationContent() {
             <span>Génération en cours</span>
           </div>
           <h1 className="gen-light-title">
-            On construit <em>{shopName}</em>
+            On construit <em>{draftShopName || fallbackName || "votre boutique"}</em>
           </h1>
           <p className="gen-light-subtitle">
             Sellia analyse votre activité et compose votre boutique sur mesure. Cela prend quelques secondes.
@@ -186,6 +302,125 @@ function GenerationContent() {
           </div>
         </div>
       </div>
+
+      {isComplete && aiStatus === "pending" && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "32px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(14,17,22,0.9)",
+            color: "#FAFAF7",
+            padding: "12px 20px",
+            borderRadius: "10px",
+            fontSize: "13px",
+            fontWeight: 500,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+            zIndex: 1000,
+          }}
+        >
+          <span>✨ Sellia met la dernière touche...</span>
+        </div>
+      )}
+
+      {aiStatus === "failed" && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: "#FAFAF7",
+              borderRadius: "16px",
+              padding: "32px",
+              maxWidth: "400px",
+              textAlign: "center",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ fontSize: "40px", marginBottom: "16px" }}>⚠️</div>
+            <h2 style={{ fontFamily: "Fraunces, serif", fontSize: "24px", marginBottom: "12px", color: "#0E1116" }}>
+              Génération échouée
+            </h2>
+            <p style={{ fontSize: "14px", color: "#404552", marginBottom: "24px", lineHeight: 1.5 }}>
+              {aiError || "Une erreur est survenue. Veuillez réessayer."}
+            </p>
+            <a
+              href="/"
+              style={{
+                display: "inline-block",
+                background: "#E84B1F",
+                color: "#FFFFFF",
+                padding: "12px 24px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontWeight: 600,
+                fontSize: "14px",
+              }}
+            >
+              Recommencer
+            </a>
+          </div>
+        </div>
+      )}
+
+      {aiStatus === "expired" && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: "#FAFAF7",
+              borderRadius: "16px",
+              padding: "32px",
+              maxWidth: "400px",
+              textAlign: "center",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ fontSize: "40px", marginBottom: "16px" }}>⏱️</div>
+            <h2 style={{ fontFamily: "Fraunces, serif", fontSize: "24px", marginBottom: "12px", color: "#0E1116" }}>
+              Lien expiré
+            </h2>
+            <p style={{ fontSize: "14px", color: "#404552", marginBottom: "24px", lineHeight: 1.5 }}>
+              Cette boutique générée a expiré (24h). Recommencez la génération.
+            </p>
+            <a
+              href="/"
+              style={{
+                display: "inline-block",
+                background: "#E84B1F",
+                color: "#FFFFFF",
+                padding: "12px 24px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontWeight: 600,
+                fontSize: "14px",
+              }}
+            >
+              Recommencer
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

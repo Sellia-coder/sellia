@@ -26,6 +26,7 @@ model User {
   bio              String?
 
   twoFactorEnabled Boolean   @default(false)
+  onboardingCompleted Boolean @default(false)
 
   shops            Shop[]
   sessions         Session[]
@@ -51,13 +52,22 @@ model Shop {
 
   tagline        String?
   description    String?
+  category       String?
   email          String?
   phone          String?
   address        String?
+  whatsappNumber String?
+  contactEmail   String?
+  city           String?
+  country        String?
+  instagramUrl   String?
+  facebookUrl    String?
 
   // Apparence
   themeId        String   @default("minimal")
   primaryColor   String   @default("#E84B1F")
+  secondaryColor String?
+  accentColor    String?
   bgColor        String   @default("#FAFAF7")
   textColor      String   @default("#0E1116")
   displayFont    String   @default("Fraunces")
@@ -82,12 +92,79 @@ model Shop {
   isPublished    Boolean  @default(false)
   status         String   @default("SETUP") // SETUP, ACTIVE, MAINTENANCE
   plan           String   @default("DECOUVERTE") // DECOUVERTE, PRO
+  currency       String   @default("XAF")
+  views          Int      @default(0)
+  publishedAt    DateTime?
+
+  // Livraison & paiement
+  shippingZones           Json?   // Array<{ id, name, price, eta }>
+  paymentCashOnDelivery  Boolean @default(true)
+  paymentOnlineEscrow   Boolean @default(true)
+
+  products       Product[]
+  orders         Order[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@index([ownerId])
   @@index([slug])
+  @@index([status])
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  shopId           String
+  shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Identité
+  name             String
+  slug             String?
+  description      String?  @db.Text
+  shortDescription String?
+  emoji            String?
+
+  // Prix
+  price            Int
+  comparePrice     Int?
+  currency         String   @default("XAF")
+
+  // Catégorisation
+  category        String?
+  customCategory String?
+  tags           String[] @default([])
+
+  // Type & inventaire
+  type            String   @default("physical")
+  sku             String?
+  stock           Int?
+  unlimitedStock  Boolean @default(true)
+  weight          Int?
+
+  // Digital uniquement
+  digitalFileUrl String?  @db.Text
+  downloadLimit  Int?
+
+  // Visuel
+  imageUrl    String?  @db.Text
+  galleryUrls Json?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Statut
+  status      String   @default("active")
+  position    Int      @default(0)
+  views       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([shopId, slug])
+  @@index([shopId])
+  @@index([status])
+  @@index([category])
 }
 
 // ============= SESSION =============
@@ -155,4 +232,77 @@ model PasswordResetToken {
 
   @@index([token])
   @@index([email])
+}
+
+// ============= DRAFT SHOP — Boutique générée par IA en attente de claim =============
+model DraftShop {
+  id              String   @id @default(cuid())
+
+  // Input utilisateur
+  prompt          String   @db.Text
+  shopName        String
+
+  // Statut de génération
+  status          String   @default("pending")  // pending, ready, failed
+  errorMessage    String?  @db.Text
+
+  // Output IA (stocké en JSON)
+  generatedData   Json?
+
+  // Métadonnées
+  ipAddress       String?
+
+  // Liaison user après inscription
+  userId          String?
+  claimedAt       DateTime?
+  consumedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime  // TTL 24h
+
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// ============= ORDER (commandes boutique publique) =============
+model Order {
+  id                String    @id @default(cuid())
+  shopId            String
+  shop              Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  orderNumber       String    @unique
+
+  customerName      String
+  customerPhone     String
+  customerEmail     String?
+  customerCity      String?
+  customerAddress   String?
+  customerNotes     String?   @db.Text
+
+  items             Json
+  subtotal          Int
+  shippingPrice     Int       @default(0)
+  shippingZone      String?
+  shippingEta       String?
+  total             Int
+
+  paymentMethod     String
+  paymentStatus     String    @default("pending")
+
+  status            String    @default("pending")
+
+  whatsappContacted Boolean   @default(false)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  confirmedAt       DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+
+  @@index([shopId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
 }

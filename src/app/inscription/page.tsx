@@ -1,13 +1,15 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useState, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { signUpAction } from "@/app/actions/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Inscription() {
+function InscriptionContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const draftShopId = searchParams.get("draftShopId");
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +18,12 @@ export default function Inscription() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [shopName, setShopName] = useState<string | null>(null);
+  const [draftPreview, setDraftPreview] = useState<{
+    name: string;
+    tagline?: string;
+    emoji?: string;
+    primaryColor?: string;
+  } | null>(null);
 
   // Récupère le nom de la boutique générée pour personnaliser
   useEffect(() => {
@@ -31,6 +39,33 @@ export default function Inscription() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (!draftShopId) return;
+
+    let isMounted = true;
+    fetch(`/api/shop/draft/${draftShopId}`)
+      .then((res) => res.json())
+      .then((result) => {
+        if (!isMounted) return;
+        if (result.success && result.data?.generatedData) {
+          const data = result.data.generatedData;
+          setDraftPreview({
+            name: data.name || result.data.shopName,
+            tagline: data.tagline,
+            emoji: data.products?.[0]?.emoji || "🛍️",
+            primaryColor: data.primaryColor,
+          });
+        }
+      })
+      .catch(() => {
+        // Ignore : la preview est juste cosmétique
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [draftShopId]);
 
   const getPasswordStrength = () => {
     if (!password) return 0;
@@ -71,11 +106,20 @@ export default function Inscription() {
     formData.append("firstName", firstName);
     formData.append("email", email);
     formData.append("password", password);
+    if (draftShopId) {
+      formData.append("draftShopId", draftShopId);
+    }
 
     const result = await signUpAction(formData);
 
     if (result.success) {
-      router.push(`/verifier-email?email=${encodeURIComponent(result.email!)}`);
+      const params = new URLSearchParams({
+        email: result.email!,
+      });
+      if (draftShopId) {
+        params.append("draftShopId", draftShopId);
+      }
+      router.push(`/verifier-email?${params.toString()}`);
     } else {
       setErrors((prev) => ({
         ...prev,
@@ -185,7 +229,86 @@ export default function Inscription() {
             </p>
           </div>
 
-          <a href="/api/auth/google/start?intent=signup" className="auth-google-btn">
+          {draftPreview && (
+            <div
+              style={{
+                background: "linear-gradient(135deg, rgba(232, 75, 31, 0.06), rgba(232, 75, 31, 0.02))",
+                border: "1px solid rgba(232, 75, 31, 0.2)",
+                borderRadius: "12px",
+                padding: "14px 16px",
+                marginBottom: "20px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "10px",
+                  background: draftPreview.primaryColor || "#0E1116",
+                  color: "#FFFFFF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "24px",
+                  flexShrink: 0,
+                }}
+              >
+                {draftPreview.emoji}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    letterSpacing: "1.2px",
+                    textTransform: "uppercase",
+                    color: "#E84B1F",
+                    fontWeight: 600,
+                    marginBottom: "2px",
+                  }}
+                >
+                  Vous sauvegardez
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Fraunces', serif",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    color: "#0E1116",
+                    lineHeight: 1.2,
+                    marginBottom: "2px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {draftPreview.name}
+                </div>
+                {draftPreview.tagline && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6E7178",
+                      fontStyle: "italic",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {draftPreview.tagline}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <a
+            href={`/api/auth/google/start?intent=signup${draftShopId ? `&draftShopId=${encodeURIComponent(draftShopId)}` : ""}`}
+            className="auth-google-btn"
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -200,6 +323,7 @@ export default function Inscription() {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form" noValidate>
+            <input type="hidden" name="draftShopId" value={draftShopId || ""} />
             <div className={`auth-field ${errors.form ? "auth-field-error" : ""}`}>
               <label htmlFor="firstName">Prénom</label>
               <div className="auth-input-wrapper">
@@ -346,5 +470,13 @@ export default function Inscription() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function Inscription() {
+  return (
+    <Suspense fallback={<div className="auth-page" />}>
+      <InscriptionContent />
+    </Suspense>
   );
 }

@@ -7,6 +7,7 @@ import { createSession, destroySession, getSession } from "@/lib/auth/session";
 import { isDeviceTrusted, trustCurrentDevice } from "@/lib/auth/trustedDevice";
 import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from "@/lib/email/send";
 import { createPasswordResetToken, verifyPasswordResetToken, consumePasswordResetToken } from "@/lib/auth/passwordReset";
+import { claimDraftShop } from "@/lib/draftShop/claim";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
@@ -17,6 +18,7 @@ export async function signUpAction(formData: FormData) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
   const firstName = String(formData.get("firstName") || "").trim();
+  const draftShopId = String(formData.get("draftShopId") || "").trim() || null;
   const lastName = String(formData.get("lastName") || "").trim() || null;
 
   // Validation
@@ -34,20 +36,21 @@ export async function signUpAction(formData: FormData) {
 
   // Vérifier si l'email existe déjà
   const existing = await db.user.findUnique({ where: { email } });
+  let user;
   if (existing) {
     if (existing.emailVerified) {
       return { success: false, error: "Un compte existe déjà avec cet email. Connectez-vous." };
     }
     // Compte existe mais non vérifié — on update et on renvoie un code
     const passwordHash = await hashPassword(password);
-    await db.user.update({
+    user = await db.user.update({
       where: { email },
       data: { passwordHash, firstName: firstName || existing.firstName, lastName: lastName || existing.lastName },
     });
   } else {
     // Créer le user (non vérifié)
     const passwordHash = await hashPassword(password);
-    await db.user.create({
+    user = await db.user.create({
       data: { email, passwordHash, firstName, lastName },
     });
   }
@@ -60,7 +63,16 @@ export async function signUpAction(formData: FormData) {
     return { success: false, error: "Impossible d'envoyer l'email de vérification. Réessayez." };
   }
 
-  return { success: true, email };
+  // Claim DraftShop si draftShopId fourni (depuis form ou cookie OAuth)
+  if (draftShopId) {
+    const claimResult = await claimDraftShop(user.id, draftShopId);
+    if (!claimResult.success) {
+      console.warn("[signUpAction] DraftShop claim failed:", claimResult.error);
+      // Non bloquant : on laisse le signup continuer
+    }
+  }
+
+  return { success: true, email, requiresVerification: true, draftShopId };
 }
 
 // ============================================
@@ -70,6 +82,7 @@ export async function verifyOTPAction(formData: FormData) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const code = String(formData.get("code") || "").trim();
   const flow = String(formData.get("flow") || "EMAIL_VERIFICATION");
+  const draftShopId = String(formData.get("draftShopId") || "").trim() || null;
 
   if (!email || !code || code.length !== 6) {
     return { success: false, error: "Code invalide." };
@@ -107,6 +120,17 @@ export async function verifyOTPAction(formData: FormData) {
 
     if (user.firstName) {
       sendWelcomeEmail(email, user.firstName).catch(() => {});
+    }
+
+    // Filet de sécurité : si draftShopId présent et pas encore claimed, claim ici
+    if (draftShopId) {
+      const draft = await db.draftShop.findUnique({
+        where: { id: draftShopId },
+        select: { userId: true },
+      });
+      if (draft && !draft.userId) {
+        await claimDraftShop(user.id, draftShopId).catch(() => {});
+      }
     }
   } else {
     // LOGIN flow

@@ -4,10 +4,12 @@ import { exchangeGoogleCode, verifyGoogleState } from "@/lib/auth/google";
 import { createSession } from "@/lib/auth/session";
 import { trustCurrentDevice } from "@/lib/auth/trustedDevice";
 import { sendWelcomeEmail } from "@/lib/email/send";
+import { claimDraftShop } from "@/lib/draftShop/claim";
 
 export async function GET(req: NextRequest) {
   const appUrl = process.env.APP_URL || "http://localhost:3000";
   const { searchParams } = new URL(req.url);
+  const draftShopIdFromCookie = req.cookies.get("sellia_draft_shop_id")?.value || null;
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const error = searchParams.get("error");
@@ -116,6 +118,17 @@ export async function GET(req: NextRequest) {
     sendWelcomeEmail(email, user.firstName).catch(() => {});
   }
 
-  // Redirect vers le dashboard
-  return NextResponse.redirect(`${appUrl}/dashboard`);
+  // Claim DraftShop si cookie présent
+  if (draftShopIdFromCookie) {
+    await claimDraftShop(user.id, draftShopIdFromCookie).catch((err) => {
+      console.warn("[google/callback] DraftShop claim failed:", err);
+    });
+  }
+
+  const finalResponse = NextResponse.redirect(`${appUrl}/dashboard`);
+  if (draftShopIdFromCookie) {
+    finalResponse.cookies.delete("sellia_draft_shop_id");
+  }
+
+  return finalResponse;
 }

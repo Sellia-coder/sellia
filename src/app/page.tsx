@@ -53,6 +53,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string[]>([]);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   // Nav scroll effect
   useEffect(() => {
@@ -217,41 +219,86 @@ export default function Home() {
               <button
                 className="form-cta"
                 type="button"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem("sellia_prompt", prompt);
-                    localStorage.setItem("sellia_shop_name", shopName);
-                    const params = new URLSearchParams({
-                      description: prompt,
-                      name: shopName,
+                onClick={async () => {
+                  if (prompt.trim().length < 10 || shopName.trim().length < 2) return;
+                  if (isGenerating) return;
+
+                  setIsGenerating(true);
+                  setGenerationError(null);
+
+                  try {
+                    const response = await fetch("/api/shop/generate", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        prompt: prompt.trim(),
+                        shopName: shopName.trim(),
+                      }),
                     });
-                    window.location.href = `/generation?${params.toString()}`;
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                      setGenerationError(result.error || "Erreur lors de la génération.");
+                      setIsGenerating(false);
+                      return;
+                    }
+
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("sellia_prompt", prompt);
+                      localStorage.setItem("sellia_shop_name", shopName);
+                    }
+                    window.location.href = `/generation?id=${result.draftShopId}`;
+                  } catch (err) {
+                    console.error("[generate] Error:", err);
+                    setGenerationError("Erreur réseau. Vérifiez votre connexion et réessayez.");
+                    setIsGenerating(false);
                   }
                 }}
                 disabled={
                   prompt.trim().length < 10 ||
-                  shopName.trim().length < 2
+                  shopName.trim().length < 2 ||
+                  isGenerating
                 }
               >
                 <span className="form-cta-glow"></span>
                 <span className="form-cta-content">
-                  <span>Générer ma boutique</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
+                  {isGenerating ? (
+                    <>
+                      <span>Génération en cours...</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}>
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                      </svg>
+                    </>
+                  ) : (
+                    <>
+                      <span>Générer ma boutique</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </>
+                  )}
                 </span>
               </button>
               <p className="form-cta-status">
-                {prompt.trim().length === 0 && shopName.trim().length === 0 && "Commencez par décrire votre activité"}
-                {prompt.trim().length > 0 && prompt.trim().length < 10 && "Décrivez votre activité plus en détail"}
-                {prompt.trim().length >= 10 && shopName.trim().length === 0 && "Plus qu'à choisir un nom pour votre boutique"}
-                {prompt.trim().length >= 10 && shopName.trim().length > 0 && shopName.trim().length < 2 && "Ajoutez quelques caractères au nom"}
-                {prompt.trim().length >= 10 && shopName.trim().length >= 2 && (
-                  <span className="form-cta-status-ready">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                    Prêt à générer · cela prend 8 secondes
-                  </span>
+                {generationError ? (
+                  <span style={{ color: "#dc2626", fontWeight: 500 }}>⚠️ {generationError}</span>
+                ) : isGenerating ? (
+                  <span>Connexion à l&apos;IA Sellia...</span>
+                ) : (
+                  <>
+                    {prompt.trim().length === 0 && shopName.trim().length === 0 && "Commencez par décrire votre activité"}
+                    {prompt.trim().length > 0 && prompt.trim().length < 10 && "Décrivez votre activité plus en détail"}
+                    {prompt.trim().length >= 10 && shopName.trim().length === 0 && "Plus qu'à choisir un nom pour votre boutique"}
+                    {prompt.trim().length >= 10 && shopName.trim().length > 0 && shopName.trim().length < 2 && "Ajoutez quelques caractères au nom"}
+                    {prompt.trim().length >= 10 && shopName.trim().length >= 2 && (
+                      <span className="form-cta-status-ready">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                        Prêt à générer · cela prend 8 secondes
+                      </span>
+                    )}
+                  </>
                 )}
               </p>
             </div>
