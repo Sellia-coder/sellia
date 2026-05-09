@@ -3390,3 +3390,75 @@
     margin-top: 4px;
   }
 }
+
+/* ============================================================
+   FIX BUG MENU — Icônes cliquables
+   ============================================================ */
+
+.shop-header {
+  z-index: 100;
+  position: sticky;
+  top: 0;
+}
+
+.shop-header-inner {
+  min-width: 0;
+}
+
+.shop-header-icon-btn,
+.shop-header-mobile-toggle {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 2;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shop-header-icon-btn svg,
+.shop-header-mobile-toggle svg {
+  pointer-events: none;
+}
+
+.shop-header-icon-badge {
+  pointer-events: none;
+}
+
+.shop-header-brand {
+  position: relative;
+  z-index: 1;
+}
+
+.shop-header-actions {
+  position: relative;
+  z-index: 3;
+}
+
+.shop-header-nav {
+  min-width: 0;
+}
+
+.shop-header-icon-btn:hover {
+  background: #f2f0ea;
+  color: var(--shop-primary, #e84b1f);
+}
+
+.shop-header-icon-btn:active {
+  transform: scale(0.92);
+  transition: transform 0.1s;
+}
+
+.shop-search-overlay {
+  z-index: 200;
+}
+
+.shop-header-mobile-nav {
+  z-index: 99;
+  position: relative;
+}
+
+.shop-header-mobile-nav a {
+  pointer-events: auto;
+  cursor: pointer;
+  display: block;
+}
