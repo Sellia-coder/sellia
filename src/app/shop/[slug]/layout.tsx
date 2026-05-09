@@ -5,7 +5,7 @@ import {
   getShopCategoryTemplate,
 } from "@/lib/shop-data";
 import { CartProvider } from "@/components/shop/CartProvider";
-import ShopHeader from "@/components/shop/ShopHeader";
+import SeliaNav from "@/components/shop/SeliaNav";
 import ShopFooter from "@/components/shop/ShopFooter";
 import PreFooterTrust from "@/components/shop/PreFooterTrust";
 import "./shop.css";
@@ -91,7 +91,7 @@ export default async function ShopLayout({ children, params }: Props) {
       />
       <CartProvider shopSlug={shop.slug}>
         <div className={`shop-root shop-template-${template}`} style={cssVars}>
-          <ShopHeader shop={shop} />
+          <SeliaNav shop={shop} />
           <main className="shop-main">{children}</main>
           <PreFooterTrust />
           <ShopFooter shop={shop} />
