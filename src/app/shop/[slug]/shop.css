@@ -3802,3 +3802,60 @@ button.shop-header-icon-btn svg {
   fill: none !important;
   opacity: 1 !important;
 }
+/* ============================================================
+   FIX ULTIME — Override variables CSS globales du globals.css
+   Le globals.css définit --shop-primary à #0E1116 globalement
+   On force la cascade au niveau .shop-root
+   ============================================================ */
+
+   .shop-root {
+    /* Réinitialise les variables CSS au niveau du composant */
+    --shop-primary: var(--shop-primary, #E84B1F) !important;
+    --shop-secondary: var(--shop-secondary, #0E1116) !important;
+    --shop-accent: var(--shop-accent, #E84B1F) !important;
+  }
+  
+  /* Force la couleur du brand link au-dessus de tout */
+  .shop-root .shop-header,
+  .shop-root .shop-header * {
+    color: #0E1116;
+  }
+  
+  .shop-root .shop-header-brand {
+    color: #0E1116 !important;
+    text-decoration: none !important;
+  }
+  
+  .shop-root .shop-header-logo {
+    background-color: var(--shop-primary, #E84B1F) !important;
+    color: #FFFFFF !important;
+  }
+  
+  .shop-root .shop-header-logo span {
+    color: #FFFFFF !important;
+  }
+  
+  .shop-root .shop-header-name {
+    color: #0E1116 !important;
+  }
+  
+  .shop-root .shop-header-tagline {
+    color: #6E7178 !important;
+  }
+  
+  .shop-root .shop-header-icon-btn {
+    color: #0E1116 !important;
+    background: transparent !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+  
+  .shop-root .shop-header-icon-btn svg {
+    color: inherit !important;
+    stroke: currentColor !important;
+  }
+  
+  .shop-root .shop-header-icon-btn:hover {
+    color: var(--shop-primary, #E84B1F) !important;
+    background: #F2F0EA !important;
+  }
