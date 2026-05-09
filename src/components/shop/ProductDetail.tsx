@@ -1,27 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import type { Product, Shop } from "@prisma/client";
 import {
-  MessageCircle,
   ShoppingCart,
-  Truck,
-  ShieldCheck,
   Banknote,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
+  Eye,
+  Store,
 } from "lucide-react";
 import ProductCard from "./ProductCard";
-import {
-  buildProductGalleryImages,
-  parseShippingZones,
-} from "@/lib/shop-data";
+import Breadcrumbs from "./Breadcrumbs";
+import StockIndicator from "./StockIndicator";
+import UrgencyTimer from "./UrgencyTimer";
+import TrustBadges from "./TrustBadges";
+import PaymentLogos from "./PaymentLogos";
+import { buildProductGalleryImages, parseShippingZones } from "@/lib/shop-data";
 
 interface Props {
-  shop: Shop & { shippingZones: unknown };
-  product: Product;
-  related: Product[];
+  shop: Record<string, unknown> & {
+    slug: string;
+    name: string;
+    shippingZones: unknown;
+    paymentCashOnDelivery: boolean;
+    paymentOnlineEscrow: boolean;
+  };
+  product: Record<string, unknown> & {
+    id: string;
+    slug: string | null;
+    name: string;
+    price: number;
+    comparePrice: number | null;
+    imageUrl: string | null;
+    emoji: string | null;
+    description: string | null;
+    shortDescription: string | null;
+    category: string | null;
+    customCategory: string | null;
+    type: string;
+    galleryUrls: unknown;
+    stock: number | null;
+    promoEndsAt: Date | string | null;
+    unlimitedStock?: boolean;
+  };
+  related: Array<Record<string, unknown> & { id: string; slug: string | null }>;
 }
 
 export default function ProductDetail({ shop, product, related }: Props) {
@@ -31,6 +55,23 @@ export default function ProductDetail({ shop, product, related }: Props) {
     5
   );
   const [activeImage, setActiveImage] = useState(0);
+  const [viewerCount, setViewerCount] = useState(1);
+
+  useEffect(() => {
+    const seed = product.id?.charCodeAt(0) ?? 1;
+    const hour = new Date().getHours();
+    const base = ((seed * 7 + hour * 3) % 8) + 2;
+    setViewerCount(base);
+
+    const interval = setInterval(() => {
+      setViewerCount((c) => {
+        const drift = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+        return Math.max(2, Math.min(12, c + drift));
+      });
+    }, 8000 + Math.random() * 4000);
+
+    return () => clearInterval(interval);
+  }, [product.id]);
 
   const hasPromo =
     product.comparePrice != null && product.comparePrice > product.price;
@@ -45,21 +86,35 @@ export default function ProductDetail({ shop, product, related }: Props) {
   const segment = product.slug ?? product.id;
   const orderPath = `/shop/${shop.slug}/commander/${segment}`;
 
-  const waNumber = shop.whatsappNumber?.replace(/[^0-9]/g, "") ?? "";
-  const waMessage = encodeURIComponent(
-    `Bonjour, je suis intéressé(e) par : ${product.name} (${product.price.toLocaleString("fr-FR")} FCFA).`
-  );
-  const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMessage}` : null;
-
   const zones = parseShippingZones(shop.shippingZones);
-  const showShippingBlock =
-    product.type === "physical" &&
-    zones.length > 0;
+  const firstZone = zones[0];
+  const isPhysical = product.type === "physical";
+  const isOutOfStock = product.stock != null && product.stock <= 0;
 
   const categoryLabel = product.category ?? product.customCategory;
+  const showStockCounter = product.stock != null;
+
+  const promoEnd =
+    product.promoEndsAt instanceof Date
+      ? product.promoEndsAt
+      : product.promoEndsAt
+        ? new Date(product.promoEndsAt as string)
+        : null;
 
   return (
     <article className="shop-product-detail">
+      <div className="shop-container">
+        <Breadcrumbs
+          items={[
+            { label: "Accueil", href: `/shop/${shop.slug}` },
+            ...(categoryLabel
+              ? [{ label: categoryLabel, href: `/shop/${shop.slug}` }]
+              : []),
+            { label: product.name },
+          ]}
+        />
+      </div>
+
       <div className="shop-container shop-product-detail-inner">
         <div className="shop-product-gallery">
           <div className="shop-product-gallery-main">
@@ -67,13 +122,18 @@ export default function ProductDetail({ shop, product, related }: Props) {
               <img
                 src={allImages[activeImage]}
                 alt={product.name}
-                key={allImages[activeImage]}
+                key={activeImage}
               />
             ) : (
               <span className="shop-product-gallery-emoji">
-                {product.emoji ?? "🛍️"}
+                {(product.emoji as string) ?? "🛍️"}
               </span>
             )}
+
+            {hasPromo && (
+              <span className="shop-product-gallery-badge">-{promoPercent}%</span>
+            )}
+
             {allImages.length > 1 && (
               <>
                 <button
@@ -81,8 +141,7 @@ export default function ProductDetail({ shop, product, related }: Props) {
                   className="shop-product-gallery-arrow shop-product-gallery-arrow-prev"
                   onClick={() =>
                     setActiveImage(
-                      (prev) =>
-                        (prev - 1 + allImages.length) % allImages.length
+                      (prev) => (prev - 1 + allImages.length) % allImages.length
                     )
                   }
                   aria-label="Image précédente"
@@ -112,6 +171,7 @@ export default function ProductDetail({ shop, product, related }: Props) {
                     i === activeImage ? "is-active" : ""
                   }`}
                   onClick={() => setActiveImage(i)}
+                  aria-label={`Image ${i + 1}`}
                 >
                   <img src={url} alt="" />
                 </button>
@@ -121,6 +181,13 @@ export default function ProductDetail({ shop, product, related }: Props) {
         </div>
 
         <div className="shop-product-info">
+          <Link href={`/shop/${shop.slug}/a-propos`} className="shop-product-vendor">
+            <Store size={12} strokeWidth={2} />
+            <span>
+              Vendu par <strong>{shop.name}</strong>
+            </span>
+          </Link>
+
           {categoryLabel && (
             <div className="shop-product-category">{categoryLabel}</div>
           )}
@@ -144,37 +211,66 @@ export default function ProductDetail({ shop, product, related }: Props) {
             )}
           </div>
 
+          <div className="shop-product-meta-row">
+            {showStockCounter ? (
+              <StockIndicator stock={product.stock} />
+            ) : null}
+            <div className="shop-product-viewers">
+              <Eye size={12} strokeWidth={2} />
+              <span>
+                <strong>{viewerCount}</strong> personnes consultent ce produit
+              </span>
+            </div>
+          </div>
+
+          {hasPromo && promoEnd && !isNaN(promoEnd.getTime()) && (
+            <UrgencyTimer promoEndsAt={promoEnd} />
+          )}
+
           <div className="shop-product-actions">
-            {showOnlineEscrow && (
+            {!isOutOfStock && showOnlineEscrow && (
               <Link
                 href={`${orderPath}?method=online_escrow`}
-                className="shop-btn shop-btn-primary"
+                className="shop-btn shop-btn-primary shop-btn-lg shop-btn-full"
               >
                 <ShoppingCart size={16} strokeWidth={2} />
-                Acheter en ligne
+                Acheter en ligne — {product.price.toLocaleString("fr-FR")} FCFA
               </Link>
             )}
-            {showCashOnDelivery && (
+            {!isOutOfStock && showCashOnDelivery && (
               <Link
                 href={`${orderPath}?method=cash_on_delivery`}
-                className="shop-btn shop-btn-secondary"
+                className="shop-btn shop-btn-secondary shop-btn-lg shop-btn-full"
               >
                 <Banknote size={16} strokeWidth={2} />
                 Paiement à la livraison
               </Link>
             )}
-            {waLink && (
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shop-btn shop-btn-whatsapp"
+            {isOutOfStock && (
+              <button
+                type="button"
+                className="shop-btn shop-btn-secondary shop-btn-lg shop-btn-full"
+                disabled
               >
-                <MessageCircle size={16} strokeWidth={2} />
-                WhatsApp
-              </a>
+                Produit en rupture
+              </button>
             )}
           </div>
+
+          {(showOnlineEscrow || showCashOnDelivery) && (
+            <div className="shop-product-payment-info">
+              <PaymentLogos showCashOnDelivery={showCashOnDelivery} />
+              <p className="shop-product-payment-note">
+                <ShieldCheck size={11} strokeWidth={2} />
+                Paiement sécurisé · Tes données sont protégées
+              </p>
+            </div>
+          )}
+
+          <TrustBadges
+            shippingEta={isPhysical ? (firstZone?.eta ?? null) : null}
+            hasEscrow={showOnlineEscrow}
+          />
 
           {product.description && (
             <div className="shop-product-description">
@@ -186,46 +282,56 @@ export default function ProductDetail({ shop, product, related }: Props) {
             </div>
           )}
 
-          {showShippingBlock && (
+          {zones.length > 0 && isPhysical && (
             <div className="shop-product-shipping">
-              <h2 className="shop-product-section-title">
-                <Truck size={14} strokeWidth={2} /> Livraison
-              </h2>
+              <h2 className="shop-product-section-title">Livraison</h2>
               <ul className="shop-product-shipping-list">
                 {zones.slice(0, 5).map((z) => (
                   <li key={z.id}>
                     <span>{z.name}</span>
                     <span>
                       {z.price.toLocaleString("fr-FR")} FCFA
-                      {z.eta && (
-                        <span className="shop-eta">· {z.eta}</span>
-                      )}
+                      {z.eta && <span className="shop-eta">· {z.eta}</span>}
                     </span>
                   </li>
                 ))}
               </ul>
             </div>
           )}
-
-          {showOnlineEscrow && (
-            <div className="shop-product-trust">
-              <ShieldCheck size={14} strokeWidth={2} />
-              <span>
-                Paiement sécurisé par Sellia · Remboursement automatique si non
-                livré sous 6 jours
-              </span>
-            </div>
-          )}
         </div>
       </div>
+
+      {!isOutOfStock && (showOnlineEscrow || showCashOnDelivery) && (
+        <div className="shop-sticky-cta">
+          <div className="shop-sticky-cta-info">
+            <div className="shop-sticky-cta-name">{product.name}</div>
+            <div className="shop-sticky-cta-price">
+              {product.price.toLocaleString("fr-FR")} FCFA
+            </div>
+          </div>
+          <Link
+            href={`${orderPath}${
+              showOnlineEscrow ? "?method=online_escrow" : "?method=cash_on_delivery"
+            }`}
+            className="shop-btn shop-btn-primary"
+          >
+            <ShoppingCart size={14} strokeWidth={2} />
+            Acheter
+          </Link>
+        </div>
+      )}
 
       {related.length > 0 && (
         <section className="shop-related">
           <div className="shop-container">
-            <h2 className="shop-related-title">Autres produits</h2>
+            <h2 className="shop-related-title">Tu pourrais aussi aimer</h2>
             <div className="shop-products-grid">
               {related.map((p) => (
-                <ProductCard key={p.id} shopSlug={shop.slug} product={p} />
+                <ProductCard
+                  key={String(p.id)}
+                  shopSlug={shop.slug}
+                  product={p as never}
+                />
               ))}
             </div>
           </div>

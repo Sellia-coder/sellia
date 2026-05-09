@@ -177,7 +177,7 @@ export default function Step5Recap({
                 <li>
                   <span className="perso-recap-list-icon">
                     <ShieldCheck size={14} strokeWidth={2} />
-                    Paiement en ligne sécurisé (escrow QR)
+                    Paiement en ligne · QR reçu par le client, scanné par toi
                   </span>
                 </li>
               )}

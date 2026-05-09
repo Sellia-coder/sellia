@@ -141,6 +141,9 @@ model Product {
   unlimitedStock  Boolean @default(true)
   weight          Int?
 
+  // Compteur d'urgence (promo)
+  promoEndsAt     DateTime?
+
   // Digital uniquement
   digitalFileUrl String?  @db.Text
   downloadLimit  Int?

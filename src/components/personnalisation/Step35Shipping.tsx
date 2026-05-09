@@ -259,10 +259,10 @@ export default function Step35Shipping({
               </div>
               <p className="perso-payment-option-desc">
                 Le client paie en avance sur ta boutique. Les fonds sont{" "}
-                <strong>sécurisés par Sellia</strong>. À la livraison, tu
-                scannes le QR code que le client te présente pour recevoir le
-                paiement instantanément. Si le client n&apos;est pas livré dans
-                6 jours, il est automatiquement remboursé.
+                <strong>sécurisés par Sellia</strong>. À la livraison,{" "}
+                <strong>tu scannes le QR que le client te présente</strong> pour
+                libérer les fonds sur ton solde. Si le client n&apos;est pas livré
+                dans 6 jours, il est automatiquement remboursé.
               </p>
 
               {value.paymentOnlineEscrow && (
@@ -276,19 +276,22 @@ export default function Step35Shipping({
                       <span className="perso-escrow-info-step-num">1</span>
                       <span>
                         Le client paie sur ta boutique (Mobile Money / carte).
+                        Les fonds sont sécurisés par Sellia.
                       </span>
                     </li>
                     <li className="perso-escrow-info-step">
                       <span className="perso-escrow-info-step-num">2</span>
                       <span>
-                        Tu reçois un QR code pour la commande dans ton dashboard.
+                        Le client reçoit un <strong>QR code de validation</strong>{" "}
+                        par email/SMS — c&apos;est sa preuve de commande.
                       </span>
                     </li>
                     <li className="perso-escrow-info-step">
                       <span className="perso-escrow-info-step-num">3</span>
                       <span>
-                        À la livraison, tu scannes le QR du client → fonds
-                        crédités sur ton solde Sellia instantanément.
+                        À la livraison, <strong>tu scannes le QR que le client
+                        te présente</strong> → fonds crédités sur ton solde
+                        Sellia instantanément.
                       </span>
                     </li>
                   </ul>

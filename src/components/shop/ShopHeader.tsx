@@ -18,7 +18,6 @@ export default function ShopHeader({ shop }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const initial = (shop.name?.[0] ?? "S").toUpperCase();
   const homePath = `/shop/${shop.slug}`;
-  const recherchePath = `/shop/${shop.slug}/recherche`;
 
   return (
     <header className="shop-header">
@@ -45,39 +44,46 @@ export default function ShopHeader({ shop }: Props) {
         </Link>
 
         <nav className="shop-header-nav" aria-label="Navigation principale">
-          <Link href={homePath}>Accueil</Link>
-          <Link href={`${homePath}#produits`}>Produits</Link>
-          <Link href={recherchePath}>Recherche</Link>
-          <Link href={`${homePath}/a-propos`}>À propos</Link>
-          <Link href={`${homePath}/contact`}>Contact</Link>
+          <Link href={homePath} className="shop-header-nav-link">
+            Accueil
+          </Link>
+          <Link href={`${homePath}#produits`} className="shop-header-nav-link">
+            Produits
+          </Link>
+          <Link href={`${homePath}/a-propos`} className="shop-header-nav-link">
+            À propos
+          </Link>
+          <Link href={`${homePath}/contact`} className="shop-header-nav-link">
+            Contact
+          </Link>
         </nav>
 
         <div className="shop-header-actions">
-          <Link
-            href={recherchePath}
+          <button
+            type="button"
             className="shop-header-icon-btn"
             aria-label="Rechercher"
           >
-            <Search size={18} strokeWidth={2} />
-          </Link>
-          <button
-            type="button"
-            className="shop-header-icon-btn shop-header-icon-btn-fav"
-            aria-label="Favoris"
-          >
-            <Heart size={18} strokeWidth={2} />
+            <Search size={18} strokeWidth={1.8} />
+          </button>
+          <button type="button" className="shop-header-icon-btn" aria-label="Favoris">
+            <Heart size={18} strokeWidth={1.8} />
           </button>
           <button type="button" className="shop-header-icon-btn" aria-label="Panier">
-            <ShoppingBag size={18} strokeWidth={2} />
+            <ShoppingBag size={18} strokeWidth={1.8} />
           </button>
           <button
             type="button"
             className="shop-header-mobile-toggle"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Menu"
+            aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileOpen ? (
+              <X size={20} strokeWidth={2} />
+            ) : (
+              <Menu size={20} strokeWidth={2} />
+            )}
           </button>
         </div>
       </div>
@@ -89,9 +95,6 @@ export default function ShopHeader({ shop }: Props) {
           </Link>
           <Link href={`${homePath}#produits`} onClick={() => setMobileOpen(false)}>
             Produits
-          </Link>
-          <Link href={recherchePath} onClick={() => setMobileOpen(false)}>
-            Recherche
           </Link>
           <Link href={`${homePath}/a-propos`} onClick={() => setMobileOpen(false)}>
             À propos
