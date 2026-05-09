@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import FavoriteButton from "./FavoriteButton";
 
 interface Props {
   shopSlug: string;
@@ -29,6 +32,9 @@ export default function ProductCard({ shopSlug, product }: Props) {
   return (
     <Link href={productPath} className="shop-product-card">
       <div className="shop-product-card-image">
+        <div className="shop-product-card-fav">
+          <FavoriteButton shopSlug={shopSlug} productId={product.id} />
+        </div>
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.name} />
         ) : (

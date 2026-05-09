@@ -103,6 +103,7 @@ model Shop {
 
   products       Product[]
   orders         Order[]
+  reviews        Review[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -163,6 +164,8 @@ model Product {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  reviews     Review[]
 
   @@unique([shopId, slug])
   @@index([shopId])
@@ -307,5 +310,31 @@ model Order {
   @@index([orderNumber])
   @@index([status])
   @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+model Review {
+  id              String    @id @default(cuid())
+  shopId          String
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  authorName      String
+  authorEmail     String?
+
+  rating          Int
+  title           String?   @db.Text
+  content         String    @db.Text
+
+  status          String    @default("pending")
+  rejectionReason String?
+
+  createdAt       DateTime  @default(now())
+  approvedAt      DateTime?
+
+  @@index([shopId])
+  @@index([productId])
+  @@index([status])
   @@index([createdAt])
 }

@@ -4,8 +4,10 @@ import {
   getPublishedShopBySlug,
   getShopCategoryTemplate,
 } from "@/lib/shop-data";
+import { CartProvider } from "@/components/shop/CartProvider";
 import ShopHeader from "@/components/shop/ShopHeader";
 import ShopFooter from "@/components/shop/ShopFooter";
+import PreFooterTrust from "@/components/shop/PreFooterTrust";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
@@ -87,11 +89,14 @@ export default async function ShopLayout({ children, params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className={`shop-root shop-template-${template}`} style={cssVars}>
-        <ShopHeader shop={shop} />
-        <main className="shop-main">{children}</main>
-        <ShopFooter shop={shop} />
-      </div>
+      <CartProvider shopSlug={shop.slug}>
+        <div className={`shop-root shop-template-${template}`} style={cssVars}>
+          <ShopHeader shop={shop} />
+          <main className="shop-main">{children}</main>
+          <PreFooterTrust />
+          <ShopFooter shop={shop} />
+        </div>
+      </CartProvider>
     </>
   );
 }

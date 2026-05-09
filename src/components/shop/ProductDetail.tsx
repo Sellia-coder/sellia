@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ShoppingCart,
   Banknote,
@@ -10,6 +11,7 @@ import {
   ShieldCheck,
   Eye,
   Store,
+  Check,
 } from "lucide-react";
 import ProductCard from "./ProductCard";
 import Breadcrumbs from "./Breadcrumbs";
@@ -18,9 +20,15 @@ import UrgencyTimer from "./UrgencyTimer";
 import TrustBadges from "./TrustBadges";
 import PaymentLogos from "./PaymentLogos";
 import { buildProductGalleryImages, parseShippingZones } from "@/lib/shop-data";
+import { addToCart } from "@/lib/cart";
+import { useCartContext } from "./CartProvider";
+import QuantityPicker from "./QuantityPicker";
+import FavoriteButton from "./FavoriteButton";
+import ProductReviews from "./ProductReviews";
 
 interface Props {
   shop: Record<string, unknown> & {
+    id: string;
     slug: string;
     name: string;
     shippingZones: unknown;
@@ -49,6 +57,11 @@ interface Props {
 }
 
 export default function ProductDetail({ shop, product, related }: Props) {
+  const router = useRouter();
+  const { refresh: refreshCart } = useCartContext();
+  const [quantity, setQuantity] = useState(1);
+  const [addedFlash, setAddedFlash] = useState(false);
+
   const allImages = buildProductGalleryImages(
     product.imageUrl,
     product.galleryUrls,
@@ -101,6 +114,35 @@ export default function ProductDetail({ shop, product, related }: Props) {
         ? new Date(product.promoEndsAt as string)
         : null;
 
+  const cartLinePayload = () => ({
+    productId: product.id,
+    productSlug: product.slug ?? product.id,
+    name: product.name,
+    price: product.price,
+    imageUrl: product.imageUrl ?? null,
+    emoji: product.emoji ?? null,
+    productType: product.type,
+  });
+
+  const handleAddToCart = () => {
+    addToCart(shop.slug, cartLinePayload(), quantity);
+    refreshCart();
+    setAddedFlash(true);
+    setTimeout(() => setAddedFlash(false), 1800);
+  };
+
+  const handleBuyNowOnline = () => {
+    addToCart(shop.slug, cartLinePayload(), quantity);
+    refreshCart();
+    router.push(`/shop/${shop.slug}/panier?method=online_escrow`);
+  };
+
+  const handleBuyNowCash = () => {
+    addToCart(shop.slug, cartLinePayload(), quantity);
+    refreshCart();
+    router.push(`/shop/${shop.slug}/panier?method=cash_on_delivery`);
+  };
+
   return (
     <article className="shop-product-detail">
       <div className="shop-container">
@@ -118,6 +160,13 @@ export default function ProductDetail({ shop, product, related }: Props) {
       <div className="shop-container shop-product-detail-inner">
         <div className="shop-product-gallery">
           <div className="shop-product-gallery-main">
+            <div className="shop-product-gallery-fav">
+              <FavoriteButton
+                shopSlug={shop.slug}
+                productId={product.id}
+                variant="detail"
+              />
+            </div>
             {allImages.length > 0 ? (
               <img
                 src={allImages[activeImage]}
@@ -227,25 +276,62 @@ export default function ProductDetail({ shop, product, related }: Props) {
             <UrgencyTimer promoEndsAt={promoEnd} />
           )}
 
+          <div className="shop-product-qty-row">
+            <span className="shop-product-qty-label">Quantité</span>
+            <QuantityPicker
+              value={quantity}
+              onChange={setQuantity}
+              min={1}
+              max={99}
+              disabled={isOutOfStock}
+            />
+          </div>
+
           <div className="shop-product-actions">
+            {!isOutOfStock && (
+              <button
+                type="button"
+                className="shop-btn shop-btn-add-cart shop-btn-lg shop-btn-full"
+                onClick={handleAddToCart}
+              >
+                {addedFlash ? (
+                  <>
+                    <Check size={16} strokeWidth={2.5} />
+                    Ajouté au panier
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart size={16} strokeWidth={2} />
+                    Ajouter au panier (
+                    {(product.price * quantity).toLocaleString("fr-FR")} FCFA)
+                  </>
+                )}
+              </button>
+            )}
+
             {!isOutOfStock && showOnlineEscrow && (
-              <Link
-                href={`${orderPath}?method=online_escrow`}
+              <button
+                type="button"
+                onClick={handleBuyNowOnline}
                 className="shop-btn shop-btn-primary shop-btn-lg shop-btn-full"
               >
                 <ShoppingCart size={16} strokeWidth={2} />
-                Acheter en ligne — {product.price.toLocaleString("fr-FR")} FCFA
-              </Link>
+                Acheter maintenant
+              </button>
             )}
-            {!isOutOfStock && showCashOnDelivery && (
-              <Link
-                href={`${orderPath}?method=cash_on_delivery`}
-                className="shop-btn shop-btn-secondary shop-btn-lg shop-btn-full"
-              >
-                <Banknote size={16} strokeWidth={2} />
-                Paiement à la livraison
-              </Link>
-            )}
+            {!isOutOfStock &&
+              showCashOnDelivery &&
+              !showOnlineEscrow && (
+                <button
+                  type="button"
+                  onClick={handleBuyNowCash}
+                  className="shop-btn shop-btn-secondary shop-btn-lg shop-btn-full"
+                >
+                  <Banknote size={16} strokeWidth={2} />
+                  Paiement à la livraison
+                </button>
+              )}
+
             {isOutOfStock && (
               <button
                 type="button"
@@ -298,6 +384,8 @@ export default function ProductDetail({ shop, product, related }: Props) {
               </ul>
             </div>
           )}
+
+          <ProductReviews shopId={shop.id} productId={product.id} />
         </div>
       </div>
 
