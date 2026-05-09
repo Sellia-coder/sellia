@@ -3736,3 +3736,69 @@
 .shop-template-mode .shop-header-tagline {
   font-style: normal !important;
 }
+/* ============================================================
+   FIX FINAL — Override pseudo-classes Link Next.js
+   ============================================================ */
+
+/* Le Link Next.js applique des couleurs par défaut sur :link/:visited */
+a.shop-header-brand,
+a.shop-header-brand:link,
+a.shop-header-brand:visited,
+a.shop-header-brand:hover,
+a.shop-header-brand:active,
+a.shop-header-brand:focus {
+  color: #0E1116 !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+}
+
+a.shop-header-brand .shop-header-logo,
+a.shop-header-brand:link .shop-header-logo,
+a.shop-header-brand:visited .shop-header-logo {
+  background: var(--shop-primary, #E84B1F) !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
+a.shop-header-brand .shop-header-logo span {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
+a.shop-header-brand .shop-header-name,
+a.shop-header-brand:link .shop-header-name,
+a.shop-header-brand:visited .shop-header-name {
+  color: #0E1116 !important;
+  opacity: 1 !important;
+  font-style: normal !important;
+}
+
+a.shop-header-brand .shop-header-tagline,
+a.shop-header-brand:link .shop-header-tagline,
+a.shop-header-brand:visited .shop-header-tagline {
+  color: #6E7178 !important;
+  opacity: 1 !important;
+  font-style: normal !important;
+}
+
+/* Force les boutons icone à être bien visibles, override TOUT */
+button.shop-header-icon-btn,
+button.shop-header-icon-btn:link,
+button.shop-header-icon-btn:visited {
+  color: #0E1116 !important;
+  opacity: 1 !important;
+  background: transparent !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+button.shop-header-icon-btn:hover {
+  color: var(--shop-primary, #E84B1F) !important;
+  background: #F2F0EA !important;
+}
+
+button.shop-header-icon-btn svg {
+  stroke: currentColor !important;
+  fill: none !important;
+  opacity: 1 !important;
+}
