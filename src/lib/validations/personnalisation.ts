@@ -122,6 +122,27 @@ export const step1Schema = z.object({
   logoUrl: z.string().nullable().optional(),
 });
 
+export const variantAxisSchema = z.object({
+  name: z.string().min(1).max(40),
+  values: z.array(z.string().min(1).max(40)).min(1).max(20),
+  swatches: z.array(z.string().regex(/^#[0-9A-Fa-f]{6}$/)).optional(),
+});
+
+export const variantSchema = z.object({
+  id: z.string().optional(),
+  attributes: z.record(z.string(), z.string()),
+  label: z.string(),
+  stock: z.number().int().min(0).nullable().optional(),
+  priceDelta: z.number().int().default(0),
+  imageUrl: z.string().nullable().optional(),
+  sku: z.string().max(50).nullable().optional(),
+  isActive: z.boolean().default(true),
+  position: z.number().int().default(0),
+});
+
+export type VariantAxisInput = z.infer<typeof variantAxisSchema>;
+export type VariantInput = z.infer<typeof variantSchema>;
+
 export const productEditSchema = z
   .object({
     id: z.string(),
@@ -162,6 +183,10 @@ export const productEditSchema = z
     imageUrl: z.string().max(2_500_000, "Image trop lourde").nullable().optional(),
     galleryUrls: z.array(z.string().max(2_500_000)).max(4).default([]),
 
+    hasVariants: z.boolean().default(false),
+    variantAxes: z.array(variantAxisSchema).max(2).default([]),
+    variants: z.array(variantSchema).default([]),
+
     included: z.boolean(),
   })
   .refine((p) => !p.comparePrice || p.comparePrice > p.price, {
@@ -171,6 +196,10 @@ export const productEditSchema = z
   .refine((p) => p.unlimitedStock || (typeof p.stock === "number" && p.stock >= 0), {
     message: "Indique un stock ou coche illimité",
     path: ["stock"],
+  })
+  .refine((p) => !p.hasVariants || p.type === "physical", {
+    message: "Les variantes sont uniquement disponibles pour les produits physiques",
+    path: ["hasVariants"],
   });
 
 export const step2Schema = z.object({

@@ -43,6 +43,9 @@ const EMPTY_PRODUCT = (id: string): ProductEditInput => ({
   downloadLimit: null,
   imageUrl: null,
   galleryUrls: [],
+  hasVariants: false,
+  variantAxes: [],
+  variants: [],
   included: true,
 });
 

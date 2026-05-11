@@ -125,6 +125,9 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
       downloadLimit: null,
       imageUrl: null,
       galleryUrls: [],
+      hasVariants: false,
+      variantAxes: [],
+      variants: [],
       included: true,
     };
   });

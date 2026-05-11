@@ -37,6 +37,12 @@ export async function getPublishedShopBySlug(slug: string) {
       products: {
         where: { status: "active" },
         orderBy: { position: "asc" },
+        include: {
+          variants: {
+            where: { isActive: true },
+            orderBy: { position: "asc" },
+          },
+        },
       },
     },
   });

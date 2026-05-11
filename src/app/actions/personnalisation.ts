@@ -230,6 +230,13 @@ export async function publishShopAction(input: PublishShopInput) {
           const trimmedSlug = p.slug?.trim();
           const productSlug =
             trimmedSlug && trimmedSlug.length > 0 ? trimmedSlug.toLowerCase() : generateProductSlug(p.name, i);
+          const safeHasVariants = p.type === "physical" && (p.hasVariants ?? false);
+          const safeAxes = safeHasVariants ? p.variantAxes : undefined;
+          const safeVariants: any[] | undefined =
+            safeHasVariants && Array.isArray(p.variants) && p.variants.length > 0
+              ? p.variants
+              : undefined;
+
           await tx.product.create({
             data: {
               shopId: createdShop.id,
@@ -254,6 +261,22 @@ export async function publishShopAction(input: PublishShopInput) {
               imageUrl: p.imageUrl?.trim() ? p.imageUrl : null,
               galleryUrls:
                 Array.isArray(p.galleryUrls) && p.galleryUrls.length > 0 ? p.galleryUrls : null,
+              hasVariants: safeHasVariants,
+              variantAxes: safeAxes ?? undefined,
+              variants: safeVariants
+                ? {
+                    create: safeVariants.map((v: any, vi: number) => ({
+                      attributes: v.attributes,
+                      label: v.label,
+                      stock: v.stock ?? null,
+                      priceDelta: v.priceDelta ?? 0,
+                      imageUrl: v.imageUrl ?? null,
+                      sku: v.sku ?? null,
+                      isActive: v.isActive ?? true,
+                      position: vi,
+                    })),
+                  }
+                : undefined,
               status: "active",
               position: i,
             },

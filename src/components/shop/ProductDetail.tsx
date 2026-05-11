@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -19,15 +19,21 @@ import { buildProductGalleryImages } from "@/lib/shop-data";
 import ProductReviews from "./ProductReviews";
 import styles from "./ProductDetail.module.css";
 
-const MOCK_COLORS = [
-  { name: "Gris", hex: "#8B8B8B" },
-  { name: "Bleu marine", hex: "#1E3A8A" },
-  { name: "Rouge", hex: "#991B1B" },
-  { name: "Blanc", hex: "#F8F8F8" },
-  { name: "Noir", hex: "#0A0E13" },
-];
+interface VariantAxis {
+  name: string;
+  values: string[];
+  swatches?: string[];
+}
 
-const MOCK_SIZES = ["S", "M", "L", "XL"];
+interface Variant {
+  id: string;
+  attributes: Record<string, string>;
+  label: string;
+  stock: number | null;
+  priceDelta: number;
+  imageUrl: string | null;
+  isActive: boolean;
+}
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("fr-FR").format(price);
@@ -71,6 +77,9 @@ interface Props {
     unlimitedStock?: boolean;
     type?: string;
     emoji?: string | null;
+    hasVariants?: boolean;
+    variantAxes?: unknown;
+    variants?: Variant[];
   };
   related: Array<{
     id: string;
@@ -102,18 +111,46 @@ export default function ProductDetail({
     product.currency ?? shop.currency ?? "XAF"
   );
 
+  const variantAxes: VariantAxis[] = Array.isArray(product.variantAxes)
+    ? (product.variantAxes as VariantAxis[])
+    : [];
+  const hasVariants = Boolean(product.hasVariants) && variantAxes.length > 0;
+  const productVariants: Variant[] = product.variants ?? [];
+
+  const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>(() => {
+    if (hasVariants && variantAxes.length > 0) {
+      const init: Record<string, string> = {};
+      for (const axis of variantAxes) {
+        if (axis.values.length > 0) init[axis.name] = axis.values[0];
+      }
+      return init;
+    }
+    return {};
+  });
+
+  const activeVariant = useMemo(() => {
+    if (!hasVariants || productVariants.length === 0) return null;
+    return productVariants.find((v) =>
+      Object.entries(v.attributes).every(([k, val]) => selectedAttributes[k] === val)
+    ) ?? null;
+  }, [hasVariants, productVariants, selectedAttributes]);
+
+  const effectivePrice = activeVariant ? product.price + activeVariant.priceDelta : product.price;
+  const effectiveStock = activeVariant
+    ? (activeVariant.stock ?? product.stock ?? 0)
+    : (product.stock ?? 0);
+  const variantImage = activeVariant?.imageUrl ?? null;
+
   const allImages = buildProductGalleryImages(
-    product.imageUrl,
+    variantImage ?? product.imageUrl,
     product.galleryUrls,
     8
   );
-  const [activeImage, setActiveImage] = useState(0);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
   useEffect(() => {
-    setActiveImage(0);
-  }, [product.id]);
+    setActiveImageIdx(0);
+  }, [product.id, activeVariant?.id]);
 
-  const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(1);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "reviews">(
     "description"
@@ -137,9 +174,11 @@ export default function ProductDetail({
     reviews.length > 0 ? reviews.length : 1000;
 
   const unlimited = product.unlimitedStock ?? true;
-  const rawStock = product.stock;
-  const maxQty = unlimited ? 99 : Math.min(99, Math.max(1, rawStock ?? 1));
-  const isOutOfStock = !unlimited && rawStock !== null && rawStock <= 0;
+  const rawStock = hasVariants ? effectiveStock : (product.stock ?? 0);
+  const maxQty = (unlimited && !hasVariants) ? 99 : Math.min(99, Math.max(1, rawStock));
+  const isOutOfStock = hasVariants
+    ? effectiveStock <= 0
+    : (!unlimited && product.stock !== null && product.stock <= 0);
 
   const showOnlineEscrow = Boolean(shop.paymentOnlineEscrow);
   const showCashOnDelivery = Boolean(shop.paymentCashOnDelivery);
@@ -147,9 +186,9 @@ export default function ProductDetail({
   const cartLinePayload = () => ({
     productId: product.id,
     productSlug: segment,
-    name: product.name,
-    price: product.price,
-    imageUrl: product.imageUrl ?? null,
+    name: activeVariant ? `${product.name} — ${activeVariant.label}` : product.name,
+    price: effectivePrice,
+    imageUrl: variantImage ?? product.imageUrl ?? null,
     emoji: product.emoji ?? null,
     productType: product.type ?? "physical",
   });
@@ -188,7 +227,7 @@ export default function ProductDetail({
               <div className={styles.galleryMain}>
                 {allImages.length > 0 ? (
                   <img
-                    src={allImages[activeImage]}
+                    src={allImages[activeImageIdx]}
                     alt={product.name}
                     className={styles.galleryImage}
                   />
@@ -209,10 +248,10 @@ export default function ProductDetail({
                     <button
                       key={url}
                       type="button"
-                      className={`${styles.galleryThumb} ${i === activeImage ? styles.galleryThumbActive : ""}`}
-                      onClick={() => setActiveImage(i)}
+                      className={`${styles.galleryThumb} ${i === activeImageIdx ? styles.galleryThumbActive : ""}`}
+                      onClick={() => setActiveImageIdx(i)}
                       style={
-                        i === activeImage
+                        i === activeImageIdx
                           ? { borderColor: primaryColor }
                           : undefined
                       }
@@ -259,87 +298,71 @@ export default function ProductDetail({
 
               <div className={styles.priceWrap}>
                 <span className={styles.price} style={{ color: primaryColor }}>
-                  {formatPrice(product.price)}
+                  {formatPrice(effectivePrice)}
                 </span>
                 <span className={styles.currency}>{currency}</span>
                 {product.comparePrice != null &&
-                  product.comparePrice > product.price && (
+                  product.comparePrice > effectivePrice && (
                     <span className={styles.comparePrice}>
                       {formatPrice(product.comparePrice)} {currency}
                     </span>
                   )}
               </div>
 
-              <div className={styles.variantBlock}>
-                <span className={styles.variantLabel}>Couleur</span>
-                <div className={styles.colorOptions}>
-                  {MOCK_COLORS.map((color, i) => (
-                    <button
-                      key={color.name}
-                      type="button"
-                      className={styles.colorOption}
-                      onClick={() => setSelectedColor(i)}
-                      style={
-                        i === selectedColor
-                          ? { borderColor: primaryColor }
-                          : undefined
-                      }
-                      aria-label={color.name}
-                      title={color.name}
-                    >
-                      <span
-                        className={styles.colorSwatch}
-                        style={{ backgroundColor: color.hex }}
-                      />
-                      {i === selectedColor && (
-                        <Check
-                          size={12}
-                          strokeWidth={3}
-                          className={styles.colorCheck}
-                          style={{
-                            color:
-                              color.hex === "#F8F8F8" ? "#0A0E13" : "#FFFFFF",
-                          }}
-                        />
-                      )}
-                    </button>
-                  ))}
+              {hasVariants && variantAxes.map((axis) => (
+                <div key={axis.name} className={styles.variantBlock}>
+                  <span className={styles.variantLabel}>{axis.name}</span>
+                  {axis.swatches ? (
+                    <div className={styles.colorOptions}>
+                      {axis.values.map((val, i) => {
+                        const isActive = selectedAttributes[axis.name] === val;
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            className={`${styles.colorOption} ${isActive ? styles.colorOptionActive : ""}`}
+                            onClick={() => setSelectedAttributes({ ...selectedAttributes, [axis.name]: val })}
+                            style={isActive ? { borderColor: primaryColor } : undefined}
+                            aria-label={val}
+                            title={val}
+                          >
+                            <span className={styles.colorSwatch} style={{ backgroundColor: axis.swatches?.[i] }} />
+                            {isActive && (
+                              <Check size={12} strokeWidth={3} className={styles.colorCheck} style={{ color: "#FFFFFF" }} />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className={styles.sizeOptions}>
+                      {axis.values.map((val) => {
+                        const isActive = selectedAttributes[axis.name] === val;
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            className={`${styles.sizeOption} ${isActive ? styles.sizeOptionActive : ""}`}
+                            onClick={() => setSelectedAttributes({ ...selectedAttributes, [axis.name]: val })}
+                            style={isActive ? { backgroundColor: primaryColor, borderColor: primaryColor, color: "#FFFFFF" } : undefined}
+                          >
+                            {val}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              <div className={styles.variantBlock}>
-                <span className={styles.variantLabel}>Taille</span>
-                <div className={styles.sizeOptions}>
-                  {MOCK_SIZES.map((size, i) => (
-                    <button
-                      key={size}
-                      type="button"
-                      className={styles.sizeOption}
-                      onClick={() => setSelectedSize(i)}
-                      style={
-                        i === selectedSize
-                          ? {
-                              backgroundColor: primaryColor,
-                              borderColor: primaryColor,
-                              color: "#FFFFFF",
-                            }
-                          : undefined
-                      }
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              ))}
 
               <div className={styles.quantityBlock}>
                 <span className={styles.variantLabel}>
                   Quantité{" "}
                   <span className={styles.stockNote}>
                     (
-                    {unlimited
+                    {unlimited && !hasVariants
                       ? "En stock"
-                      : `${rawStock ?? 0} disponible${rawStock !== 1 ? "s" : ""}`}
+                      : `${rawStock} disponible${rawStock !== 1 ? "s" : ""}`}
                     )
                   </span>
                 </span>
@@ -650,7 +673,7 @@ export default function ProductDetail({
                 className={styles.stickyCtaPrice}
                 style={{ color: primaryColor }}
               >
-                {formatPrice(product.price)} {currency}
+                {formatPrice(effectivePrice)} {currency}
               </span>
             </div>
             <button

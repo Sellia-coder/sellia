@@ -40,6 +40,7 @@ import {
 import RichTextEditor from "./RichTextEditor";
 import AiDescriptionGenerator from "./AiDescriptionGenerator";
 import ProductGallery from "./ProductGallery";
+import ProductVariantsEditor from "./ProductVariantsEditor";
 
 interface Props {
   product: ProductEditInput;
@@ -251,7 +252,16 @@ export default function ProductEditorModal({
                     key={t.code}
                     type="button"
                     className={`perso-type-option ${draft.type === t.code ? "is-active" : ""}`}
-                    onClick={() => update("type", t.code)}
+                    onClick={() => {
+                      if (draft.hasVariants && t.code !== "physical") {
+                        const ok = window.confirm("Les variantes seront supprimées car ce produit n'est plus physique. Continuer ?");
+                        if (!ok) return;
+                        update("hasVariants", false);
+                        update("variantAxes", []);
+                        update("variants", []);
+                      }
+                      update("type", t.code);
+                    }}
                   >
                     <div className="perso-type-option-icon-premium">
                       <Icon size={20} strokeWidth={1.8} />
@@ -376,6 +386,22 @@ export default function ProductEditorModal({
               </div>
             </div>
             <p className="perso-form-help">Le prix barré affiche une remise visible (ancien prix rayé).</p>
+          </div>
+
+          <div className="perso-form-section">
+            <ProductVariantsEditor
+              productType={draft.type}
+              basePrice={draft.price ?? 0}
+              globalStock={draft.unlimitedStock ? null : (draft.stock ?? null)}
+              hasVariants={draft.hasVariants ?? false}
+              axes={(draft.variantAxes ?? []) as any}
+              variants={(draft.variants ?? []) as any}
+              onChange={(data) => {
+                update("hasVariants", data.hasVariants);
+                update("variantAxes", data.axes as any);
+                update("variants", data.variants as any);
+              }}
+            />
           </div>
 
           <div className="perso-form-section">

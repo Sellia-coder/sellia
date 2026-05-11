@@ -159,6 +159,11 @@ model Product {
   metaTitle       String?
   metaDescription String?
 
+  // Variantes (physique uniquement)
+  hasVariants   Boolean  @default(false)
+  variantAxes   Json?    // [{ name, values, swatches? }]
+  variants      ProductVariant[]
+
   // Statut
   status      String   @default("active")
   position    Int      @default(0)
@@ -173,6 +178,29 @@ model Product {
   @@index([shopId])
   @@index([status])
   @@index([category])
+}
+
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  attributes  Json     // { "Taille": "M", "Couleur": "Bleu" }
+  label       String   // "Bleu / M"
+
+  stock       Int?     // null = hérite du Product.stock
+  priceDelta  Int      @default(0) // prix final = Product.price + priceDelta
+  imageUrl    String?
+  sku         String?
+
+  isActive    Boolean  @default(true)
+  position    Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([productId, isActive])
 }
 
 // ============= SESSION =============
