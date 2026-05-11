@@ -4,485 +4,669 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ShoppingBag,
-  Banknote,
-  ChevronLeft,
-  ChevronRight,
-  ShieldCheck,
-  Eye,
-  Store,
-  Check,
+  Star,
   Plus,
+  Minus,
+  ShieldCheck,
+  Truck,
+  RefreshCw,
+  MessageCircle,
+  Check,
 } from "lucide-react";
-import type { ShopWithProducts } from "@/lib/shop-data";
-import { currencyDisplay, mapShopProductToCard } from "@/lib/shopProductCard";
-import ProductCard from "./ProductCard";
-import Breadcrumbs from "./Breadcrumbs";
-import StockIndicator from "./StockIndicator";
-import UrgencyTimer from "./UrgencyTimer";
-import TrustBadges from "./TrustBadges";
-import PaymentLogos from "./PaymentLogos";
-import { buildProductGalleryImages, parseShippingZones } from "@/lib/shop-data";
 import { addToCart } from "@/lib/cart";
 import { useCartContext } from "./CartProvider";
-import QuantityPicker from "./QuantityPicker";
-import FavoriteButton from "./FavoriteButton";
+import { buildProductGalleryImages } from "@/lib/shop-data";
 import ProductReviews from "./ProductReviews";
+import styles from "./ProductDetail.module.css";
+
+const MOCK_COLORS = [
+  { name: "Gris", hex: "#8B8B8B" },
+  { name: "Bleu marine", hex: "#1E3A8A" },
+  { name: "Rouge", hex: "#991B1B" },
+  { name: "Blanc", hex: "#F8F8F8" },
+  { name: "Noir", hex: "#0A0E13" },
+];
+
+const MOCK_SIZES = ["S", "M", "L", "XL"];
+
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat("fr-FR").format(price);
+}
+
+function currencyLabel(currency: string): string {
+  return currency === "XAF" ? "FCFA" : currency;
+}
+
+interface ReviewVM {
+  id: string;
+  authorName: string;
+  rating: number;
+  comment: string;
+  createdAt: string | Date;
+}
 
 interface Props {
-  shop: Record<string, unknown> & {
+  shop: {
     id: string;
     slug: string;
     name: string;
-    shippingZones: unknown;
-    paymentCashOnDelivery: boolean;
-    paymentOnlineEscrow: boolean;
+    primaryColor?: string | null;
+    currency?: string | null;
+    paymentCashOnDelivery?: boolean;
+    paymentOnlineEscrow?: boolean;
   };
-  product: Record<string, unknown> & {
+  product: {
     id: string;
     slug: string | null;
     name: string;
     price: number;
     comparePrice: number | null;
+    currency?: string | null;
     imageUrl: string | null;
-    emoji: string | null;
+    galleryUrls?: unknown;
     description: string | null;
     shortDescription: string | null;
     category: string | null;
-    customCategory: string | null;
-    type: string;
-    galleryUrls: unknown;
     stock: number | null;
-    promoEndsAt: Date | string | null;
     unlimitedStock?: boolean;
+    type?: string;
+    emoji?: string | null;
   };
-  related: Array<Record<string, unknown> & { id: string; slug: string | null }>;
+  related: Array<{
+    id: string;
+    slug: string | null;
+    name: string;
+    price: number;
+    imageUrl: string | null;
+    currency?: string | null;
+  }>;
+  reviews: Array<{
+    id: string;
+    authorName: string;
+    rating: number;
+    content: string;
+    createdAt: Date;
+  }>;
 }
 
-export default function ProductDetail({ shop, product, related }: Props) {
+export default function ProductDetail({
+  shop,
+  product,
+  related,
+  reviews: reviewsProp,
+}: Props) {
   const router = useRouter();
-  const { refresh: refreshCart } = useCartContext();
-  const [quantity, setQuantity] = useState(1);
-  const [addedFlash, setAddedFlash] = useState(false);
+  const { refresh } = useCartContext();
+  const primaryColor = shop.primaryColor ?? "#E84B1F";
+  const currency = currencyLabel(
+    product.currency ?? shop.currency ?? "XAF"
+  );
 
   const allImages = buildProductGalleryImages(
     product.imageUrl,
     product.galleryUrls,
-    5
+    8
   );
   const [activeImage, setActiveImage] = useState(0);
-  const [viewerCount, setViewerCount] = useState(1);
-
   useEffect(() => {
-    const seed = product.id?.charCodeAt(0) ?? 1;
-    const hour = new Date().getHours();
-    const base = ((seed * 7 + hour * 3) % 8) + 2;
-    setViewerCount(base);
-
-    const interval = setInterval(() => {
-      setViewerCount((c) => {
-        const drift = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
-        return Math.max(2, Math.min(12, c + drift));
-      });
-    }, 8000 + Math.random() * 4000);
-
-    return () => clearInterval(interval);
+    setActiveImage(0);
   }, [product.id]);
 
-  const hasPromo =
-    product.comparePrice != null && product.comparePrice > product.price;
-  const promoPercent = hasPromo
-    ? Math.round(
-        ((product.comparePrice! - product.price) / product.comparePrice!) * 100
-      )
-    : 0;
-
-  const showCashOnDelivery = shop.paymentCashOnDelivery;
-  const showOnlineEscrow = shop.paymentOnlineEscrow;
-  const segment = product.slug ?? product.id;
-  const orderPath = `/shop/${shop.slug}/commander/${segment}`;
-  const cardCurrency = currencyDisplay(
-    String((shop as { currency?: string }).currency ?? "XAF")
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(1);
+  const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState<"description" | "reviews">(
+    "description"
   );
-  const shopPrimary = (shop as { primaryColor?: string | null }).primaryColor;
-  const primaryColor = shopPrimary ?? "#E84B1F";
 
-  const zones = parseShippingZones(shop.shippingZones);
-  const firstZone = zones[0];
-  const isPhysical = product.type === "physical";
-  const isOutOfStock = product.stock != null && product.stock <= 0;
+  const segment = product.slug ?? product.id;
 
-  const categoryLabel = product.category ?? product.customCategory;
-  const showStockCounter = product.stock != null;
+  const reviews: ReviewVM[] = reviewsProp.map((r) => ({
+    id: r.id,
+    authorName: r.authorName,
+    rating: r.rating,
+    comment: r.content,
+    createdAt: r.createdAt,
+  }));
 
-  const promoEnd =
-    product.promoEndsAt instanceof Date
-      ? product.promoEndsAt
-      : product.promoEndsAt
-        ? new Date(product.promoEndsAt as string)
-        : null;
+  const ratingValue =
+    reviews.length > 0
+      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+      : 4.8;
+  const reviewsCountDisplay =
+    reviews.length > 0 ? reviews.length : 1000;
+
+  const unlimited = product.unlimitedStock ?? true;
+  const rawStock = product.stock;
+  const maxQty = unlimited ? 99 : Math.min(99, Math.max(1, rawStock ?? 1));
+  const isOutOfStock = !unlimited && rawStock !== null && rawStock <= 0;
+
+  const showOnlineEscrow = Boolean(shop.paymentOnlineEscrow);
+  const showCashOnDelivery = Boolean(shop.paymentCashOnDelivery);
 
   const cartLinePayload = () => ({
     productId: product.id,
-    productSlug: product.slug ?? product.id,
+    productSlug: segment,
     name: product.name,
     price: product.price,
     imageUrl: product.imageUrl ?? null,
     emoji: product.emoji ?? null,
-    productType: product.type,
+    productType: product.type ?? "physical",
   });
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     addToCart(shop.slug, cartLinePayload(), quantity);
-    refreshCart();
-    setAddedFlash(true);
-    setTimeout(() => setAddedFlash(false), 1800);
+    refresh();
   };
 
-  const handleBuyNowOnline = () => {
+  const goCheckout = (
+    method: "online_escrow" | "cash_on_delivery"
+  ) => {
+    if (isOutOfStock) return;
     addToCart(shop.slug, cartLinePayload(), quantity);
-    refreshCart();
-    router.push(`/shop/${shop.slug}/panier?method=online_escrow`);
+    refresh();
+    router.push(
+      `/shop/${shop.slug}/panier?checkout=1&method=${method}`
+    );
   };
 
-  const handleBuyNowCash = () => {
-    addToCart(shop.slug, cartLinePayload(), quantity);
-    refreshCart();
-    router.push(`/shop/${shop.slug}/panier?method=cash_on_delivery`);
+  const handleBuyNow = () => {
+    if (!showOnlineEscrow && showCashOnDelivery) {
+      goCheckout("cash_on_delivery");
+      return;
+    }
+    goCheckout(showOnlineEscrow ? "online_escrow" : "cash_on_delivery");
   };
 
   return (
-    <article className="shop-product-detail">
-      <div className="shop-container">
-        <Breadcrumbs
-          items={[
-            { label: "Accueil", href: `/shop/${shop.slug}` },
-            ...(categoryLabel
-              ? [{ label: categoryLabel, href: `/shop/${shop.slug}` }]
-              : []),
-            { label: product.name },
-          ]}
-        />
-      </div>
-
-      <div className="shop-container shop-product-detail-inner">
-        <div className="shop-product-gallery">
-          <div className="shop-product-gallery-main">
-            <div className="shop-product-gallery-fav">
-              <FavoriteButton
-                shopSlug={shop.slug}
-                productId={product.id}
-                variant="detail"
-              />
-            </div>
-            {allImages.length > 0 ? (
-              <img
-                src={allImages[activeImage]}
-                alt={product.name}
-                key={activeImage}
-              />
-            ) : (
-              <span className="shop-product-gallery-emoji">
-                {(product.emoji as string) ?? "🛍️"}
-              </span>
-            )}
-
-            {hasPromo && (
-              <span
-                className="shop-product-gallery-badge"
-                style={{ backgroundColor: primaryColor }}
-              >
-                -{promoPercent}%
-              </span>
-            )}
-
-            {allImages.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  className="shop-product-gallery-arrow shop-product-gallery-arrow-prev"
-                  onClick={() =>
-                    setActiveImage(
-                      (prev) => (prev - 1 + allImages.length) % allImages.length
-                    )
-                  }
-                  aria-label="Image précédente"
-                >
-                  <ChevronLeft size={20} strokeWidth={2} />
-                </button>
-                <button
-                  type="button"
-                  className="shop-product-gallery-arrow shop-product-gallery-arrow-next"
-                  onClick={() =>
-                    setActiveImage((prev) => (prev + 1) % allImages.length)
-                  }
-                  aria-label="Image suivante"
-                >
-                  <ChevronRight size={20} strokeWidth={2} />
-                </button>
-              </>
-            )}
-          </div>
-          {allImages.length > 1 && (
-            <div className="shop-product-gallery-thumbs">
-              {allImages.map((url, i) => (
-                <button
-                  key={url}
-                  type="button"
-                  className={`shop-product-gallery-thumb ${
-                    i === activeImage ? "is-active" : ""
-                  }`}
-                  onClick={() => setActiveImage(i)}
-                  aria-label={`Image ${i + 1}`}
-                >
-                  <img src={url} alt="" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="shop-product-info">
-          <Link href={`/shop/${shop.slug}/a-propos`} className="shop-product-vendor">
-            <Store size={12} strokeWidth={2} />
-            <span>
-              Vendu par <strong>{shop.name}</strong>
-            </span>
-          </Link>
-
-          {categoryLabel && (
-            <div className="shop-product-category">{categoryLabel}</div>
-          )}
-          <h1 className="shop-product-name">{product.name}</h1>
-
-          {product.shortDescription && (
-            <p className="shop-product-short-desc">{product.shortDescription}</p>
-          )}
-
-          <div className="shop-product-pricing">
-            <span
-              className="shop-product-price"
-              style={{ color: primaryColor }}
-            >
-              {product.price.toLocaleString("fr-FR")} FCFA
-            </span>
-            {hasPromo && (
-              <>
-                <span className="shop-product-compare">
-                  {product.comparePrice!.toLocaleString("fr-FR")} FCFA
-                </span>
-                <span
-                  className="shop-product-promo-badge"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  -{promoPercent}%
-                </span>
-              </>
-            )}
-          </div>
-
-          <div className="shop-product-meta-row">
-            {showStockCounter ? (
-              <StockIndicator stock={product.stock} />
-            ) : null}
-            <div className="shop-product-viewers">
-              <Eye size={12} strokeWidth={2} />
-              <span>
-                <strong>{viewerCount}</strong> personnes consultent ce produit
-              </span>
-            </div>
-          </div>
-
-          {hasPromo && promoEnd && !isNaN(promoEnd.getTime()) && (
-            <UrgencyTimer promoEndsAt={promoEnd} />
-          )}
-
-          <div className="shop-product-qty-row">
-            <span className="shop-product-qty-label">Quantité</span>
-            <QuantityPicker
-              value={quantity}
-              onChange={setQuantity}
-              min={1}
-              max={99}
-              disabled={isOutOfStock}
-            />
-          </div>
-
-          <div className="shop-product-actions">
-            {!isOutOfStock && (
-              <button
-                type="button"
-                className="shop-btn shop-btn-add-cart shop-btn-lg shop-btn-full"
-                onClick={handleAddToCart}
-                style={
-                  addedFlash
-                    ? {
-                        background: "#16A34A",
-                        color: "#FFFFFF",
-                        border: "1.5px solid #16A34A",
-                      }
-                    : {
-                        background: "#FFFFFF",
-                        color: primaryColor,
-                        border: `1.5px solid ${primaryColor}`,
-                      }
-                }
-              >
-                {addedFlash ? (
-                  <>
-                    <Check size={16} strokeWidth={2.5} />
-                    Ajouté au panier
-                  </>
+    <>
+      <article className={styles.detail}>
+        <div className={styles.container}>
+          <div className={styles.grid}>
+            <div className={styles.gallery}>
+              <div className={styles.galleryMain}>
+                {allImages.length > 0 ? (
+                  <img
+                    src={allImages[activeImage]}
+                    alt={product.name}
+                    className={styles.galleryImage}
+                  />
                 ) : (
-                  <>
-                    <Plus size={16} strokeWidth={2.2} />
-                    Ajouter au panier (
-                    {(product.price * quantity).toLocaleString("fr-FR")} FCFA)
-                  </>
+                  <div className={styles.galleryPlaceholder}>
+                    <span>
+                      {product.emoji
+                        ? String(product.emoji).charAt(0).toUpperCase()
+                        : product.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
                 )}
-              </button>
-            )}
+              </div>
 
-            {!isOutOfStock && showOnlineEscrow && (
-              <button
-                type="button"
-                onClick={handleBuyNowOnline}
-                className="shop-btn shop-btn-primary shop-btn-lg shop-btn-full"
-                style={{
-                  backgroundColor: primaryColor,
-                  borderColor: primaryColor,
-                }}
-              >
-                <ShoppingBag size={18} strokeWidth={2.2} />
-                Acheter maintenant
-              </button>
-            )}
-            {!isOutOfStock &&
-              showCashOnDelivery &&
-              !showOnlineEscrow && (
-                <button
-                  type="button"
-                  onClick={handleBuyNowCash}
-                  className="shop-btn shop-btn-secondary shop-btn-lg shop-btn-full"
-                  style={{
-                    borderColor: primaryColor,
-                    color: primaryColor,
-                  }}
-                >
-                  <Banknote size={16} strokeWidth={2} />
-                  Paiement à la livraison
-                </button>
+              {allImages.length > 1 && (
+                <div className={styles.galleryThumbs}>
+                  {allImages.map((url, i) => (
+                    <button
+                      key={url}
+                      type="button"
+                      className={`${styles.galleryThumb} ${i === activeImage ? styles.galleryThumbActive : ""}`}
+                      onClick={() => setActiveImage(i)}
+                      style={
+                        i === activeImage
+                          ? { borderColor: primaryColor }
+                          : undefined
+                      }
+                      aria-label={`Image ${i + 1}`}
+                    >
+                      <img src={url} alt="" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.info}>
+              <h1 className={styles.name}>{product.name}</h1>
+
+              <div className={styles.ratingRow}>
+                <div className={styles.ratingStars}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star
+                      key={i}
+                      size={16}
+                      strokeWidth={0}
+                      fill={
+                        i <= Math.round(ratingValue) ? "#FFB800" : "#E5E2DA"
+                      }
+                    />
+                  ))}
+                  <span className={styles.ratingValue}>
+                    {ratingValue.toFixed(1)}/5
+                  </span>
+                  <span className={styles.ratingCount}>
+                    ({reviewsCountDisplay.toLocaleString("fr-FR")}+ clients)
+                  </span>
+                </div>
+                <div className={styles.securePay}>
+                  <ShieldCheck size={13} strokeWidth={2.4} />
+                  <span>Paiement sécurisé</span>
+                </div>
+              </div>
+
+              {product.shortDescription && (
+                <p className={styles.shortDesc}>{product.shortDescription}</p>
               )}
 
-            {isOutOfStock && (
+              <div className={styles.priceWrap}>
+                <span className={styles.price} style={{ color: primaryColor }}>
+                  {formatPrice(product.price)}
+                </span>
+                <span className={styles.currency}>{currency}</span>
+                {product.comparePrice != null &&
+                  product.comparePrice > product.price && (
+                    <span className={styles.comparePrice}>
+                      {formatPrice(product.comparePrice)} {currency}
+                    </span>
+                  )}
+              </div>
+
+              <div className={styles.variantBlock}>
+                <span className={styles.variantLabel}>Couleur</span>
+                <div className={styles.colorOptions}>
+                  {MOCK_COLORS.map((color, i) => (
+                    <button
+                      key={color.name}
+                      type="button"
+                      className={styles.colorOption}
+                      onClick={() => setSelectedColor(i)}
+                      style={
+                        i === selectedColor
+                          ? { borderColor: primaryColor }
+                          : undefined
+                      }
+                      aria-label={color.name}
+                      title={color.name}
+                    >
+                      <span
+                        className={styles.colorSwatch}
+                        style={{ backgroundColor: color.hex }}
+                      />
+                      {i === selectedColor && (
+                        <Check
+                          size={12}
+                          strokeWidth={3}
+                          className={styles.colorCheck}
+                          style={{
+                            color:
+                              color.hex === "#F8F8F8" ? "#0A0E13" : "#FFFFFF",
+                          }}
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.variantBlock}>
+                <span className={styles.variantLabel}>Taille</span>
+                <div className={styles.sizeOptions}>
+                  {MOCK_SIZES.map((size, i) => (
+                    <button
+                      key={size}
+                      type="button"
+                      className={styles.sizeOption}
+                      onClick={() => setSelectedSize(i)}
+                      style={
+                        i === selectedSize
+                          ? {
+                              backgroundColor: primaryColor,
+                              borderColor: primaryColor,
+                              color: "#FFFFFF",
+                            }
+                          : undefined
+                      }
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.quantityBlock}>
+                <span className={styles.variantLabel}>
+                  Quantité{" "}
+                  <span className={styles.stockNote}>
+                    (
+                    {unlimited
+                      ? "En stock"
+                      : `${rawStock ?? 0} disponible${rawStock !== 1 ? "s" : ""}`}
+                    )
+                  </span>
+                </span>
+                <div className={styles.quantityControl}>
+                  <button
+                    type="button"
+                    className={styles.quantityBtn}
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    aria-label="Diminuer"
+                  >
+                    <Minus size={14} strokeWidth={2.4} />
+                  </button>
+                  <span className={styles.quantityValue}>{quantity}</span>
+                  <button
+                    type="button"
+                    className={styles.quantityBtn}
+                    onClick={() =>
+                      setQuantity((q) => Math.min(maxQty, q + 1))
+                    }
+                    disabled={quantity >= maxQty}
+                    aria-label="Augmenter"
+                  >
+                    <Plus size={14} strokeWidth={2.4} />
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.ctas}>
+                {!isOutOfStock && (showOnlineEscrow || showCashOnDelivery) && (
+                  <button
+                    type="button"
+                    className={styles.buyBtn}
+                    style={{
+                      backgroundColor: primaryColor,
+                      borderColor: primaryColor,
+                    }}
+                    onClick={handleBuyNow}
+                  >
+                    Acheter maintenant
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={styles.addCartBtn}
+                  onClick={handleAddToCart}
+                  style={{ color: primaryColor, borderColor: primaryColor }}
+                  disabled={isOutOfStock}
+                >
+                  Ajouter au panier
+                </button>
+              </div>
+
+              <div className={styles.paymentsBlock}>
+                <span className={styles.paymentsLabel}>
+                  Moyens de paiement disponibles
+                </span>
+                <div className={styles.paymentsLogos}>
+                  <div className={styles.payLogo} aria-label="Visa">
+                    <svg
+                      viewBox="0 0 48 16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                    >
+                      <path
+                        d="M19.9 0.5L17.3 15.5H13.7L16.3 0.5H19.9Z"
+                        fill="#1A1F71"
+                      />
+                      <path
+                        d="M32 0.9C31.3 0.6 30.2 0.3 28.9 0.3C25.6 0.3 23.3 2.1 23.3 4.7C23.3 6.6 25 7.7 26.3 8.3C27.6 8.9 28 9.3 28 9.9C28 10.8 26.9 11.2 25.9 11.2C24.5 11.2 23.7 11 22.5 10.5L22 10.3L21.5 13.6C22.4 14 24 14.4 25.7 14.4C29.2 14.4 31.5 12.7 31.5 9.9C31.5 8.4 30.6 7.2 28.5 6.3C27.2 5.7 26.5 5.3 26.5 4.6C26.5 4 27.1 3.5 28.5 3.5C29.6 3.5 30.5 3.7 31.1 4L31.5 4.2L32 0.9Z"
+                        fill="#1A1F71"
+                      />
+                      <path
+                        d="M37.8 0.5H40.4C41.2 0.5 41.8 0.7 42.2 1.6L46.7 15.5H43.2L42.5 13.3H37.7L36.9 15.5H33.4L37.8 0.5ZM41.5 10.5L40.2 5.4L38.8 10.5H41.5Z"
+                        fill="#1A1F71"
+                      />
+                      <path
+                        d="M10.7 0.5L7.3 10.7L7 9C6.3 6.8 4.4 4.4 2.2 3.2L5.4 15.4H9L14.3 0.5H10.7Z"
+                        fill="#1A1F71"
+                      />
+                    </svg>
+                  </div>
+                  <div className={styles.payLogo} aria-label="Mastercard">
+                    <svg viewBox="0 0 36 24" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="13" cy="12" r="9" fill="#EB001B" />
+                      <circle cx="23" cy="12" r="9" fill="#F79E1B" />
+                      <path
+                        d="M18 5.2C16.2 6.8 15 9.3 15 12C15 14.7 16.2 17.2 18 18.8C19.8 17.2 21 14.7 21 12C21 9.3 19.8 6.8 18 5.2Z"
+                        fill="#FF5F00"
+                      />
+                    </svg>
+                  </div>
+                  <div
+                    className={styles.payLogoText}
+                    style={{ backgroundColor: "#FF6900" }}
+                  >
+                    <span>Orange Money</span>
+                  </div>
+                  <div
+                    className={styles.payLogoText}
+                    style={{
+                      backgroundColor: "#FFCC00",
+                      color: "#0A0E13",
+                    }}
+                  >
+                    <span>MTN MoMo</span>
+                  </div>
+                  <div
+                    className={styles.payLogoText}
+                    style={{ backgroundColor: "#1DC8FF" }}
+                  >
+                    <span>Wave</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.trustGrid}>
+                <div className={styles.trustItem}>
+                  <div className={styles.trustIcon} style={{ color: primaryColor }}>
+                    <Truck size={18} strokeWidth={2} />
+                  </div>
+                  <div className={styles.trustText}>
+                    <span className={styles.trustTitle}>Livraison rapide</span>
+                    <span className={styles.trustDesc}>
+                      24-48h dans votre région
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.trustItem}>
+                  <div className={styles.trustIcon} style={{ color: primaryColor }}>
+                    <RefreshCw size={18} strokeWidth={2} />
+                  </div>
+                  <div className={styles.trustText}>
+                    <span className={styles.trustTitle}>Retours gratuits</span>
+                    <span className={styles.trustDesc}>Sous 7 jours</span>
+                  </div>
+                </div>
+                <div className={styles.trustItem}>
+                  <div className={styles.trustIcon} style={{ color: primaryColor }}>
+                    <ShieldCheck size={18} strokeWidth={2} />
+                  </div>
+                  <div className={styles.trustText}>
+                    <span className={styles.trustTitle}>Paiement sécurisé</span>
+                    <span className={styles.trustDesc}>Protégé par Sellia</span>
+                  </div>
+                </div>
+                <div className={styles.trustItem}>
+                  <div className={styles.trustIcon} style={{ color: primaryColor }}>
+                    <MessageCircle size={18} strokeWidth={2} />
+                  </div>
+                  <div className={styles.trustText}>
+                    <span className={styles.trustTitle}>Support 24/7</span>
+                    <span className={styles.trustDesc}>Réponse sous 24h</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section className={styles.tabsSection}>
+            <div className={styles.tabsHeader}>
               <button
                 type="button"
-                className="shop-btn shop-btn-secondary shop-btn-lg shop-btn-full"
-                disabled
+                className={`${styles.tab}`}
+                onClick={() => setActiveTab("description")}
+                style={
+                  activeTab === "description"
+                    ? {
+                        color: primaryColor,
+                        borderBottomColor: primaryColor,
+                      }
+                    : undefined
+                }
               >
-                Produit en rupture
+                Description
               </button>
-            )}
-          </div>
+              <button
+                type="button"
+                className={`${styles.tab}`}
+                onClick={() => setActiveTab("reviews")}
+                style={
+                  activeTab === "reviews"
+                    ? {
+                        color: primaryColor,
+                        borderBottomColor: primaryColor,
+                      }
+                    : undefined
+                }
+              >
+                Avis ({reviewsProp.length})
+              </button>
+            </div>
 
-          {(showOnlineEscrow || showCashOnDelivery) && (
-            <div className="shop-product-payment-info">
-              <PaymentLogos showCashOnDelivery={showCashOnDelivery} />
-              <p className="shop-product-payment-note">
-                <ShieldCheck
-                  size={11}
-                  strokeWidth={2}
+            <div className={styles.tabsContent}>
+              {activeTab === "description" && (
+                <div className={styles.descContent}>
+                  {product.description ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: product.description,
+                      }}
+                    />
+                  ) : (
+                    <p>
+                      {product.shortDescription ??
+                        "Pas de description disponible."}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "reviews" && (
+                <>
+                  <div className={styles.reviewsList}>
+                    {reviews.length === 0 ? (
+                      <p className={styles.reviewsEmpty}>
+                        Aucun avis pour ce produit pour le moment.
+                      </p>
+                    ) : (
+                      reviews.map((review) => (
+                        <div key={review.id} className={styles.reviewItem}>
+                          <div className={styles.reviewHeader}>
+                            <span className={styles.reviewAuthor}>
+                              {review.authorName}
+                            </span>
+                            <div className={styles.reviewStars}>
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <Star
+                                  key={i}
+                                  size={12}
+                                  strokeWidth={0}
+                                  fill={
+                                    i <= review.rating ? "#FFB800" : "#E5E2DA"
+                                  }
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className={styles.reviewComment}>
+                            {review.comment}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className={styles.reviewSubmitWrap}>
+                    <ProductReviews
+                      shopId={shop.id}
+                      productId={product.id}
+                      embedded
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
+          {related.length > 0 && (
+            <section className={styles.relatedSection}>
+              <div className={styles.relatedHeader}>
+                <h2 className={styles.relatedTitle}>Vous aimerez aussi</h2>
+                <Link
+                  href={`/shop/${shop.slug}`}
+                  className={styles.relatedSeeAll}
                   style={{ color: primaryColor }}
-                />
-                Paiement sécurisé · Tes données sont protégées
-              </p>
-            </div>
-          )}
-
-          <TrustBadges
-            shippingEta={isPhysical ? (firstZone?.eta ?? null) : null}
-            hasEscrow={showOnlineEscrow}
-            primaryColor={primaryColor}
-          />
-
-          {product.description && (
-            <div className="shop-product-description">
-              <h2 className="shop-product-section-title">Description</h2>
-              <div
-                className="shop-product-description-content"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              />
-            </div>
-          )}
-
-          {zones.length > 0 && isPhysical && (
-            <div className="shop-product-shipping">
-              <h2 className="shop-product-section-title">Livraison</h2>
-              <ul className="shop-product-shipping-list">
-                {zones.slice(0, 5).map((z) => (
-                  <li key={z.id}>
-                    <span>{z.name}</span>
-                    <span>
-                      {z.price.toLocaleString("fr-FR")} FCFA
-                      {z.eta && <span className="shop-eta">· {z.eta}</span>}
-                    </span>
-                  </li>
+                >
+                  Voir tout
+                </Link>
+              </div>
+              <div className={styles.relatedGrid}>
+                {related.slice(0, 5).map((rel) => (
+                  <Link
+                    key={rel.id}
+                    href={`/shop/${shop.slug}/produit/${rel.slug ?? rel.id}`}
+                    className={styles.relatedCard}
+                  >
+                    <div className={styles.relatedImage}>
+                      {rel.imageUrl ? (
+                        <img src={rel.imageUrl} alt={rel.name} />
+                      ) : (
+                        <div className={styles.relatedPlaceholder}>
+                          <span>{rel.name.charAt(0)}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.relatedInfo}>
+                      <span className={styles.relatedName}>{rel.name}</span>
+                      <span className={styles.relatedShop}>{shop.name}</span>
+                      <span className={styles.relatedPrice}>
+                        {formatPrice(rel.price)}{" "}
+                        {currencyLabel(rel.currency ?? shop.currency ?? "XAF")}
+                      </span>
+                    </div>
+                  </Link>
                 ))}
-              </ul>
-            </div>
+              </div>
+            </section>
           )}
-
-          <ProductReviews shopId={shop.id} productId={product.id} />
         </div>
-      </div>
+      </article>
 
       {!isOutOfStock && (showOnlineEscrow || showCashOnDelivery) && (
-        <div className="shop-sticky-cta">
-          <div className="shop-sticky-cta-info">
-            <div className="shop-sticky-cta-name">{product.name}</div>
-            <div
-              className="shop-sticky-cta-price"
-              style={{ color: primaryColor }}
-            >
-              {product.price.toLocaleString("fr-FR")} FCFA
+        <div className={styles.stickyCtaBar}>
+          <div className={styles.stickyCtaInner}>
+            <div className={styles.stickyCtaInfo}>
+              <span className={styles.stickyCtaName}>{product.name}</span>
+              <span
+                className={styles.stickyCtaPrice}
+                style={{ color: primaryColor }}
+              >
+                {formatPrice(product.price)} {currency}
+              </span>
             </div>
+            <button
+              type="button"
+              className={styles.stickyCtaBtn}
+              style={{
+                backgroundColor: primaryColor,
+                borderColor: primaryColor,
+              }}
+              onClick={handleBuyNow}
+            >
+              Acheter maintenant
+            </button>
           </div>
-          <Link
-            href={`${orderPath}${
-              showOnlineEscrow ? "?method=online_escrow" : "?method=cash_on_delivery"
-            }`}
-            className="shop-btn shop-btn-primary"
-            style={{
-              backgroundColor: primaryColor,
-              borderColor: primaryColor,
-            }}
-          >
-            <ShoppingBag size={14} strokeWidth={2.2} />
-            Acheter
-          </Link>
         </div>
       )}
-
-      {related.length > 0 && (
-        <section className="shop-related">
-          <div className="shop-container">
-            <h2 className="shop-related-title">Tu pourrais aussi aimer</h2>
-            <div className="shop-products-grid">
-              {related.map((p) => (
-                <ProductCard
-                  key={String(p.id)}
-                  shopSlug={shop.slug}
-                  product={mapShopProductToCard(
-                    p as ShopWithProducts["products"][number],
-                    cardCurrency
-                  )}
-                  primaryColor={shopPrimary ?? undefined}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-    </article>
+    </>
   );
 }

@@ -1,0 +1,160 @@
+/* ============================================================
+   MERCHANT CARD — Carte de visite enrichie du marchand
+   ============================================================ */
+
+.merchantCard {
+  max-width: 720px;
+  margin: 48px auto 0;
+  padding: 28px 32px;
+  background: #FFFFFF;
+  border: 1px solid #ECE9E2;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px -8px rgba(14, 17, 22, 0.05);
+}
+
+.merchantCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.merchantCardLabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  color: #8A8D95;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.merchantCardDivider {
+  flex: 1;
+  height: 1px;
+  background: #ECE9E2;
+}
+
+.merchantInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+.merchantInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.15s;
+  min-width: 0;
+}
+
+.merchantInfo:hover {
+  opacity: 0.75;
+}
+
+.merchantInfo,
+.merchantInfo:link,
+.merchantInfo:visited {
+  text-decoration: none;
+}
+
+.merchantInfoIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #FAFAF7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.merchantInfoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.merchantInfoLabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8A8D95;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.merchantInfoValue {
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0A0E13;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.merchantSocial {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #F0EDE6;
+  flex-wrap: wrap;
+}
+
+.merchantSocialLabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6B6E76;
+}
+
+.merchantSocialBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.merchantSocialBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #FAFAF7;
+  border: 1.5px solid #ECE9E2;
+  color: #0A0E13;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.merchantSocialBtn:hover {
+  background: #0A0E13;
+  border-color: #0A0E13;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(14, 17, 22, 0.15);
+}
+
+@media (max-width: 700px) {
+  .merchantCard {
+    padding: 20px;
+    margin-top: 32px;
+  }
+  .merchantInfoGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .merchantSocial {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

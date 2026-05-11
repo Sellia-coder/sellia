@@ -10,6 +10,8 @@ import {
 interface Props {
   shopId: string;
   productId: string;
+  /** Bloc léger sans liste (liste gérée ailleurs, ex. onglet fiche produit) */
+  embedded?: boolean;
 }
 
 interface ReviewRow {
@@ -21,7 +23,11 @@ interface ReviewRow {
   createdAt: Date | string;
 }
 
-export default function ProductReviews({ shopId, productId }: Props) {
+export default function ProductReviews({
+  shopId,
+  productId,
+  embedded = false,
+}: Props) {
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -37,6 +43,10 @@ export default function ProductReviews({ shopId, productId }: Props) {
   const [content, setContent] = useState("");
 
   useEffect(() => {
+    if (embedded) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     (async () => {
       const result = await listApprovedReviewsAction(productId);
@@ -48,7 +58,7 @@ export default function ProductReviews({ shopId, productId }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [productId]);
+  }, [productId, embedded]);
 
   const avgRating =
     reviews.length > 0
@@ -93,6 +103,125 @@ export default function ProductReviews({ shopId, productId }: Props) {
       setContent("");
     });
   };
+
+  if (embedded) {
+    return (
+      <div className="shop-reviews shop-reviews-embedded">
+        {success && (
+          <div className="shop-reviews-success">
+            <Check size={14} strokeWidth={2.5} />
+            Merci pour ton avis ! Il sera publié après validation.
+          </div>
+        )}
+        {!showForm ? (
+          <button
+            type="button"
+            className="shop-btn shop-btn-secondary"
+            onClick={() => setShowForm(true)}
+          >
+            Laisser un avis
+          </button>
+        ) : (
+          <div className="shop-review-form">
+            <h3 className="shop-review-form-title">Ton avis</h3>
+            <div className="shop-form-row">
+              <label className="shop-form-label">Note *</label>
+              <div className="shop-review-rating-input">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className="shop-review-rating-star"
+                    onMouseEnter={() => setHoverRating(n)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => setRating(n)}
+                    aria-label={`${n} étoile${n > 1 ? "s" : ""}`}
+                  >
+                    <Star
+                      size={26}
+                      strokeWidth={1.5}
+                      fill={
+                        n <= (hoverRating || rating)
+                          ? "var(--shop-primary)"
+                          : "none"
+                      }
+                      color={
+                        n <= (hoverRating || rating)
+                          ? "var(--shop-primary)"
+                          : "#D9D6CC"
+                      }
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="shop-form-row">
+              <label className="shop-form-label">Ton nom *</label>
+              <input
+                type="text"
+                value={authorName}
+                onChange={(e) => setAuthorName(e.target.value)}
+                className="shop-input"
+              />
+            </div>
+            <div className="shop-form-row">
+              <label className="shop-form-label">Email</label>
+              <input
+                type="email"
+                value={authorEmail}
+                onChange={(e) => setAuthorEmail(e.target.value)}
+                className="shop-input"
+              />
+            </div>
+            <div className="shop-form-row">
+              <label className="shop-form-label">Titre</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="shop-input"
+              />
+            </div>
+            <div className="shop-form-row">
+              <label className="shop-form-label">Ton avis *</label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="shop-input shop-textarea"
+                rows={4}
+              />
+            </div>
+            {error && (
+              <div className="shop-alert-error">
+                <AlertCircle size={14} strokeWidth={2} />
+                {error}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="shop-btn shop-btn-primary"
+                onClick={handleSubmit}
+                disabled={isPending}
+              >
+                {isPending ? "Envoi…" : "Envoyer"}
+              </button>
+              <button
+                type="button"
+                className="shop-btn shop-btn-secondary"
+                onClick={() => {
+                  setShowForm(false);
+                  setError(null);
+                }}
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="shop-reviews">

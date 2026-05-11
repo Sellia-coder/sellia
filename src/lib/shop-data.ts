@@ -130,3 +130,18 @@ export function buildProductGalleryImages(
   }
   return urls.slice(0, max);
 }
+
+export async function getApprovedProductReviews(productId: string) {
+  return db.review.findMany({
+    where: { productId, status: "approved" },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: {
+      id: true,
+      authorName: true,
+      rating: true,
+      content: true,
+      createdAt: true,
+    },
+  });
+}

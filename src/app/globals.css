@@ -14533,3 +14533,8 @@ footer {
     font-size: 22px;
   }
 }
+
+/* Fiche produit : marge sous le contenu pour la barre CTA fixe */
+.shop-product-page-wrapper {
+  padding-bottom: 80px;
+}

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getShopProductBySlug, getRelatedProducts } from "@/lib/shop-data";
+import {
+  getShopProductBySlug,
+  getRelatedProducts,
+  getApprovedProductReviews,
+} from "@/lib/shop-data";
 import ProductDetail from "@/components/shop/ProductDetail";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +50,10 @@ export default async function ProductPage({ params }: Props) {
   if (!result) notFound();
 
   const { shop, product } = result;
-  const related = await getRelatedProducts(shop.id, product.id, 4);
+  const [related, reviews] = await Promise.all([
+    getRelatedProducts(shop.id, product.id, 5),
+    getApprovedProductReviews(product.id),
+  ]);
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -69,7 +76,22 @@ export default async function ProductPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
-      <ProductDetail shop={shop} product={product} related={related} />
+      <div className="shop-product-page-wrapper">
+        <ProductDetail
+          shop={{
+            id: shop.id,
+            slug: shop.slug,
+            name: shop.name,
+            primaryColor: shop.primaryColor,
+            currency: shop.currency,
+            paymentCashOnDelivery: shop.paymentCashOnDelivery,
+            paymentOnlineEscrow: shop.paymentOnlineEscrow,
+          }}
+          product={product}
+          related={related}
+          reviews={reviews}
+        />
+      </div>
     </>
   );
 }
