@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ method?: string }>;
+  searchParams: Promise<{ method?: string; checkout?: string }>;
 }
 
 export default async function CartPage({ params, searchParams }: Props) {
@@ -15,5 +15,11 @@ export default async function CartPage({ params, searchParams }: Props) {
   const shop = await getPublishedShopBySlug(slug);
   if (!shop) notFound();
 
-  return <CartView shop={shop} initialMethod={sp.method ?? null} />;
+  return (
+    <CartView
+      shop={shop}
+      initialMethod={sp.method ?? null}
+      initialCheckout={sp.checkout === "1"}
+    />
+  );
 }

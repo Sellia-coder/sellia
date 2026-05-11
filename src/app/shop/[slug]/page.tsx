@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { getPublishedShopBySlug } from "@/lib/shop-data";
 import ShopHero from "@/components/shop/ShopHero";
 import ShopProductListing from "@/components/shop/ShopProductListing";
-import TrustStrip from "@/components/shop/TrustStrip";
 
 export const dynamic = "force-dynamic";
 
@@ -20,11 +19,6 @@ export default async function ShopHomePage({ params }: Props) {
       <ShopHero shop={shop} />
 
       <ShopProductListing shop={shop} />
-
-      <TrustStrip
-        primaryColor={shop.primaryColor ?? undefined}
-        location={shop.country ?? "Cameroun"}
-      />
     </>
   );
 }

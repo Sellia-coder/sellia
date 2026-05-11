@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Heart, Plus, Star, ArrowRight } from "lucide-react";
+import { Heart, Plus, Star } from "lucide-react";
 import {
   addToCart,
   isFavorite,
@@ -78,7 +77,6 @@ export default function ProductCard({
 }: Props) {
   const [isAdding, setIsAdding] = useState(false);
   const [favorited, setFavorited] = useState(false);
-  const router = useRouter();
   const { refresh } = useCartContext();
 
   const segment = product.slug ?? product.id;
@@ -122,14 +120,8 @@ export default function ProductCard({
     setTimeout(() => setIsAdding(false), 800);
   };
 
-  const handleDiscover = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(productPath);
-  };
-
   return (
-    <article className={styles.card}>
+    <Link href={productPath} className={styles.card} prefetch={false}>
       <div className={styles.media}>
         {badge && (
           <span
@@ -155,21 +147,19 @@ export default function ProductCard({
           <Heart size={16} strokeWidth={2.2} fill={favorited ? "currentColor" : "none"} />
         </button>
 
-        <Link href={productPath} className={styles.mediaLink} aria-label={`Voir ${product.name}`}>
-          <div className={styles.mediaInner}>
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt=""
-                className={styles.image}
-              />
-            ) : (
-              <div className={styles.placeholder}>
-                <span>{product.name.charAt(0).toUpperCase()}</span>
-              </div>
-            )}
-          </div>
-        </Link>
+        <div className={styles.mediaInner}>
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt=""
+              className={styles.image}
+            />
+          ) : (
+            <div className={styles.placeholder}>
+              <span>{product.name.charAt(0).toUpperCase()}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className={styles.body}>
@@ -177,9 +167,7 @@ export default function ProductCard({
           <span className={styles.category}>{product.category.toUpperCase()}</span>
         )}
 
-        <Link href={productPath} className={styles.nameLink}>
-          <h3 className={styles.name}>{product.name}</h3>
-        </Link>
+        <h3 className={styles.name}>{product.name}</h3>
 
         {product.description && (
           <p className={styles.description}>{product.description}</p>
@@ -208,14 +196,6 @@ export default function ProductCard({
         <div className={styles.actions}>
           <button
             type="button"
-            className={styles.discoverBtn}
-            onClick={handleDiscover}
-          >
-            <span>Découvrir</span>
-            <ArrowRight size={14} strokeWidth={2.4} />
-          </button>
-          <button
-            type="button"
             className={`${styles.quickAddBtn} ${isAdding ? styles.quickAddBtnSuccess : ""}`}
             onClick={handleQuickAdd}
             aria-label="Ajouter au panier"
@@ -224,14 +204,16 @@ export default function ProductCard({
                 ? {
                     backgroundColor: primaryColor,
                     borderColor: primaryColor,
+                    color: "#FFFFFF",
                   }
                 : undefined
             }
           >
-            <Plus size={16} strokeWidth={2.5} />
+            <Plus size={18} strokeWidth={2.5} />
+            <span>Ajouter au panier</span>
           </button>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

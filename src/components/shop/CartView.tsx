@@ -28,9 +28,19 @@ import type { ShopWithProducts } from "@/lib/shop-data";
 interface Props {
   shop: ShopWithProducts;
   initialMethod: string | null;
+  /** Ouvre directement le formulaire (ex. /panier?checkout=1 ou /commander) */
+  initialCheckout?: boolean;
 }
 
-export default function CartView({ shop, initialMethod }: Props) {
+function formatPrice(n: number): string {
+  return new Intl.NumberFormat("fr-FR").format(n);
+}
+
+export default function CartView({
+  shop,
+  initialMethod,
+  initialCheckout = false,
+}: Props) {
   const router = useRouter();
   const { refresh } = useCartContext();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -43,6 +53,12 @@ export default function CartView({ shop, initialMethod }: Props) {
     setMounted(true);
     setItems(getCart(shop.slug));
   }, [shop.slug]);
+
+  useEffect(() => {
+    if (!mounted || !initialCheckout) return;
+    const cart = getCart(shop.slug);
+    if (cart.length > 0) setShowCheckout(true);
+  }, [mounted, initialCheckout, shop.slug]);
 
   const zones = parseShippingZones(shop.shippingZones);
   const hasPhysicalLines = shopHasPhysicalProducts(
@@ -183,7 +199,7 @@ export default function CartView({ shop, initialMethod }: Props) {
               href={`/shop/${shop.slug}`}
               className="shop-btn shop-btn-primary shop-btn-lg"
             >
-              Découvrir la boutique
+              Découvrir les produits
             </Link>
           </div>
         </div>
@@ -452,15 +468,28 @@ export default function CartView({ shop, initialMethod }: Props) {
                 </div>
               </div>
 
-              {!showCheckout ? (
-                <button
-                  type="button"
-                  className="shop-btn shop-btn-primary shop-btn-lg shop-btn-full"
-                  onClick={() => setShowCheckout(true)}
-                >
-                  Passer à la commande
-                </button>
-              ) : (
+              {!showCheckout && items.length > 0 && (
+                <div className="cartCheckoutWrap">
+                  <Link
+                    href={`/shop/${shop.slug}/commander`}
+                    className="checkoutBtn"
+                  >
+                    <ShoppingBag size={18} strokeWidth={2.2} />
+                    <span>Passer la commande</span>
+                    <span className="checkoutTotal">
+                      {formatPrice(subtotal)} FCFA
+                    </span>
+                  </Link>
+                  <Link
+                    href={`/shop/${shop.slug}`}
+                    className="continueShopping"
+                  >
+                    ← Continuer mes achats
+                  </Link>
+                </div>
+              )}
+
+              {showCheckout ? (
                 <button
                   type="button"
                   className="shop-btn shop-btn-primary shop-btn-lg shop-btn-full"
@@ -482,7 +511,7 @@ export default function CartView({ shop, initialMethod }: Props) {
                     "Confirmer la commande"
                   )}
                 </button>
-              )}
+              ) : null}
 
               <p className="shop-order-summary-trust">
                 <ShieldCheck size={12} strokeWidth={2} />

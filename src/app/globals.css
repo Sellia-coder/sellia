@@ -14477,7 +14477,7 @@ footer {
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin: 32px 0 24px;
+  margin: 28px 0 24px;
   flex-wrap: wrap;
 }
 
@@ -14505,6 +14505,7 @@ footer {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  align-items: stretch;
 }
 
 @media (max-width: 1099px) {
