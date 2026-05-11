@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ShoppingCart,
+  ShoppingBag,
   Banknote,
   ChevronLeft,
   ChevronRight,
@@ -12,6 +12,7 @@ import {
   Eye,
   Store,
   Check,
+  Plus,
 } from "lucide-react";
 import type { ShopWithProducts } from "@/lib/shop-data";
 import { currencyDisplay, mapShopProductToCard } from "@/lib/shopProductCard";
@@ -104,6 +105,7 @@ export default function ProductDetail({ shop, product, related }: Props) {
     String((shop as { currency?: string }).currency ?? "XAF")
   );
   const shopPrimary = (shop as { primaryColor?: string | null }).primaryColor;
+  const primaryColor = shopPrimary ?? "#E84B1F";
 
   const zones = parseShippingZones(shop.shippingZones);
   const firstZone = zones[0];
@@ -186,7 +188,12 @@ export default function ProductDetail({ shop, product, related }: Props) {
             )}
 
             {hasPromo && (
-              <span className="shop-product-gallery-badge">-{promoPercent}%</span>
+              <span
+                className="shop-product-gallery-badge"
+                style={{ backgroundColor: primaryColor }}
+              >
+                -{promoPercent}%
+              </span>
             )}
 
             {allImages.length > 1 && (
@@ -253,7 +260,10 @@ export default function ProductDetail({ shop, product, related }: Props) {
           )}
 
           <div className="shop-product-pricing">
-            <span className="shop-product-price">
+            <span
+              className="shop-product-price"
+              style={{ color: primaryColor }}
+            >
               {product.price.toLocaleString("fr-FR")} FCFA
             </span>
             {hasPromo && (
@@ -261,7 +271,12 @@ export default function ProductDetail({ shop, product, related }: Props) {
                 <span className="shop-product-compare">
                   {product.comparePrice!.toLocaleString("fr-FR")} FCFA
                 </span>
-                <span className="shop-product-promo-badge">-{promoPercent}%</span>
+                <span
+                  className="shop-product-promo-badge"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  -{promoPercent}%
+                </span>
               </>
             )}
           </div>
@@ -299,6 +314,19 @@ export default function ProductDetail({ shop, product, related }: Props) {
                 type="button"
                 className="shop-btn shop-btn-add-cart shop-btn-lg shop-btn-full"
                 onClick={handleAddToCart}
+                style={
+                  addedFlash
+                    ? {
+                        background: "#16A34A",
+                        color: "#FFFFFF",
+                        border: "1.5px solid #16A34A",
+                      }
+                    : {
+                        background: "#FFFFFF",
+                        color: primaryColor,
+                        border: `1.5px solid ${primaryColor}`,
+                      }
+                }
               >
                 {addedFlash ? (
                   <>
@@ -307,7 +335,7 @@ export default function ProductDetail({ shop, product, related }: Props) {
                   </>
                 ) : (
                   <>
-                    <ShoppingCart size={16} strokeWidth={2} />
+                    <Plus size={16} strokeWidth={2.2} />
                     Ajouter au panier (
                     {(product.price * quantity).toLocaleString("fr-FR")} FCFA)
                   </>
@@ -320,8 +348,12 @@ export default function ProductDetail({ shop, product, related }: Props) {
                 type="button"
                 onClick={handleBuyNowOnline}
                 className="shop-btn shop-btn-primary shop-btn-lg shop-btn-full"
+                style={{
+                  backgroundColor: primaryColor,
+                  borderColor: primaryColor,
+                }}
               >
-                <ShoppingCart size={16} strokeWidth={2} />
+                <ShoppingBag size={18} strokeWidth={2.2} />
                 Acheter maintenant
               </button>
             )}
@@ -332,6 +364,10 @@ export default function ProductDetail({ shop, product, related }: Props) {
                   type="button"
                   onClick={handleBuyNowCash}
                   className="shop-btn shop-btn-secondary shop-btn-lg shop-btn-full"
+                  style={{
+                    borderColor: primaryColor,
+                    color: primaryColor,
+                  }}
                 >
                   <Banknote size={16} strokeWidth={2} />
                   Paiement à la livraison
@@ -353,7 +389,11 @@ export default function ProductDetail({ shop, product, related }: Props) {
             <div className="shop-product-payment-info">
               <PaymentLogos showCashOnDelivery={showCashOnDelivery} />
               <p className="shop-product-payment-note">
-                <ShieldCheck size={11} strokeWidth={2} />
+                <ShieldCheck
+                  size={11}
+                  strokeWidth={2}
+                  style={{ color: primaryColor }}
+                />
                 Paiement sécurisé · Tes données sont protégées
               </p>
             </div>
@@ -362,6 +402,7 @@ export default function ProductDetail({ shop, product, related }: Props) {
           <TrustBadges
             shippingEta={isPhysical ? (firstZone?.eta ?? null) : null}
             hasEscrow={showOnlineEscrow}
+            primaryColor={primaryColor}
           />
 
           {product.description && (
@@ -399,7 +440,10 @@ export default function ProductDetail({ shop, product, related }: Props) {
         <div className="shop-sticky-cta">
           <div className="shop-sticky-cta-info">
             <div className="shop-sticky-cta-name">{product.name}</div>
-            <div className="shop-sticky-cta-price">
+            <div
+              className="shop-sticky-cta-price"
+              style={{ color: primaryColor }}
+            >
               {product.price.toLocaleString("fr-FR")} FCFA
             </div>
           </div>
@@ -408,8 +452,12 @@ export default function ProductDetail({ shop, product, related }: Props) {
               showOnlineEscrow ? "?method=online_escrow" : "?method=cash_on_delivery"
             }`}
             className="shop-btn shop-btn-primary"
+            style={{
+              backgroundColor: primaryColor,
+              borderColor: primaryColor,
+            }}
           >
-            <ShoppingCart size={14} strokeWidth={2} />
+            <ShoppingBag size={14} strokeWidth={2.2} />
             Acheter
           </Link>
         </div>

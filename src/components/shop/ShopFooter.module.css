@@ -1,50 +1,43 @@
 /* ============================================================
-   SHOP FOOTER — SOFT IVORY PREMIUM
+   SHOP FOOTER — MINIMAL 2 LIGNES
    ============================================================ */
 
 .footer {
   width: 100%;
-  background: #FAFAF7;
-  color: #1A1F2A;
-  margin-top: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  border-top: 1px solid #ECE9E2;
-}
-
-.footerInner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 64px 24px 48px;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 56px;
+  padding: 32px 24px;
+  background: #FAFAF7;
+  border-top: 1px solid #ECE9E2;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* COLONNE BRAND */
-.brandCol {
+/* ROW 1 — Brand + Paiements */
+.row1 {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
-  max-width: 420px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
-.brandTop {
+.brand {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
-  background: #E84B1F;
-  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   overflow: hidden;
+  flex-shrink: 0;
+  background: #E84B1F;
+  color: #FFFFFF;
   box-shadow: 0 2px 6px rgba(14, 17, 22, 0.08);
 }
 
@@ -56,7 +49,7 @@
 
 .logo span {
   font-family: 'Fraunces', 'Times New Roman', serif;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 800;
   color: #FFFFFF;
   line-height: 1;
@@ -64,70 +57,43 @@
 
 .brandName {
   font-family: 'Fraunces', 'Times New Roman', serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #0A0E13;
   letter-spacing: -0.3px;
-  line-height: 1.2;
 }
 
-.brandDesc {
-  font-family: 'Inter', sans-serif;
-  font-size: 13.5px;
-  line-height: 1.65;
-  color: #525560;
-  margin: 0;
-  font-weight: 400;
-}
-
-/* MOYENS DE PAIEMENT */
-.paymentsWrap {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.paymentsLabel {
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  color: #8A8D95;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
+/* PAIEMENTS */
 .payments {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .payBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  padding: 0 10px;
+  height: 26px;
+  padding: 0 8px;
   background: #FFFFFF;
   border: 1px solid #ECE9E2;
-  border-radius: 6px;
+  border-radius: 5px;
   box-shadow: 0 1px 2px rgba(14, 17, 22, 0.04);
   overflow: hidden;
 }
 
 .payBadge svg {
-  height: 16px;
+  height: 14px;
   width: auto;
   display: block;
 }
 
 .payTextWrap {
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 4px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -135,7 +101,7 @@
 
 .payTextWhite {
   font-family: 'Inter', sans-serif;
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 800;
   color: #FFFFFF;
   letter-spacing: 0.1px;
@@ -145,7 +111,7 @@
 
 .payTextDark {
   font-family: 'Inter', sans-serif;
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 800;
   color: #1A1F2A;
   letter-spacing: 0.1px;
@@ -153,84 +119,61 @@
   white-space: nowrap;
 }
 
-/* COLONNES LIENS */
-.linksCol {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.colTitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  color: #0A0E13;
-  text-transform: uppercase;
-  margin: 0 0 4px;
-  line-height: 1;
-}
-
-.link {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  color: #525560;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s;
-  line-height: 1.4;
-}
-
-.link:hover,
-.link:focus {
-  color: #0A0E13;
-}
-
-.link,
-.link:link,
-.link:visited {
-  text-decoration: none;
-}
-
-.linkMuted {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  color: #8A8D95;
-  font-weight: 500;
-  font-style: italic;
-}
-
-/* BOTTOM BAR */
-.bottom {
+/* SÉPARATEUR */
+.separator {
   width: 100%;
-  border-top: 1px solid #ECE9E2;
-  padding: 22px 0;
-  background: #FAFAF7;
+  height: 1px;
+  background: #ECE9E2;
+  margin: 20px 0;
 }
 
-.bottomInner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 24px;
+/* ROW 2 — Liens légaux + Copyright */
+.row2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
-.copy {
+.legalLinks {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.legalLink {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #6B6E76;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.legalLink:hover {
+  color: #0A0E13;
+}
+
+.legalLink,
+.legalLink:link,
+.legalLink:visited {
+  text-decoration: none;
+}
+
+.copyright {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: 'Inter', sans-serif;
   font-size: 12.5px;
   color: #8A8D95;
   font-weight: 500;
 }
 
-.poweredBy {
-  font-family: 'Inter', sans-serif;
-  font-size: 12.5px;
-  color: #8A8D95;
-  font-weight: 500;
+.dot {
+  color: #C5C2BA;
 }
 
 .selliaLink {
@@ -245,26 +188,19 @@
 }
 
 /* RESPONSIVE */
-@media (max-width: 960px) {
-  .footerInner {
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    padding: 48px 20px 36px;
+@media (max-width: 700px) {
+  .footer {
+    padding: 24px 16px;
   }
-  .brandCol {
-    grid-column: 1 / -1;
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 560px) {
-  .footerInner {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-  .bottomInner {
+  .row1, .row2 {
     flex-direction: column;
-    gap: 8px;
-    text-align: center;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .copyright {
+    flex-wrap: wrap;
+  }
+  .separator {
+    margin: 16px 0;
   }
 }

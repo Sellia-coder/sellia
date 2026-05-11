@@ -12,7 +12,8 @@
   border-bottom: 1px solid #E8E5DD;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  isolation: isolate;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -202,7 +203,7 @@
   position: fixed;
   inset: 0;
   background: rgba(14, 17, 22, 0.5);
-  z-index: 200;
+  z-index: 2000;
   animation: fadeIn 0.2s ease;
   backdrop-filter: blur(2px);
 }
@@ -221,7 +222,7 @@
   width: 320px;
   max-width: 85vw;
   background: #FFFFFF;
-  z-index: 201;
+  z-index: 2001;
   display: flex;
   flex-direction: column;
   box-shadow: -8px 0 32px rgba(14, 17, 22, 0.15);

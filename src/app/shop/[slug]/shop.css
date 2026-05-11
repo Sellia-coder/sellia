@@ -454,6 +454,19 @@
 }
 
 /* Fiche produit */
+/* FIX z-index : header sticky z-index 1000 — contenu produit reste sous le header */
+.shop-product-detail,
+.shop-product-info,
+.shop-product-name {
+  position: relative;
+  z-index: 1;
+}
+
+.shop-product-gallery-main {
+  position: relative;
+  z-index: 1;
+}
+
 .shop-product-detail {
   padding: 40px 20px 80px;
 }
@@ -467,7 +480,8 @@
 
 .shop-product-gallery {
   position: sticky;
-  top: 90px;
+  top: 88px;
+  z-index: 10;
 }
 
 .shop-product-gallery-main {
@@ -2061,7 +2075,7 @@
   background: #ffffff;
   border-top: 1px solid var(--shop-line);
   padding: 10px 16px;
-  z-index: 90;
+  z-index: 40;
   align-items: center;
   gap: 12px;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
