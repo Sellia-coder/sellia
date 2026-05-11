@@ -12,6 +12,7 @@ import {
   Plus,
   Globe,
 } from "lucide-react";
+import CountrySelect from "@/components/shared/CountrySelect";
 import StepNav from "./StepNav";
 
 interface Props {
@@ -49,17 +50,10 @@ export default function Step3Contact({ value, onChange, onNext, onBack }: Props)
           <Globe size={14} strokeWidth={2} />
           Pays *
         </label>
-        <select
+        <CountrySelect
           value={value.country}
-          onChange={(e) => onChange({ ...value, country: e.target.value as Step3Input["country"] })}
-          className="perso-select"
-        >
-          {COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.flag} {c.name}
-            </option>
-          ))}
-        </select>
+          onChange={(code) => onChange({ ...value, country: code as Step3Input["country"] })}
+        />
       </div>
 
       <div className="perso-card">

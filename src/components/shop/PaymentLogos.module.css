@@ -1,0 +1,24 @@
+.paymentLogos { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.paymentLogos_sm { gap:6px; }
+.paymentLogos_md { gap:8px; }
+.paymentLogos_lg { gap:10px; }
+
+.logo { display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; transition:transform .18s cubic-bezier(.16,1,.3,1); box-shadow:0 2px 6px rgba(14,17,22,.08); }
+.logo:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(14,17,22,.15); }
+
+.logo_circle { border-radius:50%; border:1.5px solid rgba(14,17,22,.05); }
+.logo_rounded { border-radius:8px; border:1px solid rgba(14,17,22,.08); }
+
+.logo_sm { width:28px; height:28px; }
+.logo_sm svg { width:70%; height:70%; }
+.logo_md { width:36px; height:36px; }
+.logo_md svg { width:72%; height:72%; }
+.logo_lg { width:48px; height:48px; }
+.logo_lg svg { width:70%; height:70%; }
+
+.logo svg { display:block; pointer-events:none; }
+
+@media (max-width:480px) {
+  .logo_md { width:32px; height:32px; }
+  .logo_lg { width:42px; height:42px; }
+}

@@ -64,59 +64,20 @@
 }
 
 /* PAIEMENTS */
-.payments {
+.paymentsWrap {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
-.payBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 26px;
-  padding: 0 8px;
-  background: #FFFFFF;
-  border: 1px solid #ECE9E2;
-  border-radius: 5px;
-  box-shadow: 0 1px 2px rgba(14, 17, 22, 0.04);
-  overflow: hidden;
-}
-
-.payBadge svg {
-  height: 14px;
-  width: auto;
-  display: block;
-}
-
-.payTextWrap {
-  height: 18px;
-  padding: 0 7px;
-  border-radius: 3px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.payTextWhite {
+.paymentsLabel {
   font-family: 'Inter', sans-serif;
-  font-size: 9.5px;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.1px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.payTextDark {
-  font-family: 'Inter', sans-serif;
-  font-size: 9.5px;
-  font-weight: 800;
-  color: #1A1F2A;
-  letter-spacing: 0.1px;
-  line-height: 1;
-  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8A8D95;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* SÉPARATEUR */
@@ -196,6 +157,9 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+  }
+  .paymentsWrap {
+    align-items: flex-start;
   }
   .copyright {
     flex-wrap: wrap;
