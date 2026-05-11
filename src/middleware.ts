@@ -59,6 +59,37 @@ function tryShopSubdomainRewrite(req: NextRequest): NextResponse | null {
 }
 
 export function middleware(req: NextRequest) {
+  const url = req.nextUrl;
+
+  if (
+    url.pathname.match(/^\/shop\/[^/]+\/panier$/) &&
+    url.searchParams.has("checkout")
+  ) {
+    const newUrl = url.clone();
+    newUrl.pathname = url.pathname.replace("/panier", "/commander");
+    newUrl.searchParams.delete("checkout");
+    return NextResponse.redirect(newUrl);
+  }
+
+  if (url.pathname === "/panier" && url.searchParams.has("checkout")) {
+    const hostname = req.headers.get("host") ?? "";
+    const hostWithoutPort = hostname.split(":")[0] ?? "";
+    let sub = "";
+    if (hostWithoutPort.endsWith(`.${ROOT_DOMAIN}`))
+      sub = hostWithoutPort.replace(`.${ROOT_DOMAIN}`, "");
+    else if (hostWithoutPort.endsWith(".lvh.me"))
+      sub = hostWithoutPort.replace(".lvh.me", "");
+    else if (hostWithoutPort.endsWith(".localhost"))
+      sub = hostWithoutPort.replace(".localhost", "");
+
+    if (sub && !RESERVED_SUBDOMAINS.has(sub)) {
+      const newUrl = url.clone();
+      newUrl.pathname = "/commander";
+      newUrl.searchParams.delete("checkout");
+      return NextResponse.redirect(newUrl);
+    }
+  }
+
   const rewritten = tryShopSubdomainRewrite(req);
   if (rewritten) return rewritten;
 

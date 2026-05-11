@@ -199,23 +199,11 @@ export default function ProductDetail({
     refresh();
   };
 
-  const goCheckout = (
-    method: "online_escrow" | "cash_on_delivery"
-  ) => {
+  const handleBuyNow = () => {
     if (isOutOfStock) return;
     addToCart(shop.slug, cartLinePayload(), quantity);
     refresh();
-    router.push(
-      `/shop/${shop.slug}/panier?checkout=1&method=${method}`
-    );
-  };
-
-  const handleBuyNow = () => {
-    if (!showOnlineEscrow && showCashOnDelivery) {
-      goCheckout("cash_on_delivery");
-      return;
-    }
-    goCheckout(showOnlineEscrow ? "online_escrow" : "cash_on_delivery");
+    router.push(`/shop/${shop.slug}/commander`);
   };
 
   return (
