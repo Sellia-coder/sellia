@@ -19,6 +19,8 @@ import {
   Lock,
   ArrowLeft,
   Check,
+  RefreshCw,
+  MessageCircle,
 } from "lucide-react";
 import {
   clearCart,
@@ -479,6 +481,71 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                       Contacte le marchand.
                     </p>
                   )}
+
+                  {formData.paymentMethod === "online_escrow" && (
+                    <div className={styles.qrExplanation}>
+                      <div className={styles.qrHeader}>
+                        <div className={styles.qrIcon} style={{ backgroundColor: primaryColor }}>
+                          <ShieldCheck size={18} strokeWidth={2.2} />
+                        </div>
+                        <div className={styles.qrHeaderText}>
+                          <h4 className={styles.qrTitle}>Payez sans crainte avec Sellia</h4>
+                          <p className={styles.qrSubtitle}>
+                            Vos fonds sont protégés. Vous ne validez le paiement qu&apos;à la livraison.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className={styles.qrSteps}>
+                        <div className={styles.qrStep}>
+                          <span className={styles.qrStepNum} style={{ backgroundColor: primaryColor }}>1</span>
+                          <div className={styles.qrStepContent}>
+                            <span className={styles.qrStepTitle}>Vous payez en toute sécurité</span>
+                            <span className={styles.qrStepDesc}>
+                              Mobile Money ou carte bancaire. Vos fonds sont immédiatement <strong>bloqués chez Sellia</strong>, pas envoyés au vendeur.
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className={styles.qrStep}>
+                          <span className={styles.qrStepNum} style={{ backgroundColor: primaryColor }}>2</span>
+                          <div className={styles.qrStepContent}>
+                            <span className={styles.qrStepTitle}>Vous recevez votre QR code</span>
+                            <span className={styles.qrStepDesc}>
+                              Par <strong>email et SMS</strong> — c&apos;est votre preuve de commande unique. Conservez-le précieusement jusqu&apos;à la livraison.
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className={styles.qrStep}>
+                          <span className={styles.qrStepNum} style={{ backgroundColor: primaryColor }}>3</span>
+                          <div className={styles.qrStepContent}>
+                            <span className={styles.qrStepTitle}>À la livraison, vous présentez votre QR</span>
+                            <span className={styles.qrStepDesc}>
+                              Le vendeur le scanne <strong>uniquement si vous êtes satisfait</strong>. Sans votre QR, il ne reçoit pas son paiement.
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className={styles.qrStepGreen}>
+                          <span className={styles.qrStepNumGreen}>
+                            <Check size={13} strokeWidth={3.5} />
+                          </span>
+                          <div className={styles.qrStepContent}>
+                            <span className={styles.qrStepTitleGreen}>Remboursement automatique garanti</span>
+                            <span className={styles.qrStepDesc}>
+                              Si vous n&apos;êtes pas livré sous <strong>6 jours</strong>, vous êtes <strong>automatiquement remboursé</strong>. Aucune démarche à faire.
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.qrFooter}>
+                        <Lock size={12} strokeWidth={2.4} />
+                        <span>Protection acheteur Sellia · Vos données sont chiffrées</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -504,115 +571,6 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                 </div>
               )}
             </div>
-
-            {currentStep === 3 &&
-              escrowAvail &&
-              formData.paymentMethod === "online_escrow" && (
-                <div className={styles.trustBlock}>
-                  <div className={styles.trustBlockHeader}>
-                    <div
-                      className={styles.trustBlockIcon}
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      <ShieldCheck size={20} strokeWidth={2} />
-                    </div>
-                    <div>
-                      <h3 className={styles.trustBlockTitle}>Payer sans crainte</h3>
-                      <p className={styles.trustBlockSubtitle}>
-                        Votre argent est protégé par Sellia. Vous ne payez le marchand
-                        qu&apos;à la livraison.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className={styles.trustBlockSteps}>
-                    <div className={styles.trustStep}>
-                      <span
-                        className={styles.trustStepNum}
-                        style={{ backgroundColor: primaryColor }}
-                      >
-                        1
-                      </span>
-                      <div className={styles.trustStepContent}>
-                        <span className={styles.trustStepTitle}>Vous payez maintenant</span>
-                        <span className={styles.trustStepDesc}>
-                          Mobile Money ou carte bancaire. Vos fonds sont immédiatement
-                          bloqués en sécurité chez Sellia.
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={styles.trustStep}>
-                      <span
-                        className={styles.trustStepNum}
-                        style={{ backgroundColor: primaryColor }}
-                      >
-                        2
-                      </span>
-                      <div className={styles.trustStepContent}>
-                        <span className={styles.trustStepTitle}>
-                          Vous recevez votre QR code
-                        </span>
-                        <span className={styles.trustStepDesc}>
-                          Par email et SMS — c&apos;est votre preuve d&apos;achat unique.
-                          Conservez-le précieusement.
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={styles.trustStep}>
-                      <span
-                        className={styles.trustStepNum}
-                        style={{ backgroundColor: primaryColor }}
-                      >
-                        3
-                      </span>
-                      <div className={styles.trustStepContent}>
-                        <span className={styles.trustStepTitle}>
-                          À la livraison, le marchand scanne
-                        </span>
-                        <span className={styles.trustStepDesc}>
-                          Le marchand vérifie votre QR code. Une fois scanné, il reçoit son
-                          paiement.
-                          <strong>
-                            {" "}
-                            Vous recevez votre produit, il reçoit son argent.
-                          </strong>
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={styles.trustStep}>
-                      <span
-                        className={styles.trustStepNum}
-                        style={{ backgroundColor: "#16A34A" }}
-                      >
-                        <Check size={12} strokeWidth={3.5} />
-                      </span>
-                      <div className={styles.trustStepContent}>
-                        <span
-                          className={styles.trustStepTitle}
-                          style={{ color: "#16A34A" }}
-                        >
-                          Remboursement automatique
-                        </span>
-                        <span className={styles.trustStepDesc}>
-                          Si non livré sous 6 jours, vous êtes{" "}
-                          <strong>automatiquement remboursé</strong>. Aucune démarche à
-                          faire.
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.trustBlockFooter}>
-                    <Lock size={13} strokeWidth={2.4} />
-                    <span>
-                      Paiement 100% sécurisé · Protection acheteur Sellia · Garantie totale
-                    </span>
-                  </div>
-                </div>
-              )}
 
             {currentStep < 4 && (
               <div className={styles.stepActions}>
@@ -724,6 +682,33 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                   <div className={styles.summaryTrustItem}>
                     <Truck size={13} strokeWidth={2.2} />
                     <span>Livraison rapide</span>
+                  </div>
+                </div>
+
+                <div className={styles.summaryTrustBadges}>
+                  <div className={styles.summaryBadge}>
+                    <div className={styles.summaryBadgeIcon} style={{ color: "#16A34A" }}>
+                      <ShieldCheck size={14} strokeWidth={2.4} />
+                    </div>
+                    <span className={styles.summaryBadgeText}>Fonds protégés</span>
+                  </div>
+                  <div className={styles.summaryBadge}>
+                    <div className={styles.summaryBadgeIcon} style={{ color: "#16A34A" }}>
+                      <RefreshCw size={14} strokeWidth={2.4} />
+                    </div>
+                    <span className={styles.summaryBadgeText}>Remboursement garanti</span>
+                  </div>
+                  <div className={styles.summaryBadge}>
+                    <div className={styles.summaryBadgeIcon} style={{ color: "#16A34A" }}>
+                      <Lock size={14} strokeWidth={2.4} />
+                    </div>
+                    <span className={styles.summaryBadgeText}>Données chiffrées</span>
+                  </div>
+                  <div className={styles.summaryBadge}>
+                    <div className={styles.summaryBadgeIcon} style={{ color: "#16A34A" }}>
+                      <MessageCircle size={14} strokeWidth={2.4} />
+                    </div>
+                    <span className={styles.summaryBadgeText}>Support 24/7</span>
                   </div>
                 </div>
               </div>

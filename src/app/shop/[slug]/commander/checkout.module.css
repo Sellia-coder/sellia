@@ -632,6 +632,208 @@
   }
 }
 
+/* ============================================================
+   QR EXPLANATION (côté client)
+   ============================================================ */
+
+.qrExplanation {
+  margin-top: 14px;
+  padding: 22px;
+  background: linear-gradient(135deg, #FAFAF7 0%, #FFFFFF 100%);
+  border: 1.5px solid #ECE9E2;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px -6px rgba(14, 17, 22, 0.06);
+  animation: qrFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes qrFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.qrHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #ECE9E2;
+}
+
+.qrIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #FFFFFF;
+  box-shadow: 0 3px 10px rgba(14, 17, 22, 0.1);
+}
+
+.qrHeaderText {
+  flex: 1;
+  min-width: 0;
+}
+
+.qrTitle {
+  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #0A0E13;
+  letter-spacing: -0.3px;
+  margin: 0 0 3px;
+  line-height: 1.2;
+}
+
+.qrSubtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #525560;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.qrSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.qrStep,
+.qrStepGreen {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.qrStepNum {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(14, 17, 22, 0.12);
+}
+
+.qrStepNumGreen {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #16A34A;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(22, 163, 74, 0.25);
+}
+
+.qrStepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.qrStepTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0A0E13;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
+}
+
+.qrStepTitleGreen {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #16A34A;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
+}
+
+.qrStepDesc {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #525560;
+  line-height: 1.55;
+}
+
+.qrStepDesc strong {
+  font-weight: 700;
+  color: #0A0E13;
+}
+
+.qrFooter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #ECE9E2;
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #16A34A;
+}
+
+.qrFooter svg {
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   TRUST BADGES DANS LE RÉCAP
+   ============================================================ */
+
+.summaryTrustBadges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #ECE9E2;
+}
+
+.summaryBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 8px;
+}
+
+.summaryBadgeIcon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.15);
+}
+
+.summaryBadgeText {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #14532D;
+  line-height: 1.3;
+}
+
 @media (max-width: 560px) {
   .checkoutMain {
     padding: 20px;
@@ -652,5 +854,14 @@
     width: 24px;
     height: 24px;
     font-size: 12px;
+  }
+  .qrExplanation {
+    padding: 18px;
+  }
+  .qrTitle {
+    font-size: 15.5px;
+  }
+  .summaryTrustBadges {
+    grid-template-columns: 1fr;
   }
 }
