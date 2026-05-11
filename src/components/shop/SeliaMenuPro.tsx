@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default function SeliaMenuPro({ shop }: Props) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
   const { cartCount, favsCount } = useCartContext();
@@ -29,7 +29,7 @@ export default function SeliaMenuPro({ shop }: Props) {
   const primaryColor = shop.primaryColor ?? "#E84B1F";
 
   useEffect(() => {
-    if (mobileOpen) {
+    if (drawerOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -37,12 +37,12 @@ export default function SeliaMenuPro({ shop }: Props) {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [mobileOpen]);
+  }, [drawerOpen]);
 
   return (
     <>
-      <header className={styles.menuPro}>
-        <div className={styles.menuProInner}>
+      <header className={styles.header}>
+        <div className={styles.container}>
           {/* GAUCHE — Brand */}
           <Link
             href={homePath}
@@ -64,22 +64,6 @@ export default function SeliaMenuPro({ shop }: Props) {
             </div>
           </Link>
 
-          {/* CENTRE — Navigation (cachée < 820px) */}
-          <nav className={styles.nav} aria-label="Navigation principale">
-            <Link href={homePath} className={styles.navLink}>
-              Accueil
-            </Link>
-            <Link href={`${homePath}#produits`} className={styles.navLink}>
-              Produits
-            </Link>
-            <Link href={`${homePath}/a-propos`} className={styles.navLink}>
-              À propos
-            </Link>
-            <Link href={`${homePath}/contact`} className={styles.navLink}>
-              Contact
-            </Link>
-          </nav>
-
           {/* DROITE — Actions */}
           <div className={styles.actions}>
             <button
@@ -88,7 +72,7 @@ export default function SeliaMenuPro({ shop }: Props) {
               aria-label="Rechercher"
               onClick={() => setSearchOpen(true)}
             >
-              <Search size={16} strokeWidth={2.2} />
+              <Search size={18} strokeWidth={2.2} />
             </button>
 
             <button
@@ -97,7 +81,7 @@ export default function SeliaMenuPro({ shop }: Props) {
               aria-label="Favoris"
               onClick={() => router.push(`${homePath}/favoris`)}
             >
-              <Heart size={16} strokeWidth={2.2} />
+              <Heart size={18} strokeWidth={2.2} />
               {favsCount > 0 && (
                 <span className={styles.badge}>{favsCount}</span>
               )}
@@ -109,7 +93,7 @@ export default function SeliaMenuPro({ shop }: Props) {
               aria-label="Panier"
               onClick={() => router.push(`${homePath}/panier`)}
             >
-              <ShoppingBag size={16} strokeWidth={2.2} />
+              <ShoppingBag size={18} strokeWidth={2.2} />
               {cartCount > 0 && (
                 <span
                   className={styles.badge}
@@ -122,75 +106,103 @@ export default function SeliaMenuPro({ shop }: Props) {
 
             <button
               type="button"
-              className={styles.mobileToggle}
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
-              aria-expanded={mobileOpen}
+              className={styles.menuBtn}
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Ouvrir le menu"
+              aria-expanded={drawerOpen}
             >
-              {mobileOpen ? (
-                <X size={20} strokeWidth={2.2} />
-              ) : (
-                <Menu size={20} strokeWidth={2.2} />
-              )}
+              <Menu size={20} strokeWidth={2.2} />
             </button>
           </div>
         </div>
-
-        {/* DRAWER MOBILE */}
-        {mobileOpen && (
-          <>
-            <div
-              className={styles.drawerOverlay}
-              onClick={() => setMobileOpen(false)}
-              aria-hidden="true"
-            />
-            <nav className={styles.drawer} aria-label="Menu mobile">
-              <div className={styles.drawerHeader}>
-                <span className={styles.drawerTitle}>Menu</span>
-                <button
-                  type="button"
-                  className={styles.drawerClose}
-                  onClick={() => setMobileOpen(false)}
-                  aria-label="Fermer"
-                >
-                  <X size={20} strokeWidth={2.2} />
-                </button>
-              </div>
-
-              <div className={styles.drawerLinks}>
-                <Link
-                  href={homePath}
-                  onClick={() => setMobileOpen(false)}
-                  className={styles.drawerLink}
-                >
-                  Accueil
-                </Link>
-                <Link
-                  href={`${homePath}#produits`}
-                  onClick={() => setMobileOpen(false)}
-                  className={styles.drawerLink}
-                >
-                  Produits
-                </Link>
-                <Link
-                  href={`${homePath}/a-propos`}
-                  onClick={() => setMobileOpen(false)}
-                  className={styles.drawerLink}
-                >
-                  À propos
-                </Link>
-                <Link
-                  href={`${homePath}/contact`}
-                  onClick={() => setMobileOpen(false)}
-                  className={styles.drawerLink}
-                >
-                  Contact
-                </Link>
-              </div>
-            </nav>
-          </>
-        )}
       </header>
+
+      {/* DRAWER */}
+      {drawerOpen && (
+        <>
+          <div
+            className={styles.overlay}
+            onClick={() => setDrawerOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className={styles.drawer} aria-label="Menu de navigation">
+            <div className={styles.drawerHeader}>
+              <span className={styles.drawerTitle}>Menu</span>
+              <button
+                type="button"
+                className={styles.drawerClose}
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Fermer"
+              >
+                <X size={20} strokeWidth={2.2} />
+              </button>
+            </div>
+
+            <nav className={styles.drawerNav}>
+              <Link
+                href={homePath}
+                onClick={() => setDrawerOpen(false)}
+                className={styles.drawerLink}
+              >
+                Accueil
+              </Link>
+              <Link
+                href={`${homePath}#produits`}
+                onClick={() => setDrawerOpen(false)}
+                className={styles.drawerLink}
+              >
+                Produits
+              </Link>
+              <Link
+                href={`${homePath}/a-propos`}
+                onClick={() => setDrawerOpen(false)}
+                className={styles.drawerLink}
+              >
+                À propos
+              </Link>
+              <Link
+                href={`${homePath}/contact`}
+                onClick={() => setDrawerOpen(false)}
+                className={styles.drawerLink}
+              >
+                Contact
+              </Link>
+            </nav>
+
+            <div className={styles.drawerDivider} />
+
+            <div className={styles.drawerNav}>
+              <button
+                type="button"
+                className={styles.drawerLink}
+                onClick={() => {
+                  setDrawerOpen(false);
+                  setSearchOpen(true);
+                }}
+              >
+                <Search size={18} strokeWidth={2} />
+                Rechercher
+              </button>
+              <Link
+                href={`${homePath}/favoris`}
+                onClick={() => setDrawerOpen(false)}
+                className={styles.drawerLink}
+              >
+                <Heart size={18} strokeWidth={2} />
+                Favoris {favsCount > 0 && `(${favsCount})`}
+              </Link>
+              <Link
+                href={`${homePath}/panier`}
+                onClick={() => setDrawerOpen(false)}
+                className={styles.drawerLink}
+              >
+                <ShoppingBag size={18} strokeWidth={2} />
+                Panier {cartCount > 0 && `(${cartCount})`}
+              </Link>
+            </div>
+          </aside>
+        </>
+      )}
 
       <SearchOverlay
         isOpen={searchOpen}

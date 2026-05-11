@@ -1,33 +1,48 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
-import PaymentLogos from "./PaymentLogos";
+import styles from "./ShopFooter.module.css";
 
 interface Props {
   shop: {
     slug: string;
     name: string;
-    tagline: string | null;
-    logoUrl: string | null;
-    paymentCashOnDelivery?: boolean;
-    paymentOnlineEscrow?: boolean;
+    tagline?: string | null;
+    description?: string | null;
+    logoUrl?: string | null;
+    primaryColor?: string | null;
+    instagramUrl?: string | null;
+    whatsappNumber?: string | null;
+    facebookUrl?: string | null;
   };
 }
 
+function whatsappHref(whatsappNumber: string | null | undefined): string | null {
+  if (!whatsappNumber?.trim()) return null;
+  const digits = whatsappNumber.replace(/\D/g, "");
+  return digits ? `https://wa.me/${digits}` : null;
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]+>/g, "").trim();
+}
+
 export default function ShopFooter({ shop }: Props) {
-  const year = new Date().getFullYear();
   const homePath = `/shop/${shop.slug}`;
   const initial = (shop.name?.[0] ?? "S").toUpperCase();
+  const primaryColor = shop.primaryColor ?? "#E84B1F";
+  const year = new Date().getFullYear();
+  const descriptionPlain = shop.description
+    ? stripHtml(shop.description)
+    : null;
+  const wa = whatsappHref(shop.whatsappNumber);
 
   return (
-    <footer className="shop-footer">
-      <div className="shop-container shop-footer-grid">
-        <div className="shop-footer-col shop-footer-col-brand">
-          <div className="shop-footer-brand">
+    <footer className={styles.footer}>
+      <div className={styles.footerInner}>
+        <div className={styles.brandCol}>
+          <div className={styles.brandTop}>
             <div
-              className="shop-footer-logo"
-              style={{
-                background: shop.logoUrl ? "transparent" : "var(--shop-primary)",
-              }}
+              className={styles.logo}
+              style={{ backgroundColor: primaryColor }}
             >
               {shop.logoUrl ? (
                 <img src={shop.logoUrl} alt={shop.name} />
@@ -35,101 +50,93 @@ export default function ShopFooter({ shop }: Props) {
                 <span>{initial}</span>
               )}
             </div>
-            <div>
-              <div className="shop-footer-brand-name">{shop.name}</div>
-              {shop.tagline && (
-                <div className="shop-footer-brand-tagline">{shop.tagline}</div>
-              )}
-            </div>
+            <span className={styles.brandName}>{shop.name}</span>
           </div>
+          {descriptionPlain && (
+            <p className={styles.brandDesc}>{descriptionPlain}</p>
+          )}
         </div>
 
-        <div className="shop-footer-col">
-          <h3 className="shop-footer-col-title">Boutique</h3>
-          <ul className="shop-footer-links">
-            <li>
-              <Link href={homePath}>Accueil</Link>
-            </li>
-            <li>
-              <Link href={`${homePath}#produits`}>Produits</Link>
-            </li>
-            <li>
-              <Link href={`${homePath}/a-propos`}>À propos</Link>
-            </li>
-            <li>
-              <Link href={`${homePath}/contact`}>Contact</Link>
-            </li>
-          </ul>
+        <div className={styles.linksCol}>
+          <h4 className={styles.colTitle}>Boutique</h4>
+          <Link href={homePath} className={styles.link}>
+            Tous les produits
+          </Link>
+          <Link href={`${homePath}#nouveautes`} className={styles.link}>
+            Nouveautés
+          </Link>
+          <Link href={`${homePath}#promotions`} className={styles.link}>
+            Promotions
+          </Link>
         </div>
 
-        <div className="shop-footer-col">
-          <h3 className="shop-footer-col-title">Informations légales</h3>
-          <ul className="shop-footer-links">
-            <li>
-              <a
-                href="https://getsellia.com/mentions-legales"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Mentions légales
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://getsellia.com/conditions"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Conditions générales
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://getsellia.com/confidentialite"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Confidentialité
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://getsellia.com/cookies"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Cookies
-              </a>
-            </li>
-          </ul>
+        <div className={styles.linksCol}>
+          <h4 className={styles.colTitle}>Aide</h4>
+          <Link href={`${homePath}/livraison`} className={styles.link}>
+            Livraison
+          </Link>
+          <Link href={`${homePath}/retours`} className={styles.link}>
+            Retours
+          </Link>
+          <Link href={`${homePath}/contact`} className={styles.link}>
+            Contact
+          </Link>
         </div>
 
-        <div className="shop-footer-col">
-          <h3 className="shop-footer-col-title">Paiements sécurisés</h3>
-          <PaymentLogos
-            size="sm"
-            showCashOnDelivery={shop.paymentCashOnDelivery ?? false}
-          />
-          <p className="shop-footer-secure-note">
-            <Sparkles size={11} strokeWidth={2} />
-            Sécurisé par <strong>Sellia</strong>
-          </p>
+        <div className={styles.linksCol}>
+          <h4 className={styles.colTitle}>Suivez-nous</h4>
+          {shop.instagramUrl && (
+            <a
+              href={shop.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              Instagram
+            </a>
+          )}
+          {wa && (
+            <a
+              href={wa}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              WhatsApp
+            </a>
+          )}
+          {shop.facebookUrl && (
+            <a
+              href={shop.facebookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              Facebook
+            </a>
+          )}
+          {!shop.instagramUrl && !wa && !shop.facebookUrl && (
+            <span className={styles.linkMuted}>Bientôt</span>
+          )}
         </div>
       </div>
 
-      <div className="shop-footer-bottom">
-        <div className="shop-container shop-footer-bottom-inner">
-          <div className="shop-footer-credit">
-            © {year} <strong>{shop.name}</strong> · Tous droits réservés
-          </div>
-          <a
-            href="https://getsellia.com?utm_source=shop&utm_medium=footer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shop-footer-poweredby"
-          >
-            Créé avec <strong>Sellia</strong>
-          </a>
+      <div className={styles.bottom}>
+        <div className={styles.bottomInner}>
+          <span className={styles.copy}>
+            © {year} {shop.name} · Tous droits réservés
+          </span>
+          <span className={styles.poweredBy}>
+            Propulsé par{" "}
+            <a
+              href="https://getsellia.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.selliaLink}
+            >
+              Sellia
+            </a>
+          </span>
         </div>
       </div>
     </footer>

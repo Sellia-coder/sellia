@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getPublishedShopBySlug } from "@/lib/shop-data";
 import ShopHero from "@/components/shop/ShopHero";
-import ProductCard from "@/components/shop/ProductCard";
+import ShopProductListing from "@/components/shop/ShopProductListing";
+import TrustStrip from "@/components/shop/TrustStrip";
 
 export const dynamic = "force-dynamic";
 
@@ -18,29 +19,12 @@ export default async function ShopHomePage({ params }: Props) {
     <>
       <ShopHero shop={shop} />
 
-      <section className="shop-products-section" id="produits">
-        <div className="shop-container">
-          <header className="shop-products-header">
-            <h2 className="shop-products-title">Nos produits</h2>
-            <span className="shop-products-count">
-              {shop.products.length} produit
-              {shop.products.length > 1 ? "s" : ""}
-            </span>
-          </header>
+      <ShopProductListing shop={shop} />
 
-          {shop.products.length === 0 ? (
-            <div className="shop-products-empty">
-              <p>Cette boutique n&apos;a pas encore de produits publiés.</p>
-            </div>
-          ) : (
-            <div className="shop-products-grid">
-              {shop.products.map((p) => (
-                <ProductCard key={p.id} shopSlug={shop.slug} product={p} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      <TrustStrip
+        primaryColor={shop.primaryColor ?? undefined}
+        location={shop.country ?? "Cameroun"}
+      />
     </>
   );
 }

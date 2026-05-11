@@ -1,0 +1,61 @@
+.filterWrap {
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 0 8px;
+  border-bottom: 1px solid #F0EDE6;
+}
+
+.filterScroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+}
+
+.filterScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.pill {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border-radius: 100px;
+  background: #FFFFFF;
+  border: 1.5px solid #ECE9E2;
+  color: #1A1F2A;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.pill:hover {
+  border-color: #1A1F2A;
+  color: #0A0E13;
+}
+
+.pillActive {
+  background: #0A0E13;
+  border-color: #0A0E13;
+  color: #FFFFFF;
+}
+
+.pillActive:hover {
+  background: #1A1F2A;
+  border-color: #1A1F2A;
+  color: #FFFFFF;
+}
+
+@media (max-width: 560px) {
+  .pill {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}

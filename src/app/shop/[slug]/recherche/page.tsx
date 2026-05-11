@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 import { getPublishedShopBySlug } from "@/lib/shop-data";
+import {
+  currencyDisplay,
+  mapShopProductToCard,
+} from "@/lib/shopProductCard";
 import ShopSearchPanel from "@/components/shop/ShopSearchPanel";
 import ProductCard from "@/components/shop/ProductCard";
 
@@ -16,6 +20,7 @@ export default async function RecherchePage({ params, searchParams }: Props) {
   const shop = await getPublishedShopBySlug(slug);
   if (!shop) notFound();
 
+  const currency = currencyDisplay(shop.currency);
   const query = (q ?? "").trim().toLowerCase();
   const filtered =
     query.length === 0
@@ -41,7 +46,12 @@ export default async function RecherchePage({ params, searchParams }: Props) {
         ) : (
           <div className="shop-products-grid" style={{ marginTop: 28 }}>
             {filtered.map((p) => (
-              <ProductCard key={p.id} shopSlug={shop.slug} product={p} />
+              <ProductCard
+                key={p.id}
+                shopSlug={shop.slug}
+                product={mapShopProductToCard(p, currency)}
+                primaryColor={shop.primaryColor ?? undefined}
+              />
             ))}
           </div>
         )}

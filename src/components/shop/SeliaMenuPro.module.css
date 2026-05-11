@@ -1,54 +1,44 @@
 /* ============================================================
-   SELIA MENU PRO V5 — PRO COMPACT ALIGNED
-   Menu compact qui rentre sur petit écran avec nav visible
-   Tout aligné centré verticalement sur une seule ligne
+   SELIA HEADER FINAL — BULLETPROOF
+   Structure simple : Brand (gauche) + Actions (droite)
+   Nav dans drawer hamburger pour TOUS les écrans
+   Aucun grid, aucun breakpoint complexe
    ============================================================ */
 
-/* ============================================================
-   HEADER PRINCIPAL
-   ============================================================ */
-.menuPro {
+/* HEADER */
+.header {
+  width: 100%;
   background: #FFFFFF;
   border-bottom: 1px solid #E8E5DD;
-  box-shadow: 0 1px 0 rgba(14, 17, 22, 0.03);
   position: sticky;
   top: 0;
   z-index: 100;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  width: 100%;
 }
 
-.menuProInner {
+.container {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
-  height: 64px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  width: 100%;
+  box-sizing: border-box;
 }
 
-/* ============================================================
-   BRAND (logo + texte) — Compacté
-   ============================================================ */
+/* BRAND (gauche) */
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
-  position: relative;
-  z-index: 1;
   cursor: pointer;
-  transition: opacity 0.15s;
-  flex-shrink: 0;
   min-width: 0;
-  height: 100%;
-}
-
-.brand:hover {
-  opacity: 0.85;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .brand,
@@ -58,12 +48,17 @@
 .brand:active,
 .brand:focus {
   text-decoration: none;
+  color: inherit;
+}
+
+.brand:hover {
+  opacity: 0.85;
 }
 
 .logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,21 +67,19 @@
   background: #E84B1F;
   color: #FFFFFF;
   box-shadow: 0 2px 6px rgba(14, 17, 22, 0.08);
-  position: relative;
 }
 
 .logo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 10px;
   display: block;
 }
 
 .logo span {
   font-family: 'Fraunces', 'Times New Roman', serif;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 20px;
   color: #FFFFFF;
   line-height: 1;
   letter-spacing: -0.4px;
@@ -96,13 +89,12 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  justify-content: center;
-  line-height: 1;
+  overflow: hidden;
 }
 
 .brandName {
   font-family: 'Fraunces', 'Times New Roman', serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: #0A0E13;
   letter-spacing: -0.3px;
@@ -110,83 +102,33 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
 }
 
 .brandTagline {
   font-family: 'Inter', sans-serif;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #6B6E76;
   font-weight: 500;
-  letter-spacing: 0.05px;
   margin-top: 2px;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
 }
 
-/* ============================================================
-   NAVIGATION — Centrée
-   ============================================================ */
-.nav {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 2px;
-  height: auto;
-  flex-shrink: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.navLink {
-  display: inline-flex;
-  align-items: center;
-  font-family: 'Inter', sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1A1F2A;
-  text-decoration: none;
-  padding: 7px 12px;
-  border-radius: 8px;
-  letter-spacing: -0.1px;
-  transition: all 0.15s;
-  position: relative;
-  flex-shrink: 0;
-  white-space: nowrap;
-  height: 34px;
-  line-height: 1;
-}
-
-.navLink,
-.navLink:link,
-.navLink:visited {
-  color: #1A1F2A;
-}
-
-.navLink:hover {
-  background: #F5F2EC;
-  color: #0A0E13;
-}
-
-/* ============================================================
-   ACTIONS (icônes + hamburger)
-   ============================================================ */
+/* ACTIONS (droite) */
 .actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 100%;
+  gap: 6px;
   flex-shrink: 0;
 }
 
-.iconBtn {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
+.iconBtn,
+.menuBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: #FAFAF7;
   border: 1.5px solid #E8E5DD;
   color: #1A1F2A;
@@ -194,15 +136,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
   padding: 0;
-  font-family: inherit;
   outline: none;
+  font-family: inherit;
   flex-shrink: 0;
+  position: relative;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.iconBtn:hover {
+.iconBtn:hover,
+.menuBtn:hover {
   background: #0A0E13;
   border-color: #0A0E13;
   color: #FFFFFF;
@@ -210,35 +153,36 @@
   box-shadow: 0 4px 10px rgba(14, 17, 22, 0.15);
 }
 
-.iconBtn:active {
+.iconBtn:active,
+.menuBtn:active {
   transform: translateY(0);
 }
 
-.iconBtn:focus-visible {
+.iconBtn:focus-visible,
+.menuBtn:focus-visible {
   outline: 2px solid #0A0E13;
   outline-offset: 2px;
 }
 
-.iconBtn svg {
+.iconBtn svg,
+.menuBtn svg {
   display: block;
   stroke: currentColor;
   fill: none;
   pointer-events: none;
 }
 
-/* ============================================================
-   BADGE COMPTEUR
-   ============================================================ */
+/* BADGE */
 .badge {
   position: absolute;
   top: -5px;
   right: -5px;
-  min-width: 18px;
-  height: 18px;
+  min-width: 19px;
+  height: 19px;
   border-radius: 100px;
   background: #E84B1F;
   color: #FFFFFF;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -250,74 +194,42 @@
   line-height: 1;
   box-shadow: 0 2px 5px rgba(232, 75, 31, 0.4);
   pointer-events: none;
+  box-sizing: border-box;
 }
 
-/* ============================================================
-   MOBILE TOGGLE (hamburger, caché >= 820px)
-   ============================================================ */
-.mobileToggle {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  background: #FAFAF7;
-  border: 1.5px solid #E8E5DD;
-  color: #1A1F2A;
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  outline: none;
-  font-family: inherit;
-  flex-shrink: 0;
-}
-
-.mobileToggle:hover {
-  background: #0A0E13;
-  border-color: #0A0E13;
-  color: #FFFFFF;
-}
-
-.mobileToggle svg {
-  pointer-events: none;
-  stroke: currentColor;
-  fill: none;
-}
-
-/* ============================================================
-   DRAWER MOBILE
-   ============================================================ */
-.drawerOverlay {
+/* OVERLAY */
+.overlay {
   position: fixed;
   inset: 0;
   background: rgba(14, 17, 22, 0.5);
   z-index: 200;
-  animation: drawerFadeIn 0.2s ease;
+  animation: fadeIn 0.2s ease;
   backdrop-filter: blur(2px);
 }
 
-@keyframes drawerFadeIn {
+@keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
+/* DRAWER */
 .drawer {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 300px;
+  width: 320px;
   max-width: 85vw;
   background: #FFFFFF;
   z-index: 201;
   display: flex;
   flex-direction: column;
   box-shadow: -8px 0 32px rgba(14, 17, 22, 0.15);
-  animation: drawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow-y: auto;
 }
 
-@keyframes drawerSlideIn {
+@keyframes slideIn {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
@@ -326,8 +238,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 18px 20px;
   border-bottom: 1px solid #E8E5DD;
+  flex-shrink: 0;
 }
 
 .drawerTitle {
@@ -339,9 +252,9 @@
 }
 
 .drawerClose {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: #FAFAF7;
   border: 1.5px solid #E8E5DD;
   color: #1A1F2A;
@@ -360,7 +273,7 @@
   color: #FFFFFF;
 }
 
-.drawerLinks {
+.drawerNav {
   display: flex;
   flex-direction: column;
   padding: 8px 12px;
@@ -370,13 +283,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 14px;
+  padding: 14px 16px;
   font-family: 'Inter', sans-serif;
   font-size: 15px;
   font-weight: 600;
   color: #0A0E13;
   text-decoration: none;
-  border-radius: 9px;
+  border-radius: 10px;
   transition: background 0.15s;
   background: transparent;
   border: none;
@@ -396,116 +309,48 @@
   text-decoration: none;
 }
 
-/* ============================================================
-   RESPONSIVE BREAKPOINTS
-   ============================================================ */
-
-/* >= 1200px : Desktop large — Padding plus généreux */
-@media (min-width: 1200px) {
-  .menuProInner {
-    padding: 0 32px;
-    height: 68px;
-  }
-  .logo {
-    width: 42px;
-    height: 42px;
-    border-radius: 11px;
-  }
-  .logo span {
-    font-size: 20px;
-  }
-  .brandName {
-    font-size: 17px;
-    max-width: 280px;
-  }
-  .brandTagline {
-    font-size: 11.5px;
-    max-width: 280px;
-  }
-  .navLink {
-    font-size: 14px;
-    padding: 8px 14px;
-    height: 36px;
-  }
-  .iconBtn {
-    width: 38px;
-    height: 38px;
-  }
-  .nav {
-    gap: 4px;
-  }
+.drawerDivider {
+  height: 1px;
+  background: #E8E5DD;
+  margin: 4px 20px;
 }
 
-/* 820-1199px : Laptop compact (ton cas 989px) — Nav visible, compact */
-@media (min-width: 820px) and (max-width: 1199px) {
-  .menuProInner {
-    padding: 0 18px;
-    height: 64px;
-    gap: 12px;
-  }
-  .brandName {
-    max-width: 160px;
-  }
-  .brandTagline {
-    max-width: 160px;
-  }
-}
-
-/* 1000-1199px : Resserre encore un peu si nécessaire */
-@media (min-width: 1000px) and (max-width: 1199px) {
-  .nav {
-    gap: 2px;
-  }
-  .navLink {
-    padding: 7px 11px;
-    font-size: 13.5px;
-  }
-}
-
-/* < 820px : Mobile/Tablette — Hamburger visible, nav cachée */
-@media (max-width: 819px) {
-  .nav {
-    display: none;
-  }
-  .mobileToggle {
-    display: inline-flex;
-  }
-  .menuProInner {
-    padding: 0 16px;
+/* RESPONSIVE — UNIQUEMENT ajustements de taille */
+@media (max-width: 560px) {
+  .container {
+    padding: 0 14px;
     height: 60px;
     gap: 10px;
   }
-  .brand {
-    flex: 1;
-    min-width: 0;
-  }
   .brandTagline {
     display: none;
   }
-  .brandName {
-    font-size: 15.5px;
-    max-width: none;
-  }
   .logo {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
+    width: 38px;
+    height: 38px;
   }
   .logo span {
-    font-size: 17px;
+    font-size: 18px;
+  }
+  .brandName {
+    font-size: 15.5px;
+  }
+  .iconBtn,
+  .menuBtn {
+    width: 36px;
+    height: 36px;
   }
   .actions {
     gap: 4px;
   }
 }
 
-/* < 560px : Mobile — Cache recherche et favoris (accessibles via drawer) */
-@media (max-width: 559px) {
-  .menuProInner {
-    padding: 0 14px;
-    height: 58px;
+@media (max-width: 420px) {
+  .container {
+    padding: 0 12px;
     gap: 8px;
   }
+  /* Cache recherche et favoris (accessibles via drawer) */
   .iconBtn:nth-of-type(1),
   .iconBtn:nth-of-type(2) {
     display: none;
@@ -515,30 +360,6 @@
   }
 }
 
-/* < 400px : Smartphone très petit */
-@media (max-width: 399px) {
-  .menuProInner {
-    padding: 0 12px;
-    gap: 6px;
-  }
-  .brandName {
-    font-size: 13.5px;
-  }
-  .logo {
-    width: 34px;
-    height: 34px;
-  }
-  .logo span {
-    font-size: 16px;
-  }
-  .iconBtn,
-  .mobileToggle {
-    width: 34px;
-    height: 34px;
-  }
-}
-
-/* Drawer responsive */
 @media (max-width: 480px) {
   .drawer {
     width: 100%;

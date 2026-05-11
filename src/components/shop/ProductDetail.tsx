@@ -13,6 +13,8 @@ import {
   Store,
   Check,
 } from "lucide-react";
+import type { ShopWithProducts } from "@/lib/shop-data";
+import { currencyDisplay, mapShopProductToCard } from "@/lib/shopProductCard";
 import ProductCard from "./ProductCard";
 import Breadcrumbs from "./Breadcrumbs";
 import StockIndicator from "./StockIndicator";
@@ -98,6 +100,10 @@ export default function ProductDetail({ shop, product, related }: Props) {
   const showOnlineEscrow = shop.paymentOnlineEscrow;
   const segment = product.slug ?? product.id;
   const orderPath = `/shop/${shop.slug}/commander/${segment}`;
+  const cardCurrency = currencyDisplay(
+    String((shop as { currency?: string }).currency ?? "XAF")
+  );
+  const shopPrimary = (shop as { primaryColor?: string | null }).primaryColor;
 
   const zones = parseShippingZones(shop.shippingZones);
   const firstZone = zones[0];
@@ -418,7 +424,11 @@ export default function ProductDetail({ shop, product, related }: Props) {
                 <ProductCard
                   key={String(p.id)}
                   shopSlug={shop.slug}
-                  product={p as never}
+                  product={mapShopProductToCard(
+                    p as ShopWithProducts["products"][number],
+                    cardCurrency
+                  )}
+                  primaryColor={shopPrimary ?? undefined}
                 />
               ))}
             </div>

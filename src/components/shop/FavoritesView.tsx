@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart, ArrowLeft } from "lucide-react";
 import { getFavorites } from "@/lib/cart";
+import { currencyDisplay, mapShopProductToCard } from "@/lib/shopProductCard";
 import ProductCard from "./ProductCard";
 import type { ShopWithProducts } from "@/lib/shop-data";
 
@@ -32,6 +33,7 @@ export default function FavoritesView({ shop }: Props) {
   if (!mounted) return null;
 
   const favProducts = shop.products.filter((p) => favIds.includes(p.id));
+  const currency = currencyDisplay(shop.currency);
 
   return (
     <section className="shop-favorites">
@@ -63,7 +65,12 @@ export default function FavoritesView({ shop }: Props) {
         ) : (
           <div className="shop-products-grid">
             {favProducts.map((p) => (
-              <ProductCard key={p.id} shopSlug={shop.slug} product={p} />
+              <ProductCard
+                key={p.id}
+                shopSlug={shop.slug}
+                product={mapShopProductToCard(p, currency)}
+                primaryColor={shop.primaryColor ?? undefined}
+              />
             ))}
           </div>
         )}
