@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Truck,
   Plus,
@@ -9,6 +10,7 @@ import {
   Banknote,
   ShieldCheck,
   QrCode,
+  Crown,
 } from "lucide-react";
 import {
   step35Schema,
@@ -24,6 +26,7 @@ interface Props {
   onNext: () => void;
   onBack: () => void;
   countryCode: string;
+  plan?: string;
 }
 
 const MAX_ZONES = 10;
@@ -34,6 +37,7 @@ export default function Step35Shipping({
   onNext,
   onBack,
   countryCode,
+  plan = "free",
 }: Props) {
   const [error, setError] = useState<string | null>(null);
 
@@ -212,35 +216,50 @@ export default function Step35Shipping({
         </h3>
 
         <div className="perso-payment-options">
-          <label
+          <div
             className={`perso-payment-option ${
-              value.paymentCashOnDelivery ? "is-active" : ""
+              plan === "free" ? "perso-payment-option-locked" : value.paymentCashOnDelivery ? "is-active" : ""
             }`}
           >
             <div className="perso-payment-option-icon">
               <Banknote size={20} strokeWidth={1.8} />
             </div>
             <div className="perso-payment-option-body">
-              <div className="perso-payment-option-title">
-                Paiement à la livraison
+              <div className="perso-payment-option-title-row">
+                <span className="perso-payment-option-title">
+                  Paiement à la livraison
+                </span>
+                {plan === "free" && (
+                  <span className="perso-pro-badge">
+                    <Crown size={10} strokeWidth={2.5} />
+                    PRO
+                  </span>
+                )}
               </div>
               <p className="perso-payment-option-desc">
-                Le client paie en <strong>espèces ou Mobile Money</strong>{" "}
-                directement à votre livreur quand il reçoit son colis. Simple
-                et rassurant pour les nouveaux clients.
+                {plan === "free"
+                  ? "Permet au client de payer en espèces à la réception. Disponible avec le plan Pro."
+                  : "Le client paie en espèces ou Mobile Money directement à votre livreur quand il reçoit son colis."}
               </p>
             </div>
-            <span className="perso-payment-option-toggle">
-              <input
-                type="checkbox"
-                checked={value.paymentCashOnDelivery}
-                onChange={(e) =>
-                  togglePayment("paymentCashOnDelivery", e.target.checked)
-                }
-              />
-              <span className="perso-payment-option-toggle-slider" />
-            </span>
-          </label>
+            {plan === "free" ? (
+              <Link href="/dashboard/abonnement" className="perso-upgrade-btn">
+                <Crown size={13} strokeWidth={2.4} />
+                Débloquer avec Pro
+              </Link>
+            ) : (
+              <span className="perso-payment-option-toggle">
+                <input
+                  type="checkbox"
+                  checked={value.paymentCashOnDelivery}
+                  onChange={(e) =>
+                    togglePayment("paymentCashOnDelivery", e.target.checked)
+                  }
+                />
+                <span className="perso-payment-option-toggle-slider" />
+              </span>
+            )}
+          </div>
 
           <label
             className={`perso-payment-option ${

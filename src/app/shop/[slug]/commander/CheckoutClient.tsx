@@ -5,7 +5,6 @@ import {
   useEffect,
   useMemo,
   useState,
-  useTransition,
   type CSSProperties,
 } from "react";
 import Link from "next/link";
@@ -18,26 +17,54 @@ import {
   ShieldCheck,
   Lock,
   ArrowLeft,
+  ArrowRight,
   Check,
   RefreshCw,
   MessageCircle,
+  Plus,
+  Minus,
+  Trash2,
+  Star,
+  Loader2,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   clearCart,
   getCart,
+  updateCartQuantity,
+  removeFromCart as removeCartItem,
   type CartItem,
 } from "@/lib/cart";
 import { useCartContext } from "@/components/shop/CartProvider";
-import { createOrderAction } from "@/app/actions/order";
 import {
   parseShippingZones,
   shopHasPhysicalProducts,
   type ShopWithProducts,
 } from "@/lib/shop-data";
+import PaymentLogos from "@/components/shop/PaymentLogos";
+import type { PaymentMethod as PaymentLogoType } from "@/components/shop/PaymentLogos";
 import styles from "./checkout.module.css";
 
 function currencyLabel(c: string | null | undefined): string {
   return !c || c === "XAF" ? "FCFA" : c;
+}
+
+function getProviderName(provider: PaymentLogoType): string {
+  const names: Partial<Record<PaymentLogoType, string>> = {
+    wave: "Wave",
+    mtn_momo: "MTN MoMo",
+    orange_money: "Orange Money",
+    moov_money: "Moov Money",
+    free_money: "Free Money",
+    airtel_money: "Airtel Money",
+    tmoney: "T-Money",
+    vodafone_cash: "Vodafone Cash",
+    celtiis_cash: "MyCeltiis",
+    tigo_cash: "Tigo Cash",
+    visa: "Visa",
+    mastercard: "Mastercard",
+  };
+  return names[provider] ?? provider;
 }
 
 interface Props {
@@ -55,8 +82,11 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
   const [lastOrderNumber, setLastOrderNumber] = useState<string | null>(null);
+
+  const [paymentSubMethod, setPaymentSubMethod] = useState<"mobile_money" | "card">("mobile_money");
+  const [selectedProvider, setSelectedProvider] = useState<PaymentLogoType | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const zones = parseShippingZones(shop.shippingZones);
   const escrowAvail = Boolean(shop.paymentOnlineEscrow);
@@ -113,7 +143,6 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     hasPhysicalLines && selectedZone ? selectedZone.price : 0;
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  /** Livraison facturée dès qu’il y a des lignes physiques et une zone (aligné CartView après ouverture checkout). */
   const total =
     subtotal + (hasPhysicalLines && selectedZone ? shippingPrice : 0);
 
@@ -125,6 +154,18 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
   ] as const;
 
   const paymentChoiceBoth = escrowAvail && codAvail;
+
+  const handleItemQtyChange = (productId: string, qty: number) => {
+    const next = updateCartQuantity(shop.slug, productId, qty);
+    setItems(next);
+    refresh();
+  };
+
+  const handleItemRemove = (productId: string) => {
+    const next = removeCartItem(shop.slug, productId);
+    setItems(next);
+    refresh();
+  };
 
   const handleNext = () => {
     setError(null);
@@ -157,7 +198,14 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     setCurrentStep((s) => Math.max(s - 1, 1));
   };
 
-  const submitOrder = () => {
+  const canProceedToPayment =
+    formData.paymentMethod === "cash_on_delivery" ||
+    (formData.paymentMethod === "online_escrow" && selectedProvider !== null);
+
+  const handleProceedToPayment = async () => {
+    if (isProcessingPayment) return;
+    if (!canProceedToPayment) return;
+
     setError(null);
     if (formData.fullName.trim().length < 2) {
       setError("Renseigne ton nom complet");
@@ -179,34 +227,51 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
       return;
     }
 
-    startTransition(async () => {
-      const result = await createOrderAction({
-        shopSlug: shop.slug,
-        customerName: formData.fullName,
-        customerPhone: formData.phone,
-        customerEmail: formData.email || undefined,
-        customerCity: formData.city || undefined,
-        customerAddress: formData.address || undefined,
-        items: items.map((i) => ({
-          productId: i.productId,
-          quantity: i.quantity,
-        })),
-        shippingZoneId:
-          hasPhysicalLines && zones.length > 0
-            ? formData.shippingZoneId
-            : undefined,
-        paymentMethod: formData.paymentMethod,
+    setIsProcessingPayment(true);
+
+    try {
+      const response = await fetch(`/api/shop/${shop.slug}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: formData.fullName,
+          customerPhone: formData.phone,
+          customerEmail: formData.email || null,
+          deliveryAddress: formData.address,
+          deliveryCity: formData.city,
+          deliveryNotes: null,
+          paymentMethod: formData.paymentMethod,
+          paymentSubMethod: formData.paymentMethod === "online_escrow" ? paymentSubMethod : null,
+          paymentProvider: selectedProvider,
+          items: items.map((i) => ({
+            productId: i.productId,
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity,
+            imageUrl: i.imageUrl,
+          })),
+          subtotal,
+          shippingFee: shippingPrice,
+          total,
+        }),
       });
 
-      if (!result.ok) {
-        setError(result.error ?? "Erreur");
+      const result = await response.json();
+
+      if (!result.success) {
+        setError(result.error || "Erreur lors du paiement. Réessayez.");
+        setIsProcessingPayment(false);
         return;
       }
+
       clearCart(shop.slug);
       refresh();
-      setLastOrderNumber(result.order.orderNumber);
-      setCurrentStep(4);
-    });
+      router.push(`/shop/${shop.slug}/commande/${result.orderNumber}`);
+    } catch (err) {
+      console.error("[checkout] Error:", err);
+      setError("Erreur réseau. Vérifiez votre connexion.");
+      setIsProcessingPayment(false);
+    }
   };
 
   const checkoutRootStyle = useMemo(
@@ -420,6 +485,10 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                             : undefined
                         }
                       >
+                        <span className={styles.recommendedBadge}>
+                          <Star size={10} strokeWidth={2.5} fill="currentColor" />
+                          RECOMMANDÉ
+                        </span>
                         <div
                           className={styles.paymentOptionIcon}
                           style={{ color: primaryColor }}
@@ -477,9 +546,80 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                     </p>
                   ) : (
                     <p className={styles.stepCartHint}>
-                      Aucun moyen de paiement n’est activé pour cette boutique.
+                      Aucun moyen de paiement n&apos;est activé pour cette boutique.
                       Contacte le marchand.
                     </p>
+                  )}
+
+                  {formData.paymentMethod === "online_escrow" && (
+                    <div className={styles.subMethodSelector}>
+                      <div className={styles.subMethodTabs}>
+                        <button
+                          type="button"
+                          className={`${styles.subMethodTab} ${paymentSubMethod === "mobile_money" ? styles.subMethodTabActive : ""}`}
+                          onClick={() => {
+                            setPaymentSubMethod("mobile_money");
+                            setSelectedProvider(null);
+                          }}
+                          style={paymentSubMethod === "mobile_money" ? { borderColor: primaryColor, color: primaryColor } : undefined}
+                        >
+                          Mobile Money
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.subMethodTab} ${paymentSubMethod === "card" ? styles.subMethodTabActive : ""}`}
+                          onClick={() => {
+                            setPaymentSubMethod("card");
+                            setSelectedProvider(null);
+                          }}
+                          style={paymentSubMethod === "card" ? { borderColor: primaryColor, color: primaryColor } : undefined}
+                        >
+                          Carte bancaire
+                        </button>
+                      </div>
+
+                      {paymentSubMethod === "mobile_money" && (
+                        <div className={styles.providerGrid}>
+                          {(["wave", "mtn_momo", "orange_money", "moov_money", "free_money", "airtel_money"] as PaymentLogoType[]).map((provider) => (
+                            <button
+                              key={provider}
+                              type="button"
+                              className={`${styles.providerCard} ${selectedProvider === provider ? styles.providerCardActive : ""}`}
+                              onClick={() => setSelectedProvider(provider)}
+                              style={selectedProvider === provider ? { borderColor: primaryColor } : undefined}
+                            >
+                              <PaymentLogos methods={[provider]} size="md" variant="circle" />
+                              <span className={styles.providerName}>{getProviderName(provider)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {paymentSubMethod === "card" && (
+                        <div className={styles.providerGrid}>
+                          {(["visa", "mastercard"] as PaymentLogoType[]).map((provider) => (
+                            <button
+                              key={provider}
+                              type="button"
+                              className={`${styles.providerCard} ${selectedProvider === provider ? styles.providerCardActive : ""}`}
+                              onClick={() => setSelectedProvider(provider)}
+                              style={selectedProvider === provider ? { borderColor: primaryColor } : undefined}
+                            >
+                              <PaymentLogos methods={[provider]} size="md" variant="rounded" />
+                              <span className={styles.providerName}>
+                                {provider === "visa" ? "Visa" : "Mastercard"}
+                              </span>
+                            </button>
+                          ))}
+
+                          <div className={`${styles.providerCard} ${styles.providerCardDisabled}`}>
+                            <CreditCard size={28} strokeWidth={1.8} />
+                            <span className={styles.providerName}>Autres cartes</span>
+                            <span className={styles.providerSoon}>Bientôt</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {formData.paymentMethod === "online_escrow" && (
@@ -579,7 +719,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                     type="button"
                     className={styles.stepBackBtn}
                     onClick={handleBack}
-                    disabled={isPending}
+                    disabled={isProcessingPayment}
                   >
                     Retour
                   </button>
@@ -600,14 +740,24 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                   <button
                     type="button"
                     className={styles.stepNextBtn}
-                    onClick={submitOrder}
-                    disabled={isPending}
+                    onClick={handleProceedToPayment}
                     style={{
                       backgroundColor: primaryColor,
                       borderColor: primaryColor,
                     }}
+                    disabled={!canProceedToPayment || isProcessingPayment}
                   >
-                    {isPending ? "Patienter…" : "Finaliser ma commande"}
+                    {isProcessingPayment ? (
+                      <>
+                        <Loader2 size={16} strokeWidth={2.2} className={styles.spin} />
+                        Traitement...
+                      </>
+                    ) : (
+                      <>
+                        Procéder au paiement
+                        <ArrowRight size={16} strokeWidth={2.4} />
+                      </>
+                    )}
                   </button>
                 )}
               </div>
@@ -623,21 +773,54 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                   {items.map((item) => (
                     <div key={item.productId} className={styles.summaryItem}>
                       <div className={styles.summaryItemImage}>
-                        {item.imageUrl && (
+                        {item.imageUrl ? (
                           <img src={item.imageUrl} alt={item.name} />
+                        ) : (
+                          <div className={styles.summaryItemPlaceholder}>
+                            <ImageIcon size={20} strokeWidth={1.8} />
+                          </div>
                         )}
-                        <span className={styles.summaryItemQty}>
-                          {item.quantity}
-                        </span>
                       </div>
+
                       <div className={styles.summaryItemInfo}>
                         <span className={styles.summaryItemName}>
                           {item.name}
                         </span>
                         <span className={styles.summaryItemPrice}>
-                          {(item.price * item.quantity).toLocaleString("fr-FR")}{" "}
-                          {cur}
+                          {item.price.toLocaleString("fr-FR")} {cur}
                         </span>
+
+                        <div className={styles.summaryItemActions}>
+                          <div className={styles.summaryQtyControl}>
+                            <button
+                              type="button"
+                              className={styles.summaryQtyBtn}
+                              onClick={() => handleItemQtyChange(item.productId, Math.max(1, item.quantity - 1))}
+                              disabled={item.quantity <= 1}
+                              aria-label="Diminuer"
+                            >
+                              <Minus size={11} strokeWidth={2.5} />
+                            </button>
+                            <span className={styles.summaryQtyValue}>{item.quantity}</span>
+                            <button
+                              type="button"
+                              className={styles.summaryQtyBtn}
+                              onClick={() => handleItemQtyChange(item.productId, item.quantity + 1)}
+                              aria-label="Augmenter"
+                            >
+                              <Plus size={11} strokeWidth={2.5} />
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={styles.summaryRemoveBtn}
+                            onClick={() => handleItemRemove(item.productId)}
+                            aria-label="Retirer du panier"
+                          >
+                            <Trash2 size={13} strokeWidth={2.2} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

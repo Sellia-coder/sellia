@@ -1,0 +1,520 @@
+.confirmation {
+  min-height: calc(100vh - 64px);
+  background: #FAFAF7;
+  padding: 40px 0 80px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.successHeader {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.successIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.25);
+  animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bounceIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.successTitle {
+  font-family: 'Fraunces', serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: #0A0E13;
+  letter-spacing: -0.8px;
+  margin: 0 0 8px;
+  line-height: 1.1;
+}
+
+.successSubtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: #525560;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.orderNumber {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #FFFFFF;
+  border: 1px solid #ECE9E2;
+  border-radius: 12px;
+}
+
+.orderNumberLabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8A8D95;
+  text-transform: uppercase;
+}
+
+.orderNumberValue {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0A0E13;
+}
+
+.orderNumberCopy {
+  width: 26px;
+  height: 26px;
+  background: #FAFAF7;
+  border: 1px solid #ECE9E2;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B6E76;
+  transition: all 0.15s;
+}
+
+.orderNumberCopy:hover {
+  background: #ECE9E2;
+  color: #0A0E13;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.qrSection,
+.summarySection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.qrCard,
+.summaryCard,
+.deliveryCard,
+.merchantContact,
+.instructions {
+  background: #FFFFFF;
+  border: 1px solid #ECE9E2;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(14, 17, 22, 0.06);
+}
+
+.qrHeader {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.qrTitle {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #0A0E13;
+  letter-spacing: -0.4px;
+  margin: 0 0 6px;
+}
+
+.qrSubtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #525560;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.qrImageWrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto 24px;
+  background: #FFFFFF;
+  border: 2px solid #ECE9E2;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.qrImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.qrLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #8A8D95;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+
+.qrLogo {
+  position: absolute;
+  bottom: 50%;
+  right: 50%;
+  transform: translate(50%, 50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 4px 10px rgba(14, 17, 22, 0.15);
+}
+
+.qrDownloadBtn {
+  width: 100%;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px solid;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.qrDownloadBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.qrDownloadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qrInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #92400E;
+  line-height: 1.5;
+}
+
+.qrInfo svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.instructionsTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0E13;
+  margin: 0 0 14px;
+}
+
+.instructionsList {
+  margin: 0;
+  padding: 0 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.instructionsList li {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #525560;
+  line-height: 1.55;
+}
+
+.instructionsList li strong {
+  color: #0A0E13;
+  font-weight: 700;
+}
+
+.refundInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #ECE9E2;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #16A34A;
+  font-weight: 600;
+}
+
+.refundInfo svg {
+  flex-shrink: 0;
+}
+
+.summaryCardTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0E13;
+  margin: 0 0 18px;
+}
+
+.summaryItems {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summaryItem {
+  display: flex;
+  gap: 10px;
+}
+
+.summaryItemImg {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #FAFAF7;
+  border: 1px solid #ECE9E2;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.summaryItemImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.summaryItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.summaryItemName {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0A0E13;
+}
+
+.summaryItemVar {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #8A8D95;
+}
+
+.summaryItemQty {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  color: #525560;
+  margin-top: 2px;
+}
+
+.summaryDivider {
+  height: 1px;
+  background: #ECE9E2;
+  margin: 14px 0;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #525560;
+  padding: 4px 0;
+}
+
+.summaryTotal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0E13;
+}
+
+.summaryTotalAmount {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.deliveryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #6B6E76;
+  margin-bottom: 12px;
+}
+
+.deliveryContent {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #525560;
+  line-height: 1.5;
+}
+
+.deliveryContent strong {
+  font-weight: 700;
+  color: #0A0E13;
+  font-size: 14px;
+}
+
+.deliveryPhone {
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.merchantContactTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0E13;
+  margin: 0 0 4px;
+}
+
+.merchantContactDesc {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #525560;
+  margin: 0 0 14px;
+}
+
+.merchantContactActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.merchantContactBtn,
+.merchantContactBtnGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.18s;
+}
+
+.merchantContactBtn {
+  color: #FFFFFF;
+  border: none;
+}
+
+.merchantContactBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.merchantContactBtnGhost {
+  background: #FAFAF7;
+  border: 1px solid #ECE9E2;
+  color: #0A0E13;
+}
+
+.merchantContactBtnGhost:hover {
+  background: #ECE9E2;
+}
+
+.backToShop {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.backLink {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B6E76;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.backLink:hover {
+  color: #0A0E13;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .successTitle {
+    font-size: 28px;
+  }
+  .qrImageWrap {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding: 0 16px;
+  }
+  .qrCard,
+  .summaryCard,
+  .deliveryCard,
+  .merchantContact,
+  .instructions {
+    padding: 20px;
+  }
+  .successTitle {
+    font-size: 24px;
+  }
+  .qrImageWrap {
+    width: 200px;
+    height: 200px;
+  }
+  .merchantContactActions {
+    flex-direction: column;
+  }
+}

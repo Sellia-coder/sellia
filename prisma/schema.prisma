@@ -93,7 +93,9 @@ model Shop {
   // Status
   isPublished    Boolean  @default(false)
   status         String   @default("SETUP") // SETUP, ACTIVE, MAINTENANCE
-  plan           String   @default("DECOUVERTE") // DECOUVERTE, PRO
+  plan           String   @default("free") // free, pro
+  planActivatedAt DateTime?
+  planExpiresAt   DateTime?
   currency       String   @default("XAF")
   views          Int      @default(0)
   publishedAt    DateTime?
@@ -324,11 +326,20 @@ model Order {
   total             Int
 
   paymentMethod     String
+  paymentSubMethod  String?
+  paymentProvider   String?
   paymentStatus     String    @default("pending")
+
+  qrCode            String?   @unique
+  qrScannedAt       DateTime?
 
   status            String    @default("pending")
 
   whatsappContacted Boolean   @default(false)
+
+  paidAt            DateTime?
+  refundedAt        DateTime?
+  refundDeadline    DateTime?
 
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -338,6 +349,7 @@ model Order {
 
   @@index([shopId])
   @@index([orderNumber])
+  @@index([qrCode])
   @@index([status])
   @@index([paymentStatus])
   @@index([createdAt])
