@@ -1,0 +1,406 @@
+/* ============================================================
+   STEP APPEARANCE — Personnalisation couleurs boutique
+   ============================================================ */
+
+.appearance {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.headerIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #FAFAF7, #ECE9E2);
+  color: #0A0E13;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: "Fraunces", serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #0A0E13;
+  letter-spacing: -0.4px;
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #6B6E76;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #6B6E76;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.paletteGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.paletteCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: #FFFFFF;
+  border: 2px solid #ECE9E2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.paletteCard:hover {
+  border-color: #DDD9D0;
+  transform: translateY(-1px);
+}
+
+.paletteSwatches {
+  display: flex;
+  gap: 6px;
+}
+
+.paletteSwatch {
+  flex: 1;
+  height: 36px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(14, 17, 22, 0.06);
+}
+
+.paletteName {
+  font-family: "Inter", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0A0E13;
+}
+
+.paletteCheck {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(14, 17, 22, 0.18);
+}
+
+.customColors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.customColorField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0A0E13;
+}
+
+.fieldHint {
+  font-family: "Inter", sans-serif;
+  font-size: 11.5px;
+  color: #8A8D95;
+}
+
+.colorPickerWrap {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.colorPreview {
+  position: relative;
+  width: 46px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1.5px solid #ECE9E2;
+  flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.colorInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.colorHexInput {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  background: #FFFFFF;
+  border: 1.5px solid #ECE9E2;
+  border-radius: 10px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: #0A0E13;
+  outline: none;
+  text-transform: uppercase;
+}
+
+.colorHexInput:focus {
+  border-color: #0A0E13;
+}
+
+.bgGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.bgCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: #FFFFFF;
+  border: 2px solid #ECE9E2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.bgCard:hover {
+  border-color: #DDD9D0;
+}
+
+.bgPreview {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #ECE9E2;
+  flex-shrink: 0;
+}
+
+.bgInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bgName {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0A0E13;
+}
+
+.bgDesc {
+  font-family: "Inter", sans-serif;
+  font-size: 11.5px;
+  color: #8A8D95;
+}
+
+.fontGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.fontCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: #FFFFFF;
+  border: 2px solid #ECE9E2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.fontCard:hover {
+  border-color: #DDD9D0;
+}
+
+.fontPreview {
+  width: 50px;
+  height: 50px;
+  border-radius: 11px;
+  background: #FAFAF7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 22px;
+  color: #0A0E13;
+}
+
+.fontPreview_classic {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+}
+
+.fontPreview_modern {
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.fontPreview_editorial {
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.fontInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fontName {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0A0E13;
+}
+
+.fontDesc {
+  font-family: "Inter", sans-serif;
+  font-size: 11.5px;
+  color: #8A8D95;
+  line-height: 1.4;
+}
+
+.preview {
+  width: 100%;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #ECE9E2;
+  display: flex;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.previewProduct {
+  position: relative;
+  width: 240px;
+  background: #FFFFFF;
+  border: 1px solid #ECE9E2;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.previewBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 9px;
+  border-radius: 5px;
+  font-family: "Inter", sans-serif;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  color: #FFFFFF;
+  z-index: 1;
+}
+
+.previewImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #FAFAF7 0%, #ECE9E2 100%);
+}
+
+.previewBody {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.previewName {
+  font-family: "Fraunces", serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.previewPrice {
+  font-family: "Fraunces", serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.previewBtn {
+  margin-top: 6px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-family: "Inter", sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .paletteGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .customColors {
+    grid-template-columns: 1fr;
+  }
+  .bgGrid,
+  .fontGrid {
+    grid-template-columns: 1fr;
+  }
+}

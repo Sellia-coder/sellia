@@ -10,6 +10,7 @@ import {
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import StepNav from "./StepNav";
 import ProductEditorModal from "./ProductEditorModal";
+import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 
 interface Props {
   value: Step2Input;
@@ -27,7 +28,7 @@ const EMPTY_PRODUCT = (id: string): ProductEditInput => ({
   slug: "",
   shortDescription: "",
   description: "",
-  emoji: "🛍️",
+  emoji: "",
   price: 100,
   comparePrice: null,
   category: undefined,
@@ -176,7 +177,14 @@ function ProductCard({
       </label>
 
       <div className="perso-product-pro-thumb">
-        {product.imageUrl ? <img src={product.imageUrl} alt="" /> : <span>{product.emoji || "🛍️"}</span>}
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt="" />
+        ) : (
+          <ProductImagePlaceholder
+            productName={product.name || undefined}
+            size="sm"
+          />
+        )}
       </div>
 
       <div className="perso-product-pro-info">

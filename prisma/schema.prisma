@@ -64,17 +64,19 @@ model Shop {
   facebookUrl    String?
 
   // Apparence
-  themeId        String   @default("minimal")
-  primaryColor   String   @default("#E84B1F")
-  secondaryColor String?
-  accentColor    String?
-  bgColor        String   @default("#FAFAF7")
-  textColor      String   @default("#0E1116")
-  displayFont    String   @default("Fraunces")
-  bodyFont       String   @default("Inter")
-  logoUrl        String?
-  faviconUrl     String?
-  ogImageUrl     String?
+  themeId           String   @default("minimal")
+  primaryColor      String   @default("#E84B1F")
+  secondaryColor    String?
+  accentColor       String?
+  bgColor           String   @default("#FAFAF7")
+  textColor         String   @default("#0E1116")
+  displayFont       String   @default("Fraunces")
+  bodyFont          String   @default("Inter")
+  backgroundStyle String?  @default("ivory") // ivory | white | cream
+  fontStyle       String?  @default("classic") // classic | modern | editorial
+  logoUrl         String?
+  faviconUrl      String?
+  ogImageUrl      String?
 
   // SEO
   seoTitle       String?

@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Lock,
   ArrowLeft,
+  Check,
 } from "lucide-react";
 import {
   clearCart,
@@ -503,6 +504,115 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                 </div>
               )}
             </div>
+
+            {currentStep === 3 &&
+              escrowAvail &&
+              formData.paymentMethod === "online_escrow" && (
+                <div className={styles.trustBlock}>
+                  <div className={styles.trustBlockHeader}>
+                    <div
+                      className={styles.trustBlockIcon}
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      <ShieldCheck size={20} strokeWidth={2} />
+                    </div>
+                    <div>
+                      <h3 className={styles.trustBlockTitle}>Payer sans crainte</h3>
+                      <p className={styles.trustBlockSubtitle}>
+                        Votre argent est protégé par Sellia. Vous ne payez le marchand
+                        qu&apos;à la livraison.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.trustBlockSteps}>
+                    <div className={styles.trustStep}>
+                      <span
+                        className={styles.trustStepNum}
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        1
+                      </span>
+                      <div className={styles.trustStepContent}>
+                        <span className={styles.trustStepTitle}>Vous payez maintenant</span>
+                        <span className={styles.trustStepDesc}>
+                          Mobile Money ou carte bancaire. Vos fonds sont immédiatement
+                          bloqués en sécurité chez Sellia.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.trustStep}>
+                      <span
+                        className={styles.trustStepNum}
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        2
+                      </span>
+                      <div className={styles.trustStepContent}>
+                        <span className={styles.trustStepTitle}>
+                          Vous recevez votre QR code
+                        </span>
+                        <span className={styles.trustStepDesc}>
+                          Par email et SMS — c&apos;est votre preuve d&apos;achat unique.
+                          Conservez-le précieusement.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.trustStep}>
+                      <span
+                        className={styles.trustStepNum}
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        3
+                      </span>
+                      <div className={styles.trustStepContent}>
+                        <span className={styles.trustStepTitle}>
+                          À la livraison, le marchand scanne
+                        </span>
+                        <span className={styles.trustStepDesc}>
+                          Le marchand vérifie votre QR code. Une fois scanné, il reçoit son
+                          paiement.
+                          <strong>
+                            {" "}
+                            Vous recevez votre produit, il reçoit son argent.
+                          </strong>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.trustStep}>
+                      <span
+                        className={styles.trustStepNum}
+                        style={{ backgroundColor: "#16A34A" }}
+                      >
+                        <Check size={12} strokeWidth={3.5} />
+                      </span>
+                      <div className={styles.trustStepContent}>
+                        <span
+                          className={styles.trustStepTitle}
+                          style={{ color: "#16A34A" }}
+                        >
+                          Remboursement automatique
+                        </span>
+                        <span className={styles.trustStepDesc}>
+                          Si non livré sous 6 jours, vous êtes{" "}
+                          <strong>automatiquement remboursé</strong>. Aucune démarche à
+                          faire.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.trustBlockFooter}>
+                    <Lock size={13} strokeWidth={2.4} />
+                    <span>
+                      Paiement 100% sécurisé · Protection acheteur Sellia · Garantie totale
+                    </span>
+                  </div>
+                </div>
+              )}
 
             {currentStep < 4 && (
               <div className={styles.stepActions}>

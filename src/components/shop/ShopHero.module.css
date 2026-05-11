@@ -1,132 +1,122 @@
 /* ============================================================
-   MERCHANT CARD — Carte de visite enrichie du marchand
+   VENDOR CARD MINIMALISTE — STYLE TRENDIX237
    ============================================================ */
 
-.merchantCard {
-  max-width: 720px;
-  margin: 48px auto 0;
-  padding: 28px 32px;
-  background: #FFFFFF;
-  border: 1px solid #ECE9E2;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px -8px rgba(14, 17, 22, 0.05);
+.vendorCard {
+  width: 100%;
+  max-width: 920px;
+  margin: 40px auto 28px;
+  padding: 0;
 }
 
-.merchantCardHeader {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.merchantCardLabel {
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.6px;
-  color: #8A8D95;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.merchantCardDivider {
-  flex: 1;
-  height: 1px;
-  background: #ECE9E2;
-}
-
-.merchantInfoGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 24px;
-}
-
-.merchantInfo {
+.vendorCardMain {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  text-decoration: none;
-  color: inherit;
-  transition: opacity 0.15s;
-  min-width: 0;
+  gap: 24px;
+  padding: 0 8px;
 }
 
-.merchantInfo:hover {
-  opacity: 0.75;
-}
-
-.merchantInfo,
-.merchantInfo:link,
-.merchantInfo:visited {
-  text-decoration: none;
-}
-
-.merchantInfoIcon {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  background: #FAFAF7;
+.vendorLogo {
+  width: 88px;
+  height: 88px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(14, 17, 22, 0.08);
 }
 
-.merchantInfoContent {
+.vendorLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vendorLogo span {
+  font-family: "Fraunces", "Times New Roman", serif;
+  font-size: 42px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.vendorInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 10px;
+  flex: 1;
   min-width: 0;
+  padding-top: 4px;
 }
 
-.merchantInfoLabel {
-  font-family: 'Inter', sans-serif;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #8A8D95;
-  text-transform: uppercase;
-  line-height: 1.2;
-}
-
-.merchantInfoValue {
-  font-family: 'Inter', sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
+.vendorName {
+  font-family: "Inter", sans-serif;
+  font-size: 26px;
+  font-weight: 800;
   color: #0A0E13;
-  line-height: 1.4;
-  word-break: break-word;
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+  margin: 0;
 }
 
-.merchantSocial {
+.vendorTagline {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #6B6E76;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.vendorContactRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #F0EDE6;
+  gap: 24px;
   flex-wrap: wrap;
+  margin-top: 4px;
 }
 
-.merchantSocialLabel {
-  font-family: 'Inter', sans-serif;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #6B6E76;
+.vendorContactItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #525560;
+  text-decoration: none;
+  transition: color 0.15s;
 }
 
-.merchantSocialBtns {
+.vendorContactItem:hover {
+  color: #0A0E13;
+}
+
+.vendorContactItem svg {
+  color: #8A8D95;
+  flex-shrink: 0;
+}
+
+.vendorContactItem,
+.vendorContactItem:link,
+.vendorContactItem:visited {
+  text-decoration: none;
+}
+
+.vendorSocial {
   display: flex;
+  align-items: center;
   gap: 8px;
+  margin-top: 12px;
 }
 
-.merchantSocialBtn {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: #FAFAF7;
-  border: 1.5px solid #ECE9E2;
+.vendorSocialCircle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #F4F2EC;
   color: #0A0E13;
   display: inline-flex;
   align-items: center;
@@ -135,26 +125,39 @@
   text-decoration: none;
 }
 
-.merchantSocialBtn:hover {
+.vendorSocialCircle:hover {
   background: #0A0E13;
-  border-color: #0A0E13;
   color: #FFFFFF;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(14, 17, 22, 0.15);
+  box-shadow: 0 4px 10px rgba(14, 17, 22, 0.18);
+}
+
+.vendorSocialWa:hover {
+  background: #25D366;
 }
 
 @media (max-width: 700px) {
-  .merchantCard {
-    padding: 20px;
-    margin-top: 32px;
-  }
-  .merchantInfoGrid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  .merchantSocial {
+  .vendorCardMain {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .vendorLogo {
+    width: 72px;
+    height: 72px;
+  }
+  .vendorLogo span {
+    font-size: 34px;
+  }
+  .vendorName {
+    font-size: 22px;
+  }
+  .vendorInfo {
+    align-items: center;
+  }
+  .vendorContactRow {
+    justify-content: center;
+    gap: 14px;
   }
 }

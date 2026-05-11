@@ -6,19 +6,21 @@ function buildSteps(hasPhysicalProducts: boolean) {
   if (hasPhysicalProducts) {
     return [
       { num: 1, label: "Logo" },
-      { num: 2, label: "Produits" },
-      { num: 3, label: "Contact" },
+      { num: 2, label: "Apparence" },
+      { num: 3, label: "Produits" },
+      { num: 4, label: "Contact" },
       { num: 35, label: "Livraison" },
-      { num: 4, label: "À propos" },
-      { num: 5, label: "Publier" },
+      { num: 5, label: "À propos" },
+      { num: 6, label: "Publier" },
     ];
   }
   return [
     { num: 1, label: "Logo" },
-    { num: 2, label: "Produits" },
-    { num: 3, label: "Contact" },
-    { num: 4, label: "À propos" },
-    { num: 5, label: "Publier" },
+    { num: 2, label: "Apparence" },
+    { num: 3, label: "Produits" },
+    { num: 4, label: "Contact" },
+    { num: 5, label: "À propos" },
+    { num: 6, label: "Publier" },
   ];
 }
 
@@ -51,7 +53,9 @@ export default function StepHeader({
           <div className="perso-header-brand">
             <div
               className="perso-header-brand-logo"
-              style={{ background: shopLogoUrl ? "transparent" : shopPrimaryColor ?? "#E84B1F" }}
+              style={{
+                background: shopLogoUrl ? "transparent" : shopPrimaryColor ?? "#E84B1F",
+              }}
             >
               {shopLogoUrl ? <img src={shopLogoUrl} alt="" /> : <span>{initial}</span>}
             </div>
@@ -78,7 +82,9 @@ export default function StepHeader({
                   flex: idx === STEPS.length - 1 ? "0 0 auto" : 1,
                 }}
               >
-                <div className={`perso-step ${done ? "is-done" : ""} ${active ? "is-active" : ""}`}>
+                <div
+                  className={`perso-step ${done ? "is-done" : ""} ${active ? "is-active" : ""}`}
+                >
                   <div className="perso-step-circle">
                     {done ? <Check size={14} strokeWidth={2.5} /> : s.num}
                   </div>

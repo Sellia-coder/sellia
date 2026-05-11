@@ -22,10 +22,14 @@ import {
   Truck,
   Banknote,
   ShieldCheck,
+  Palette,
 } from "lucide-react";
+import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import type { StepAppearanceInput } from "@/lib/validations/personnalisation";
 
 interface Props {
   step1: Step1Input;
+  stepAppearance: StepAppearanceInput;
   step2: Step2Input;
   step3: Step3Input;
   step35: Step35Input | null;
@@ -39,6 +43,7 @@ interface Props {
 
 export default function Step5Recap({
   step1,
+  stepAppearance,
   step2,
   step3,
   step35,
@@ -81,15 +86,56 @@ export default function Step5Recap({
       </RecapCard>
 
       <RecapCard
+        icon={<Palette size={14} strokeWidth={2} />}
+        title="Apparence"
+        onEdit={() => onEditStep(2)}
+      >
+        <ul className="perso-recap-list">
+          <li>
+            <span>Couleur principale</span>
+            <span className="perso-recap-list-price">{stepAppearance.primaryColor}</span>
+          </li>
+          <li>
+            <span>Accent</span>
+            <span className="perso-recap-list-price">{stepAppearance.accentColor}</span>
+          </li>
+          <li>
+            <span>Fond · typo</span>
+            <span className="perso-recap-list-price">
+              {stepAppearance.backgroundStyle} · {stepAppearance.fontStyle}
+            </span>
+          </li>
+        </ul>
+      </RecapCard>
+
+      <RecapCard
         icon={<Package size={14} strokeWidth={2} />}
         title={`${includedProducts.length} produit${includedProducts.length > 1 ? "s" : ""}`}
-        onEdit={() => onEditStep(2)}
+        onEdit={() => onEditStep(3)}
       >
         <ul className="perso-recap-list">
           {includedProducts.slice(0, 5).map((p) => (
             <li key={p.id}>
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span>{p.emoji || "🛍️"}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    flexShrink: 0,
+                  }}
+                >
+                  {p.imageUrl ? (
+                    <img
+                      src={p.imageUrl}
+                      alt=""
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <ProductImagePlaceholder productName={p.name} size="sm" />
+                  )}
+                </span>
                 <span>{p.name}</span>
               </span>
               <span className="perso-recap-list-price">{p.price.toLocaleString("fr-FR")} FCFA</span>
@@ -103,7 +149,7 @@ export default function Step5Recap({
         </ul>
       </RecapCard>
 
-      <RecapCard icon={<Phone size={14} strokeWidth={2} />} title="Contact" onEdit={() => onEditStep(3)}>
+      <RecapCard icon={<Phone size={14} strokeWidth={2} />} title="Contact" onEdit={() => onEditStep(4)}>
         <ul className="perso-recap-list">
           <li>
             <span className="perso-recap-list-icon">
@@ -186,7 +232,7 @@ export default function Step5Recap({
         </>
       )}
 
-      <RecapCard icon={<FileText size={14} strokeWidth={2} />} title="À propos" onEdit={() => onEditStep(4)}>
+      <RecapCard icon={<FileText size={14} strokeWidth={2} />} title="À propos" onEdit={() => onEditStep(5)}>
         <p className="perso-recap-text">{step4.description}</p>
       </RecapCard>
 

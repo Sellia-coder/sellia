@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import StepHeader from "./StepHeader";
 import Step1Logo from "./Step1Logo";
+import StepAppearance from "./StepAppearance";
 import Step2Products from "./Step2Products";
 import Step3Contact from "./Step3Contact";
 import Step35Shipping from "./Step35Shipping";
@@ -20,6 +21,7 @@ import {
   type Step3Input,
   type Step35Input,
   type Step4Input,
+  type StepAppearanceInput,
 } from "@/lib/validations/personnalisation";
 
 type DraftShop = {
@@ -31,6 +33,8 @@ type DraftShop = {
   primaryColor: string | null;
   secondaryColor: string | null;
   accentColor: string | null;
+  backgroundStyle?: "ivory" | "white" | "cream" | null;
+  fontStyle?: "classic" | "modern" | "editorial" | null;
   products: unknown;
 };
 
@@ -106,7 +110,7 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
       slug: "",
       shortDescription: "",
       description: plainDraftDescriptionToRichHtml(p.description ?? ""),
-      emoji: p.emoji ?? "🛍️",
+      emoji: p.emoji?.trim() || "",
       price: parsedPrice >= 100 ? parsedPrice : 100,
       comparePrice: null,
       category: mapDraftCategory(p.category),
@@ -128,6 +132,12 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
   const [step1, setStep1] = useState<Step1Input>({
     slug: slugify(draft.name ?? "ma-boutique"),
     logoUrl: null,
+  });
+  const [stepAppearance, setStepAppearance] = useState<StepAppearanceInput>({
+    primaryColor: draft.primaryColor ?? "#E84B1F",
+    accentColor: draft.accentColor ?? "#0A0E13",
+    backgroundStyle: draft.backgroundStyle ?? "ivory",
+    fontStyle: draft.fontStyle ?? "classic",
   });
   const [step2, setStep2] = useState<Step2Input>({ products: initialProducts });
   const [step3, setStep3] = useState<Step3Input>({
@@ -180,24 +190,24 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
 
   const handleNext = () => {
     setGlobalError(null);
-    if (currentStep === 3) {
+    if (currentStep === 4) {
+      setCurrentStep(hasPhysicalProducts ? 35 : 5);
+      return;
+    }
+    if (currentStep === 35) {
+      setCurrentStep(5);
+      return;
+    }
+    if (currentStep < 6) setCurrentStep(currentStep + 1);
+  };
+  const handleBack = () => {
+    setGlobalError(null);
+    if (currentStep === 5) {
       setCurrentStep(hasPhysicalProducts ? 35 : 4);
       return;
     }
     if (currentStep === 35) {
       setCurrentStep(4);
-      return;
-    }
-    if (currentStep < 5) setCurrentStep(currentStep + 1);
-  };
-  const handleBack = () => {
-    setGlobalError(null);
-    if (currentStep === 4) {
-      setCurrentStep(hasPhysicalProducts ? 35 : 3);
-      return;
-    }
-    if (currentStep === 35) {
-      setCurrentStep(3);
       return;
     }
     if (currentStep > 1) setCurrentStep(currentStep - 1);
@@ -208,6 +218,7 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
     startTransition(async () => {
       const payload = {
         step1,
+        stepAppearance,
         step2,
         step3,
         ...(hasPhysicalProducts ? { step35 } : {}),
@@ -228,7 +239,7 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
         currentStep={currentStep}
         shopName={draft.name}
         shopLogoUrl={step1.logoUrl ?? null}
-        shopPrimaryColor={draft.primaryColor}
+        shopPrimaryColor={stepAppearance.primaryColor ?? draft.primaryColor}
         hasPhysicalProducts={hasPhysicalProducts}
       />
 
@@ -240,11 +251,19 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
             value={step1}
             onChange={setStep1}
             shopName={draft.name ?? "Ma boutique"}
-            primaryColor={draft.primaryColor ?? "#E84B1F"}
+            primaryColor={stepAppearance.primaryColor ?? draft.primaryColor ?? "#E84B1F"}
             onNext={handleNext}
           />
         )}
         {currentStep === 2 && (
+          <StepAppearance
+            value={stepAppearance}
+            onChange={setStepAppearance}
+            onNext={handleNext}
+            onBack={handleBack}
+          />
+        )}
+        {currentStep === 3 && (
           <Step2Products
             value={step2}
             onChange={setStep2}
@@ -253,7 +272,7 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
             shopContext={{ name: draft.name ?? null, category: draft.category ?? null }}
           />
         )}
-        {currentStep === 3 && (
+        {currentStep === 4 && (
           <Step3Contact
             value={step3}
             onChange={setStep3}
@@ -270,7 +289,7 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
             countryCode={step3.country}
           />
         )}
-        {currentStep === 4 && (
+        {currentStep === 5 && (
           <Step4Description
             value={step4}
             onChange={setStep4}
@@ -278,9 +297,10 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
             onBack={handleBack}
           />
         )}
-        {currentStep === 5 && (
+        {currentStep === 6 && (
           <Step5Recap
             step1={step1}
+            stepAppearance={stepAppearance}
             step2={step2}
             step3={step3}
             step35={hasPhysicalProducts ? step35 : null}

@@ -195,6 +195,18 @@ export const step4Schema = z.object({
   description: z.string().min(20, "Au moins 20 caractères").max(2000, "Maximum 2000 caractères"),
 });
 
+export const appearanceBackgroundSchema = z.enum(["ivory", "white", "cream"]);
+export const appearanceFontSchema = z.enum(["classic", "modern", "editorial"]);
+
+export const stepAppearanceSchema = z.object({
+  primaryColor: z.string().min(4).max(32),
+  accentColor: z.string().min(4).max(32),
+  backgroundStyle: appearanceBackgroundSchema,
+  fontStyle: appearanceFontSchema,
+});
+
+export type StepAppearanceInput = z.infer<typeof stepAppearanceSchema>;
+
 // ===== ZONES DE LIVRAISON & PAIEMENT (Step Livraison) =====
 
 export const COUNTRY_CITIES: Record<string, string[]> = {
@@ -263,6 +275,7 @@ export type Step35Input = z.infer<typeof step35Schema>;
 export const publishShopSchema = z
   .object({
     step1: step1Schema,
+    stepAppearance: stepAppearanceSchema,
     step2: step2Schema,
     step3: step3Schema,
     step35: step35Schema.optional(),

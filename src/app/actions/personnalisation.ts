@@ -27,8 +27,26 @@ type DraftGeneratedData = {
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;
+  backgroundStyle?: string | null;
+  fontStyle?: string | null;
   products?: DraftGeneratedProduct[];
 };
+
+function bgHexFromAppearanceStyle(style: string): string {
+  if (style === "white") return "#FFFFFF";
+  if (style === "cream") return "#F8F6F0";
+  return "#FAFAF7";
+}
+
+function fontsFromAppearanceStyle(fontStyle: string): {
+  displayFont: string;
+  bodyFont: string;
+} {
+  if (fontStyle === "modern") return { displayFont: "Inter", bodyFont: "Inter" };
+  if (fontStyle === "editorial")
+    return { displayFont: "Fraunces", bodyFont: "Fraunces" };
+  return { displayFont: "Fraunces", bodyFont: "Inter" };
+}
 
 export async function getActiveDraftShopAction() {
   const user = await getCurrentUser();
@@ -56,7 +74,13 @@ export async function getActiveDraftShopAction() {
     status: draft.status,
     primaryColor: generatedData?.primaryColor ?? "#E84B1F",
     secondaryColor: generatedData?.secondaryColor ?? "#404552",
-    accentColor: generatedData?.accentColor ?? "#E84B1F",
+    accentColor: generatedData?.accentColor ?? "#0A0E13",
+    backgroundStyle:
+      (generatedData?.backgroundStyle as "ivory" | "white" | "cream" | undefined) ??
+      "ivory",
+    fontStyle:
+      (generatedData?.fontStyle as "classic" | "modern" | "editorial" | undefined) ??
+      "classic",
     name: generatedData?.name ?? draft.shopName,
     tagline: generatedData?.tagline ?? null,
     description: generatedData?.description ?? draft.prompt,
@@ -154,19 +178,32 @@ export async function publishShopAction(input: PublishShopInput) {
 
   try {
     const includedProducts = data.step2.products.filter((p) => p.included);
+    const appearance = data.stepAppearance;
+    const { displayFont, bodyFont } = fontsFromAppearanceStyle(
+      appearance.fontStyle
+    );
+    const bgHex = bgHexFromAppearanceStyle(appearance.backgroundStyle);
 
     const shop = await db.$transaction(async (tx) => {
       const createdShop = await tx.shop.create({
         data: {
           ownerId: userId,
-          name: generatedData?.name ?? draft.shopName ?? "Ma boutique",
+          name:
+            draft.shopName?.trim() ||
+            generatedData?.name?.trim() ||
+            "Ma boutique",
           slug,
           tagline: generatedData?.tagline ?? null,
           description: data.step4.description,
           category: generatedData?.category ?? null,
-          primaryColor: generatedData?.primaryColor ?? "#E84B1F",
+          primaryColor: appearance.primaryColor,
           secondaryColor: generatedData?.secondaryColor ?? "#404552",
-          accentColor: generatedData?.accentColor ?? "#E84B1F",
+          accentColor: appearance.accentColor,
+          bgColor: bgHex,
+          displayFont,
+          bodyFont,
+          backgroundStyle: appearance.backgroundStyle,
+          fontStyle: appearance.fontStyle,
           logoUrl: data.step1.logoUrl ?? null,
           whatsappNumber: data.step3.whatsappNumber,
           contactEmail: data.step3.contactEmail,
