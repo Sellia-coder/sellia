@@ -123,7 +123,6 @@ export const metadata: Metadata = {
     other: [{ rel: "mask-icon", url: "/favicon.svg", color: "#0E1116" }],
   },
   manifest: "/manifest.json",
-  themeColor: "#0E1116",
   category: "technology",
 };
 

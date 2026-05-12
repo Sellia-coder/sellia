@@ -45,7 +45,7 @@ export default function Step1Logo({ value, onChange, shopName, primaryColor, onN
         }
         if (reason === "taken") {
           const sug = await suggestSlugsAction(value.slug);
-          if (sug.ok) setSuggestions(sug.suggestions);
+          if (sug.ok) setSuggestions([...sug.suggestions]);
         }
       }
     }, 500);

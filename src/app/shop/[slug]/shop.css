@@ -3936,3 +3936,119 @@ button.shop-header-icon-btn svg {
   position: absolute !important;
   opacity: 0 !important;
 }
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.shop-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 64px auto 24px;
+  padding: 0 20px;
+  flex-wrap: wrap;
+  max-width: 1280px;
+}
+
+.shop-pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #FFFFFF;
+  border: 1px solid #E5E1D8;
+  border-radius: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0E1116;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.shop-pagination-btn:hover:not(:disabled) {
+  background: var(--shop-primary, #E84B1F);
+  border-color: var(--shop-primary, #E84B1F);
+  color: #FFFFFF;
+}
+
+.shop-pagination-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.shop-pagination-pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+.shop-pagination-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0E1116;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.shop-pagination-page:hover:not(.is-active) {
+  background: #F2F0EA;
+  border-color: #E5E1D8;
+}
+
+.shop-pagination-page.is-active {
+  background: var(--shop-primary, #E84B1F);
+  border-color: var(--shop-primary, #E84B1F);
+  color: #FFFFFF;
+  cursor: default;
+}
+
+.shop-pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 36px;
+  font-size: 13px;
+  color: #6E7178;
+  user-select: none;
+}
+
+.shop-pagination-info {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 64px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  color: #6E7178;
+}
+
+@media (max-width: 640px) {
+  .shop-pagination {
+    gap: 4px;
+    margin-top: 40px;
+  }
+  .shop-pagination-btn span {
+    display: none;
+  }
+  .shop-pagination-btn {
+    padding: 10px 12px;
+  }
+  .shop-pagination-page {
+    min-width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+}

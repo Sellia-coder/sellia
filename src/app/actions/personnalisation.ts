@@ -260,7 +260,7 @@ export async function publishShopAction(input: PublishShopInput) {
               downloadLimit: p.type === "digital" ? (p.downloadLimit ?? null) : null,
               imageUrl: p.imageUrl?.trim() ? p.imageUrl : null,
               galleryUrls:
-                Array.isArray(p.galleryUrls) && p.galleryUrls.length > 0 ? p.galleryUrls : null,
+                Array.isArray(p.galleryUrls) && p.galleryUrls.length > 0 ? p.galleryUrls : undefined,
               hasVariants: safeHasVariants,
               variantAxes: safeAxes ?? undefined,
               variants: safeVariants

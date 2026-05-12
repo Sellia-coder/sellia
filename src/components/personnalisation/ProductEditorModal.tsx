@@ -317,7 +317,7 @@ export default function ProductEditorModal({
               <AiDescriptionGenerator
                 productName={draft.name}
                 productCategory={draft.category}
-                productType={draft.type}
+                productType={draft.type as "physical" | "digital" | "service"}
                 shopName={shopContext?.name}
                 shopCategory={shopContext?.category}
                 onApply={(html) => update("description", html)}

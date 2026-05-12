@@ -49,7 +49,20 @@ export default async function ProductPage({ params }: Props) {
   const result = await getShopProductBySlug(slug, productSlug);
   if (!result) notFound();
 
-  const { shop, product } = result;
+  const { shop, product: rawProduct } = result;
+
+  const normalizedProduct = {
+    ...rawProduct,
+    variants: rawProduct.variants?.map((v) => ({
+      ...v,
+      attributes:
+        v.attributes && typeof v.attributes === "object" && !Array.isArray(v.attributes)
+          ? (v.attributes as Record<string, string>)
+          : {},
+    })) ?? [],
+  };
+
+  const product = normalizedProduct;
   const [related, reviews] = await Promise.all([
     getRelatedProducts(shop.id, product.id, 5),
     getApprovedProductReviews(product.id),
