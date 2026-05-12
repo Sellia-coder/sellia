@@ -27,6 +27,7 @@ import {
   Star,
   Loader2,
   Image as ImageIcon,
+  ChevronDown,
 } from "lucide-react";
 import {
   clearCart,
@@ -42,29 +43,46 @@ import {
   type ShopWithProducts,
 } from "@/lib/shop-data";
 import PaymentLogos from "@/components/shop/PaymentLogos";
-import type { PaymentMethod as PaymentLogoType } from "@/components/shop/PaymentLogos";
+import CountryFlag from "@/components/shared/CountryFlag";
 import styles from "./checkout.module.css";
 
 function currencyLabel(c: string | null | undefined): string {
   return !c || c === "XAF" ? "FCFA" : c;
 }
 
-function getProviderName(provider: PaymentLogoType): string {
-  const names: Partial<Record<PaymentLogoType, string>> = {
-    wave: "Wave",
-    mtn_momo: "MTN MoMo",
-    orange_money: "Orange Money",
-    moov_money: "Moov Money",
-    free_money: "Free Money",
-    airtel_money: "Airtel Money",
-    tmoney: "T-Money",
-    vodafone_cash: "Vodafone Cash",
-    celtiis_cash: "MyCeltiis",
-    tigo_cash: "Tigo Cash",
-    visa: "Visa",
-    mastercard: "Mastercard",
+function getDialCode(code: string): string {
+  const codes: Record<string, string> = {
+    CM: "+237", CI: "+225", SN: "+221", BJ: "+229", TG: "+228",
+    BF: "+226", ML: "+223", NE: "+227", CG: "+242", GA: "+241",
+    GN: "+224", RW: "+250",
   };
-  return names[provider] ?? provider;
+  return codes[code] ?? "+237";
+}
+
+function getMomoPlaceholder(code: string): string {
+  const placeholders: Record<string, string> = {
+    CM: "6XX XXX XXX",
+    CI: "07 XX XX XX XX",
+    SN: "7X XXX XX XX",
+    BJ: "9X XX XX XX",
+    TG: "9X XX XX XX",
+    BF: "7X XX XX XX",
+    ML: "7X XX XX XX",
+    NE: "9X XX XX XX",
+    CG: "0X XXX XXX",
+    GA: "0X XX XX XX",
+    GN: "62X XX XX XX",
+    RW: "78X XXX XXX",
+  };
+  return placeholders[code] ?? "XXX XXX XXX";
+}
+
+function isValidMomoNumber(code: string, number: string): boolean {
+  const minLengths: Record<string, number> = {
+    CM: 9, CI: 10, SN: 9, BJ: 8, TG: 8, BF: 8, ML: 8,
+    NE: 8, CG: 9, GA: 8, GN: 9, RW: 9,
+  };
+  return number.length >= (minLengths[code] ?? 8);
 }
 
 interface Props {
@@ -85,7 +103,8 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
   const [lastOrderNumber, setLastOrderNumber] = useState<string | null>(null);
 
   const [paymentSubMethod, setPaymentSubMethod] = useState<"mobile_money" | "card">("mobile_money");
-  const [selectedProvider, setSelectedProvider] = useState<PaymentLogoType | null>(null);
+  const [momoCountry, setMomoCountry] = useState<string>("CM");
+  const [momoNumber, setMomoNumber] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const zones = parseShippingZones(shop.shippingZones);
@@ -200,7 +219,11 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
 
   const canProceedToPayment =
     formData.paymentMethod === "cash_on_delivery" ||
-    (formData.paymentMethod === "online_escrow" && selectedProvider !== null);
+    (
+      formData.paymentMethod === "online_escrow" &&
+      paymentSubMethod === "mobile_money" &&
+      isValidMomoNumber(momoCountry, momoNumber)
+    );
 
   const handleProceedToPayment = async () => {
     if (isProcessingPayment) return;
@@ -242,7 +265,9 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
           deliveryNotes: null,
           paymentMethod: formData.paymentMethod,
           paymentSubMethod: formData.paymentMethod === "online_escrow" ? paymentSubMethod : null,
-          paymentProvider: selectedProvider,
+          paymentProvider: null,
+          momoCountry: paymentSubMethod === "mobile_money" ? momoCountry : null,
+          momoNumber: paymentSubMethod === "mobile_money" ? momoNumber : null,
           items: items.map((i) => ({
             productId: i.productId,
             name: i.name,
@@ -552,71 +577,78 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                   )}
 
                   {formData.paymentMethod === "online_escrow" && (
-                    <div className={styles.subMethodSelector}>
-                      <div className={styles.subMethodTabs}>
+                    <div className={styles.paymentTypeSelector}>
+                      <div className={styles.paymentTypeGrid}>
                         <button
                           type="button"
-                          className={`${styles.subMethodTab} ${paymentSubMethod === "mobile_money" ? styles.subMethodTabActive : ""}`}
-                          onClick={() => {
-                            setPaymentSubMethod("mobile_money");
-                            setSelectedProvider(null);
-                          }}
-                          style={paymentSubMethod === "mobile_money" ? { borderColor: primaryColor, color: primaryColor } : undefined}
+                          className={`${styles.paymentTypeCard} ${paymentSubMethod === "mobile_money" ? styles.paymentTypeCardActive : ""}`}
+                          onClick={() => setPaymentSubMethod("mobile_money")}
+                          style={paymentSubMethod === "mobile_money" ? { borderColor: primaryColor, backgroundColor: `${primaryColor}08` } : undefined}
                         >
-                          Mobile Money
+                          <span className={styles.paymentTypeLabel}>Mobile Money</span>
+                          <div className={styles.paymentTypeLogos}>
+                            <PaymentLogos methods={["mtn_momo", "wave", "orange_money"]} size="sm" variant="circle" />
+                          </div>
                         </button>
+
                         <button
                           type="button"
-                          className={`${styles.subMethodTab} ${paymentSubMethod === "card" ? styles.subMethodTabActive : ""}`}
-                          onClick={() => {
-                            setPaymentSubMethod("card");
-                            setSelectedProvider(null);
-                          }}
-                          style={paymentSubMethod === "card" ? { borderColor: primaryColor, color: primaryColor } : undefined}
+                          className={`${styles.paymentTypeCard} ${styles.paymentTypeCardDisabled}`}
+                          disabled
+                          aria-label="Carte bancaire (bientôt disponible)"
                         >
-                          Carte bancaire
+                          <span className={styles.paymentTypeSoon}>Bientôt disponible</span>
+                          <span className={styles.paymentTypeLabel}>Carte bancaire</span>
+                          <div className={styles.paymentTypeLogos}>
+                            <PaymentLogos methods={["visa", "mastercard"]} size="sm" variant="rounded" />
+                          </div>
                         </button>
                       </div>
 
                       {paymentSubMethod === "mobile_money" && (
-                        <div className={styles.providerGrid}>
-                          {(["wave", "mtn_momo", "orange_money", "moov_money", "free_money", "airtel_money"] as PaymentLogoType[]).map((provider) => (
-                            <button
-                              key={provider}
-                              type="button"
-                              className={`${styles.providerCard} ${selectedProvider === provider ? styles.providerCardActive : ""}`}
-                              onClick={() => setSelectedProvider(provider)}
-                              style={selectedProvider === provider ? { borderColor: primaryColor } : undefined}
-                            >
-                              <PaymentLogos methods={[provider]} size="md" variant="circle" />
-                              <span className={styles.providerName}>{getProviderName(provider)}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                        <div className={styles.momoFieldWrap}>
+                          <label className={styles.momoLabel}>Numéro Mobile Money</label>
+                          <div className={styles.momoField}>
+                            <div className={styles.momoCountrySelect}>
+                              <select
+                                value={momoCountry}
+                                onChange={(e) => setMomoCountry(e.target.value)}
+                                className={styles.momoCountrySelectInput}
+                                aria-label="Pays"
+                              >
+                                <option value="CM">+237</option>
+                                <option value="CI">+225</option>
+                                <option value="SN">+221</option>
+                                <option value="BJ">+229</option>
+                                <option value="TG">+228</option>
+                                <option value="BF">+226</option>
+                                <option value="ML">+223</option>
+                                <option value="NE">+227</option>
+                                <option value="CG">+242</option>
+                                <option value="GA">+241</option>
+                                <option value="GN">+224</option>
+                                <option value="RW">+250</option>
+                              </select>
+                              <div className={styles.momoCountryDisplay}>
+                                <CountryFlag code={momoCountry as any} size="sm" />
+                                <span>{getDialCode(momoCountry)}</span>
+                                <ChevronDown size={12} strokeWidth={2.4} />
+                              </div>
+                            </div>
 
-                      {paymentSubMethod === "card" && (
-                        <div className={styles.providerGrid}>
-                          {(["visa", "mastercard"] as PaymentLogoType[]).map((provider) => (
-                            <button
-                              key={provider}
-                              type="button"
-                              className={`${styles.providerCard} ${selectedProvider === provider ? styles.providerCardActive : ""}`}
-                              onClick={() => setSelectedProvider(provider)}
-                              style={selectedProvider === provider ? { borderColor: primaryColor } : undefined}
-                            >
-                              <PaymentLogos methods={[provider]} size="md" variant="rounded" />
-                              <span className={styles.providerName}>
-                                {provider === "visa" ? "Visa" : "Mastercard"}
-                              </span>
-                            </button>
-                          ))}
-
-                          <div className={`${styles.providerCard} ${styles.providerCardDisabled}`}>
-                            <CreditCard size={28} strokeWidth={1.8} />
-                            <span className={styles.providerName}>Autres cartes</span>
-                            <span className={styles.providerSoon}>Bientôt</span>
+                            <input
+                              type="tel"
+                              inputMode="numeric"
+                              className={styles.momoInput}
+                              placeholder={getMomoPlaceholder(momoCountry)}
+                              value={momoNumber}
+                              onChange={(e) => setMomoNumber(e.target.value.replace(/[^0-9]/g, ""))}
+                              maxLength={10}
+                            />
                           </div>
+                          <span className={styles.momoHint}>
+                            Le numéro qui sera débité pour cette commande.
+                          </span>
                         </div>
                       )}
                     </div>

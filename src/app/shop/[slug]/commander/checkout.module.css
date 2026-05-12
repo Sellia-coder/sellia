@@ -868,110 +868,191 @@
 }
 
 /* ============================================================
-   SUB-METHOD SELECTOR (Mobile Money / Carte)
+   PAYMENT TYPE SELECTOR — MoMo vs Carte (MVP)
    ============================================================ */
 
-.subMethodSelector {
+.paymentTypeSelector {
   margin-top: 14px;
   padding: 18px;
   background: linear-gradient(135deg, #FAFAF7 0%, #FFFFFF 100%);
   border: 1px solid #ECE9E2;
-  border-radius: 12px;
-  animation: qrFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 14px;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.subMethodTabs {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: #F0EDE6;
-  border-radius: 9px;
-  margin-bottom: 16px;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.subMethodTab {
-  flex: 1;
-  height: 36px;
-  background: transparent;
-  border: 1.5px solid transparent;
-  border-radius: 7px;
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #6B6E76;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-
-.subMethodTab:hover {
-  color: #0A0E13;
-}
-
-.subMethodTabActive {
-  background: #FFFFFF;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(14, 17, 22, 0.08);
-}
-
-.providerGrid {
+.paymentTypeGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
-.providerCard {
+.paymentTypeCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 12px 8px;
+  justify-content: center;
+  gap: 12px;
+  min-height: 90px;
+  padding: 16px 12px;
   background: #FFFFFF;
-  border: 1.5px solid #ECE9E2;
-  border-radius: 10px;
+  border: 2px solid #ECE9E2;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: inherit;
-  position: relative;
+  overflow: hidden;
 }
 
-.providerCard:hover {
+.paymentTypeCard:hover:not(:disabled) {
   border-color: #C5C2BA;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 17, 22, 0.06);
 }
 
-.providerCardActive {
+.paymentTypeCardActive {
+  box-shadow: 0 4px 14px rgba(14, 17, 22, 0.08);
+}
+
+.paymentTypeCardDisabled {
   background: #FAFAF7;
-  box-shadow: 0 4px 10px rgba(14, 17, 22, 0.08);
-}
-
-.providerCardDisabled {
-  opacity: 0.5;
+  border-style: dashed;
   cursor: not-allowed;
-  color: #8A8D95;
+  opacity: 0.6;
 }
 
-.providerCardDisabled:hover {
-  transform: none;
-  border-color: #ECE9E2;
-}
-
-.providerName {
+.paymentTypeLabel {
   font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0E13;
+  letter-spacing: -0.2px;
+}
+
+.paymentTypeLogos {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.paymentTypeSoon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 7px;
+  background: linear-gradient(135deg, #6B6E76, #525560);
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(14, 17, 22, 0.1);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   CHAMP NUMÉRO MoMo
+   ============================================================ */
+
+.momoFieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.momoLabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0A0E13;
+  letter-spacing: -0.1px;
+}
+
+.momoField {
+  display: flex;
+  background: #FFFFFF;
+  border: 1.5px solid #ECE9E2;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border 0.18s;
+}
+
+.momoField:focus-within {
+  border-color: #0A0E13;
+  box-shadow: 0 0 0 3px rgba(14, 17, 22, 0.05);
+}
+
+.momoCountrySelect {
+  position: relative;
+  border-right: 1px solid #ECE9E2;
+}
+
+.momoCountrySelectInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+}
+
+.momoCountryDisplay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 50px;
+  padding: 0 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0E13;
+  pointer-events: none;
+  background: #FAFAF7;
+}
+
+.momoCountryDisplay svg:last-child {
+  color: #6B6E76;
+  margin-left: 2px;
+}
+
+.momoInput {
+  flex: 1;
+  height: 50px;
+  padding: 0 16px;
+  background: transparent;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
   font-weight: 600;
   color: #0A0E13;
-  text-align: center;
+  outline: none;
+  letter-spacing: 0.5px;
 }
 
-.providerSoon {
-  font-size: 9px;
-  font-weight: 700;
+.momoInput::placeholder {
+  color: #C5C2BA;
+  font-weight: 500;
+}
+
+.momoHint {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
   color: #6B6E76;
-  background: #ECE9E2;
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.4px;
-  margin-top: 2px;
+  line-height: 1.4;
 }
 
 /* ============================================================
@@ -1106,12 +1187,8 @@
   .summaryTrustBadges {
     grid-template-columns: 1fr;
   }
-  .providerGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .subMethodTabs {
-    flex-direction: column;
-    gap: 6px;
+  .paymentTypeGrid {
+    grid-template-columns: 1fr;
   }
   .summaryQtyControl {
     border-radius: 6px;

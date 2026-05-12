@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   Truck,
   Plus,
@@ -12,6 +11,7 @@ import {
   QrCode,
   Crown,
 } from "lucide-react";
+import ProUpgradeModal from "./ProUpgradeModal";
 import {
   step35Schema,
   COUNTRY_CITIES,
@@ -40,6 +40,7 @@ export default function Step35Shipping({
   plan = "free",
 }: Props) {
   const [error, setError] = useState<string | null>(null);
+  const [showProModal, setShowProModal] = useState(false);
 
   const usedNames = new Set(
     value.shippingZones.map((z) => z.name.trim().toLowerCase())
@@ -243,10 +244,14 @@ export default function Step35Shipping({
               </p>
             </div>
             {plan === "free" ? (
-              <Link href="/dashboard/abonnement" className="perso-upgrade-btn">
+              <button
+                type="button"
+                className="perso-upgrade-btn"
+                onClick={() => setShowProModal(true)}
+              >
                 <Crown size={13} strokeWidth={2.4} />
                 Débloquer avec Pro
-              </Link>
+              </button>
             ) : (
               <span className="perso-payment-option-toggle">
                 <input
@@ -346,6 +351,10 @@ export default function Step35Shipping({
       )}
 
       <StepNav onBack={onBack} onNext={handleSubmit} nextLabel="Continuer" />
+
+      {showProModal && (
+        <ProUpgradeModal onClose={() => setShowProModal(false)} />
+      )}
     </section>
   );
 }

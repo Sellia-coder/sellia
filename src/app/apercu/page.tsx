@@ -237,7 +237,7 @@ function ApercuContent() {
             href={shop?.id ? `/inscription?draftShopId=${shop.id}` : "/inscription"}
             className="apercu-pro-banner-cta"
           >
-            Sauvegarder cette boutique →
+            Modifier et Publier →
           </a>
         </div>
       </div>
@@ -316,14 +316,29 @@ function ApercuContent() {
             </div>
           </div>
           <div className="apercu-pro-hero-visual" aria-hidden="true">
-            <div className="apercu-pro-hero-visual-card">
-              {shop?.data?.products?.[0]?.emoji || "🛍️"}
+            <div className="apercu-pro-hero-visual-card apercu-pro-hero-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>Image produit ici</span>
             </div>
-            <div className="apercu-pro-hero-visual-card apercu-pro-hero-visual-card-2">
-              {shop?.data?.products?.[1]?.emoji || "✨"}
+            <div className="apercu-pro-hero-visual-card apercu-pro-hero-visual-card-2 apercu-pro-hero-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>Image produit ici</span>
             </div>
-            <div className="apercu-pro-hero-visual-card apercu-pro-hero-visual-card-3">
-              {shop?.data?.products?.[2]?.emoji || "🌟"}
+            <div className="apercu-pro-hero-visual-card apercu-pro-hero-visual-card-3 apercu-pro-hero-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>Image produit ici</span>
             </div>
           </div>
         </div>
@@ -366,8 +381,6 @@ function ApercuContent() {
                 const rating = (4.5 + ((idx * 0.07) % 0.5)).toFixed(1);
                 const reviews = 12 + idx * 7;
                 const badge = idx === 0 ? "NOUVEAU" : idx === 1 ? "BEST-SELLER" : idx === 4 ? "LIMITÉ" : null;
-                const colorVar =
-                  idx % 3 === 0 ? "var(--shop-primary)" : idx % 3 === 1 ? "var(--shop-secondary)" : "var(--shop-accent)";
                 const badgeClass = badge
                   ? `apercu-pro-product-badge apercu-pro-product-badge-${badge
                       .toLowerCase()
@@ -379,10 +392,17 @@ function ApercuContent() {
                     <div
                       className="apercu-pro-product-image"
                       style={{
-                        background: `linear-gradient(135deg, ${colorVar}33, ${colorVar}88)`,
+                        background: "linear-gradient(135deg, #F4F2EC 0%, #E8E5DD 100%)",
                       }}
                     >
-                      <span className="apercu-pro-product-emoji">{product.emoji || "🛍️"}</span>
+                      <div className="apercu-pro-product-placeholder">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <span>Image produit ici</span>
+                      </div>
                       {badge && <span className={badgeClass}>{badge}</span>}
                       <button type="button" className="apercu-pro-product-fav" aria-label="Ajouter aux favoris" disabled>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -495,9 +515,9 @@ function ApercuContent() {
         <div className="apercu-pro-final-cta-inner">
           <span className="apercu-pro-final-cta-eyebrow">— Cette boutique vous plaît ?</span>
           <h3 className="apercu-pro-final-cta-title">
-            Sauvegardez <em>{shop?.data?.name || shop?.shopName || "votre boutique"}</em>
+            Cette boutique vous plaît ?
             <br />
-            et commencez à vendre
+            <em>Publiez {shop?.data?.name || shop?.shopName || "votre boutique"}</em> maintenant
           </h3>
           <p className="apercu-pro-final-cta-desc">
             Créez votre compte Sellia en 30 secondes. Gratuit, sans carte bancaire.
@@ -505,7 +525,7 @@ function ApercuContent() {
             Vous pourrez personnaliser logo, photos produits, livraison et paiements.
           </p>
           <a href={shop?.id ? `/inscription?draftShopId=${shop.id}` : "/inscription"} className="apercu-pro-final-cta-btn">
-            Sauvegarder ma boutique
+            Modifier et Publier
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
