@@ -1,34 +1,91 @@
 "use client";
 
-import { homeKPIs, checklistItems, recentActivities } from "@/lib/mock-data";
+import { checklistItems } from "@/lib/mock-data";
+
+interface KPI {
+  label: string;
+  value: string;
+  unit?: string;
+  trend: number;
+  trendType: "up" | "down";
+  period: string;
+}
+
+interface ActivityItem {
+  id: string;
+  type: "order" | "pending" | "new_customer" | "stock_alert";
+  text: string;
+  meta: string;
+  amount?: number;
+  amountType?: "positive" | "neutral";
+}
 
 interface HomeClientProps {
   firstName: string;
+  shop?: { slug: string; name: string } | null;
+  kpis?: KPI[] | null;
+  recentActivities?: ActivityItem[];
 }
 
-export default function HomeClient({ firstName }: HomeClientProps) {
+export default function HomeClient({ firstName, shop, kpis, recentActivities }: HomeClientProps) {
   const checklistDone = checklistItems.filter(i => i.done).length;
   const checklistTotal = checklistItems.length;
   const progressPercent = (checklistDone / checklistTotal) * 100;
   const dashOffset = 150.79 - (150.79 * progressPercent) / 100;
 
+  const displayKpis = kpis ?? [];
+  const displayActivities = recentActivities ?? [];
+
+  const shopUrl = shop ? `https://${shop.slug}.getsellia.com` : null;
+
+  const todayStr = new Date().toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   return (
     <>
       <div className="dash-page-header dash-animate-fade-up">
         <div className="dash-page-header-left">
-          <div className="dash-page-eyebrow">— Dimanche 3 mai 2026</div>
+          <div className="dash-page-eyebrow">— {todayStr}</div>
           <h1 className="dash-page-title">{firstName ? `Bonjour ${firstName} 👋` : "Bonjour 👋"}</h1>
           <p className="dash-page-subtitle">
-            Voici l&apos;état de votre boutique aujourd&apos;hui. Vous avez 3 commandes à traiter et votre boutique est prête à 60%.
+            Voici l&apos;état de votre boutique aujourd&apos;hui.
           </p>
+
+          {shop && shopUrl && (
+            <a
+              href={shopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="dash-shop-url"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              <span>{shop.slug}.getsellia.com</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
+          )}
         </div>
         <div className="dash-page-actions">
-          <button className="dash-btn dash-btn-secondary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            Exporter
-          </button>
+          {shop && shopUrl && (
+            <a href={shopUrl} target="_blank" rel="noopener noreferrer" className="dash-btn dash-btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              Voir ma boutique
+            </a>
+          )}
           <button className="dash-btn dash-btn-ember">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -91,8 +148,8 @@ export default function HomeClient({ firstName }: HomeClientProps) {
       </div>
 
       <div className="dash-stats-grid">
-        {homeKPIs.map((kpi, i) => {
-          const sparkColor = kpi.trendType === "up" ? "#22c55e" : kpi.trendType === "down" ? "#dc2626" : "#3b82f6";
+        {displayKpis.map((kpi, i) => {
+          const sparkColor = kpi.trendType === "up" ? "#22c55e" : "#dc2626";
           const paths = [
             "M 0 30 L 25 25 L 50 28 L 75 18 L 100 22 L 125 12 L 150 15 L 175 8 L 200 10",
             "M 0 32 L 25 30 L 50 25 L 75 28 L 100 22 L 125 18 L 150 14 L 175 12 L 200 8",
@@ -116,7 +173,7 @@ export default function HomeClient({ firstName }: HomeClientProps) {
                 {kpi.trend > 0 ? "+" : ""}{kpi.trend}%
               </div>
               <svg className="dash-stat-chart" viewBox="0 0 200 40" preserveAspectRatio="none">
-                <path d={paths[i]} fill="none" stroke={sparkColor} strokeWidth="2"/>
+                <path d={paths[i % paths.length]} fill="none" stroke={sparkColor} strokeWidth="2"/>
               </svg>
             </div>
           );
@@ -128,13 +185,7 @@ export default function HomeClient({ firstName }: HomeClientProps) {
           <div className="dash-card-header">
             <div>
               <div className="dash-card-title">Évolution des ventes</div>
-              <div className="dash-card-subtitle">DU 27 AVRIL AU 3 MAI 2026</div>
-            </div>
-            <div className="dash-card-tabs">
-              <span className="dash-card-tab">7J</span>
-              <span className="dash-card-tab active">30J</span>
-              <span className="dash-card-tab">3M</span>
-              <span className="dash-card-tab">1A</span>
+              <div className="dash-card-subtitle">7 DERNIERS JOURS</div>
             </div>
           </div>
           <div className="dash-card-body">
@@ -152,11 +203,6 @@ export default function HomeClient({ firstName }: HomeClientProps) {
                 <line x1="0" y1="224" x2="800" y2="224" stroke="rgba(14,17,22,0.05)" strokeDasharray="3 3"/>
                 <path d="M 0 200 C 80 180, 120 160, 160 165 S 240 140, 280 130 S 360 110, 400 115 S 480 90, 520 75 S 600 55, 640 60 S 720 35, 800 25 L 800 280 L 0 280 Z" fill="url(#chartGrad1)"/>
                 <path d="M 0 200 C 80 180, 120 160, 160 165 S 240 140, 280 130 S 360 110, 400 115 S 480 90, 520 75 S 600 55, 640 60 S 720 35, 800 25" fill="none" stroke="#E84B1F" strokeWidth="2.5"/>
-                <circle cx="640" cy="60" r="6" fill="#E84B1F"/>
-                <circle cx="640" cy="60" r="12" fill="#E84B1F" opacity="0.2"/>
-                <rect x="585" y="0" width="110" height="42" rx="8" fill="#0E1116"/>
-                <text x="640" y="17" fill="#FAFAF7" fontFamily="JetBrains Mono" fontSize="9" textAnchor="middle" letterSpacing="1">2 MAI 2026</text>
-                <text x="640" y="33" fill="#FAFAF7" fontFamily="Fraunces" fontSize="14" textAnchor="middle" fontWeight="500">412 800 FCFA</text>
               </svg>
             </div>
           </div>
@@ -169,7 +215,12 @@ export default function HomeClient({ firstName }: HomeClientProps) {
           </div>
           <div className="dash-card-body" style={{padding: "0 20px"}}>
             <div className="dash-activity-list">
-              {recentActivities.map(act => {
+              {displayActivities.length === 0 && (
+                <div style={{ padding: "32px 0", textAlign: "center", color: "#8A8D95", fontSize: 13 }}>
+                  Aucune commande pour le moment.
+                </div>
+              )}
+              {displayActivities.map(act => {
                 const iconClass = act.type === "order" ? "success" : act.type === "pending" ? "info" : act.type === "new_customer" ? "ember" : "info";
                 return (
                   <div key={act.id} className="dash-activity-item">
@@ -183,7 +234,7 @@ export default function HomeClient({ firstName }: HomeClientProps) {
                       <div className="dash-activity-text" dangerouslySetInnerHTML={{__html: act.text}}></div>
                       <div className="dash-activity-meta">{act.meta}</div>
                     </div>
-                    {act.amount && (
+                    {act.amount != null && (
                       <div className={`dash-activity-amount ${act.amountType === "positive" ? "is-positive" : ""}`}>
                         {act.amountType === "positive" ? "+" : ""}{act.amount.toLocaleString("fr-FR")}
                       </div>

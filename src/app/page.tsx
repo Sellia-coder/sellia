@@ -829,13 +829,13 @@ export default function Home() {
           <span className="pricing-v2-commission-label">de commission par vente</span>
         </div>
 
-        <button className="pricing-v2-cta pricing-v2-cta-ghost" type="button">
+        <a href="#hero-form" className="pricing-v2-cta pricing-v2-cta-ghost">
           <span>Commencer gratuitement</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />
           </svg>
-        </button>
+        </a>
 
         <div className="pricing-v2-divider"></div>
 
@@ -864,6 +864,18 @@ export default function Home() {
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
             <span>Support par email (48h)</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Pixel Meta (Facebook + Instagram)</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Pixel TikTok &amp; Snapchat</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Optimisation SEO de base</span>
           </li>
         </ul>
       </article>
@@ -909,7 +921,7 @@ export default function Home() {
           <span className="pricing-v2-commission-label">de commission par vente</span>
         </div>
 
-        <button className="pricing-v2-cta pricing-v2-cta-primary" type="button">
+        <a href="#hero-form" className="pricing-v2-cta pricing-v2-cta-primary">
           <span className="pricing-v2-cta-content">
             <span>Passer Pro maintenant</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -917,7 +929,7 @@ export default function Home() {
               <polyline points="12 5 19 12 12 19" />
             </svg>
           </span>
-        </button>
+        </a>
 
         <div className="pricing-v2-divider"></div>
 
@@ -946,6 +958,14 @@ export default function Home() {
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
             <span>Statistiques détaillées &amp; rapports IA</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span><strong>Pixel Meta avancé</strong> avec Conversions API (CAPI)</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span><strong>SEO avancé</strong> (sitemap, schema.org, méta-tags par produit)</span>
           </li>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>

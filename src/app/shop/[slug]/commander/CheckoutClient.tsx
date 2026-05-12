@@ -109,7 +109,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
 
   const zones = parseShippingZones(shop.shippingZones);
   const escrowAvail = Boolean(shop.paymentOnlineEscrow);
-  const codAvail = Boolean(shop.paymentCashOnDelivery);
+  const codAvail = Boolean(shop.plan === "pro" && shop.paymentCashOnDelivery);
 
   const defaultMethod: "cash_on_delivery" | "online_escrow" =
     initialMethod === "online_escrow" ||

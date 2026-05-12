@@ -10,6 +10,7 @@ interface Props {
     description?: string | null;
     logoUrl?: string | null;
     primaryColor?: string | null;
+    plan?: string | null;
     paymentCashOnDelivery?: boolean;
   };
 }
@@ -72,7 +73,7 @@ export default function ShopFooter({ shop }: Props) {
               <PaymentLogos methods={["mastercard"]} size="md" variant="rounded" />
             </div>
 
-            {shop.paymentCashOnDelivery && (
+            {shop.plan === "pro" && shop.paymentCashOnDelivery && (
               <div className={styles.footerPaymentLogoCash} title="Paiement à la livraison">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="2" y="6" width="20" height="12" rx="2" />

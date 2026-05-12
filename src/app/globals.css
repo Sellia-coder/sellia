@@ -11010,6 +11010,8 @@ footer {
 .dash-page-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dash-ember); font-weight: 600; margin-bottom: 8px; }
 .dash-page-title { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 400; line-height: 1.1; letter-spacing: -1px; color: var(--dash-text-primary); margin: 0 0 8px; }
 .dash-page-subtitle { font-size: 14px; color: var(--dash-text-secondary); line-height: 1.5; max-width: 580px; margin: 0; }
+.dash-shop-url { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 7px 12px; background: rgba(232, 75, 31, 0.06); border: 1px solid rgba(232, 75, 31, 0.2); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #E84B1F; text-decoration: none; transition: all 0.15s; }
+.dash-shop-url:hover { background: rgba(232, 75, 31, 0.1); border-color: rgba(232, 75, 31, 0.35); }
 .dash-page-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
 /* BUTTONS */

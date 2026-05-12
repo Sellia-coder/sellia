@@ -216,6 +216,10 @@ export default function ProductEditorModal({
   };
 
   const handleSave = () => {
+    if (!draft.category || draft.category.trim().length === 0) {
+      setError("Veuillez sélectionner une catégorie pour ce produit.");
+      return;
+    }
     const parsed = productEditSchema.safeParse(draft);
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Vérifie les champs");
@@ -411,11 +415,24 @@ export default function ProductEditorModal({
             </h3>
 
             <div className="perso-form-row">
-              <label className="perso-form-label">Catégorie</label>
+              <label className="perso-form-label">Catégorie *</label>
               <CategorySelect
                 value={draft.category}
-                onChange={(code) => update("category", code)}
+                onChange={(code) => {
+                  update("category", code);
+                  if (error && code) setError(null);
+                }}
               />
+              {!draft.category && error && (
+                <div className="perso-field-error">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span>Veuillez sélectionner une catégorie pour ce produit</span>
+                </div>
+              )}
             </div>
 
             {draft.category === "autre" && (

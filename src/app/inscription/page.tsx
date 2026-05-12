@@ -26,19 +26,22 @@ function InscriptionContent() {
   } | null>(null);
 
   // Récupère le nom de la boutique générée pour personnaliser
+  // Si draftShopId existe, on attend le fetch API qui sera prioritaire
   useEffect(() => {
+    if (draftShopId) return;
+
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("sellia_generated_shop");
       if (stored) {
         try {
           const shop = JSON.parse(stored);
-          setShopName(shop.name);
+          if (shop.name) setShopName(shop.name);
         } catch {
           // ignore
         }
       }
     }
-  }, []);
+  }, [draftShopId]);
 
   useEffect(() => {
     if (!draftShopId) return;
@@ -50,12 +53,14 @@ function InscriptionContent() {
         if (!isMounted) return;
         if (result.success && result.data?.generatedData) {
           const data = result.data.generatedData;
+          const resolvedName = data.name || result.data.shopName;
           setDraftPreview({
-            name: data.name || result.data.shopName,
+            name: resolvedName,
             tagline: data.tagline,
             emoji: data.products?.[0]?.emoji || "🛍️",
             primaryColor: data.primaryColor,
           });
+          setShopName(resolvedName);
         }
       })
       .catch(() => {

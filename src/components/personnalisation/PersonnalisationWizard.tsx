@@ -161,7 +161,7 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
         eta: "3-5 jours",
       },
     ],
-    paymentCashOnDelivery: true,
+    paymentCashOnDelivery: false,
     paymentOnlineEscrow: true,
   });
   const [step4, setStep4] = useState<Step4Input>({
