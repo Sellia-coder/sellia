@@ -3919,7 +3919,6 @@ button.shop-header-icon-btn svg {
     color: var(--shop-primary, #E84B1F) !important;
     background: #F2F0EA !important;
   }
-}
 
 /* ============================================================
    GUARD — Force-hide old ShopHeader mobile nav (DELETED component)
