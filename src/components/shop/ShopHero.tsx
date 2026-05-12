@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import styles from "./ShopHero.module.css";
 
 interface Props {
   shop: {
@@ -10,26 +12,58 @@ interface Props {
   };
 }
 
-function plainSnippet(htmlOrText: string | null | undefined, max: number): string {
-  if (!htmlOrText) return "";
-  const t = htmlOrText.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  if (t.length <= max) return t;
-  return t.slice(0, max) + "…";
-}
-
 export default function ShopHero({ shop }: Props) {
-  const desc = plainSnippet(shop.description, 280);
-
   return (
-    <section className="shop-hero">
-      <div className="shop-container shop-hero-inner">
-        <div className="shop-hero-eyebrow">Bienvenue chez</div>
-        <h1 className="shop-hero-title">{shop.name}</h1>
-        {shop.tagline && <p className="shop-hero-tagline">{shop.tagline}</p>}
-        {desc && <p className="shop-hero-desc">{desc}</p>}
-        <Link href={`/shop/${shop.slug}#produits`} className="shop-hero-cta">
-          Découvrir les produits
-        </Link>
+    <section className={styles.shopHero}>
+      <div className={styles.shopHeroInner}>
+        <div className={styles.shopHeroDecor} aria-hidden="true">
+          <span className={styles.shopHeroDecorLine} />
+          <span className={styles.shopHeroDecorDot} />
+          <span className={styles.shopHeroDecorLine} />
+        </div>
+
+        <span className={styles.shopHeroEyebrow}>
+          BIENVENUE CHEZ
+        </span>
+
+        <h1 className={styles.shopHeroName}>
+          <em>{shop.name}</em>
+        </h1>
+
+        {shop.tagline && (
+          <p className={styles.shopHeroTagline}>
+            {shop.tagline}
+          </p>
+        )}
+
+        {shop.description && (
+          <p className={styles.shopHeroDescription}>
+            {shop.description}
+          </p>
+        )}
+
+        <a
+          href={`/shop/${shop.slug}/produits`}
+          className={styles.shopHeroCta}
+          onClick={(e) => {
+            e.preventDefault();
+            const target = document.getElementById("produits");
+            if (target) {
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }}
+        >
+          <span>Découvrir les produits</span>
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+            <path d="M1 7H17M17 7L11 1M17 7L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square"/>
+          </svg>
+        </a>
+
+        <div className={styles.shopHeroDecor} aria-hidden="true">
+          <span className={styles.shopHeroDecorLine} />
+          <span className={styles.shopHeroDecorDot} />
+          <span className={styles.shopHeroDecorLine} />
+        </div>
       </div>
     </section>
   );

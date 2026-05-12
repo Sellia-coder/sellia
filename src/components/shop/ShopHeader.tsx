@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Menu, X, Search, Heart, ShoppingBag } from "lucide-react";
 import { useCartContext } from "./CartProvider";
 import SearchOverlay from "./SearchOverlay";
+import styles from "./ShopHeader.module.css";
 
 interface Props {
   shop: {
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export default function ShopHeader({ shop }: Props) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
   const { cartCount, favsCount } = useCartContext();
@@ -95,57 +96,98 @@ export default function ShopHeader({ shop }: Props) {
             <button
               type="button"
               className="shop-header-mobile-toggle"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
-              aria-expanded={mobileOpen}
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Ouvrir le menu"
+              aria-expanded={drawerOpen}
             >
-              {mobileOpen ? (
-                <X size={20} strokeWidth={2} />
-              ) : (
-                <Menu size={20} strokeWidth={2} />
-              )}
+              <Menu size={20} strokeWidth={2} />
             </button>
           </div>
         </div>
-
-        {mobileOpen && (
-          <nav className="shop-header-mobile-nav" aria-label="Menu mobile">
-            <Link href={homePath} onClick={() => setMobileOpen(false)}>
-              Accueil
-            </Link>
-            <Link
-              href={`${homePath}#produits`}
-              onClick={() => setMobileOpen(false)}
-            >
-              Produits
-            </Link>
-            <Link
-              href={`${homePath}/a-propos`}
-              onClick={() => setMobileOpen(false)}
-            >
-              À propos
-            </Link>
-            <Link
-              href={`${homePath}/contact`}
-              onClick={() => setMobileOpen(false)}
-            >
-              Contact
-            </Link>
-            <Link
-              href={`${homePath}/favoris`}
-              onClick={() => setMobileOpen(false)}
-            >
-              Favoris {favsCount > 0 && `(${favsCount})`}
-            </Link>
-            <Link
-              href={`${homePath}/panier`}
-              onClick={() => setMobileOpen(false)}
-            >
-              Panier {cartCount > 0 && `(${cartCount})`}
-            </Link>
-          </nav>
-        )}
       </header>
+
+      {/* DRAWER MENU — un seul, à droite */}
+      {drawerOpen && (
+        <>
+          <div
+            className={styles.drawerOverlay}
+            onClick={() => setDrawerOpen(false)}
+          />
+          <aside className={styles.drawer}>
+            <div className={styles.drawerHeader}>
+              <span className={styles.drawerTitle}>Menu</span>
+              <button
+                type="button"
+                className={styles.drawerClose}
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Fermer le menu"
+              >
+                <X size={20} strokeWidth={2} />
+              </button>
+            </div>
+
+            <nav className={styles.drawerNav}>
+              <Link
+                href={homePath}
+                className={styles.drawerNavLink}
+                onClick={() => setDrawerOpen(false)}
+              >
+                Accueil
+              </Link>
+              <Link
+                href={`${homePath}#produits`}
+                className={styles.drawerNavLink}
+                onClick={() => setDrawerOpen(false)}
+              >
+                Produits
+              </Link>
+              <Link
+                href={`${homePath}/a-propos`}
+                className={styles.drawerNavLink}
+                onClick={() => setDrawerOpen(false)}
+              >
+                À propos
+              </Link>
+              <Link
+                href={`${homePath}/contact`}
+                className={styles.drawerNavLink}
+                onClick={() => setDrawerOpen(false)}
+              >
+                Contact
+              </Link>
+            </nav>
+
+            <div className={styles.drawerDivider} />
+
+            <div className={styles.drawerActions}>
+              <button
+                type="button"
+                className={styles.drawerActionLink}
+                onClick={() => { setDrawerOpen(false); setSearchOpen(true); }}
+              >
+                <Search size={16} strokeWidth={2} />
+                <span>Rechercher</span>
+              </button>
+              <Link
+                href={`${homePath}/favoris`}
+                className={styles.drawerActionLink}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <Heart size={16} strokeWidth={2} />
+                <span>Favoris {favsCount > 0 ? `(${favsCount})` : ""}</span>
+              </Link>
+              <Link
+                href={`${homePath}/panier`}
+                className={styles.drawerActionLink}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ShoppingBag size={16} strokeWidth={2} />
+                <span>Panier {cartCount > 0 ? `(${cartCount})` : ""}</span>
+              </Link>
+            </div>
+          </aside>
+        </>
+      )}
 
       <SearchOverlay
         isOpen={searchOpen}

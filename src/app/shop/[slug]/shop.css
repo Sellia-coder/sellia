@@ -1540,14 +1540,6 @@
     display: none;
   }
 
-  .shop-header-mobile-toggle {
-    display: flex;
-  }
-
-  .shop-header-mobile-nav {
-    display: flex;
-  }
-
   .shop-header-tagline {
     display: none;
   }
@@ -3775,12 +3767,6 @@
   pointer-events: auto !important;
   position: relative !important;
   z-index: 10 !important;
-}
-
-@media (max-width: 720px) {
-  .shop-header-mobile-toggle {
-    display: flex !important;
-  }
 }
 
 .shop-header-mobile-toggle svg {

@@ -1,5 +1,5 @@
 /* ============================================================
-   SHOP FOOTER — MINIMAL 2 LIGNES
+   SHOP FOOTER — PREMIUM 2 LIGNES
    ============================================================ */
 
 .footer {
@@ -15,22 +15,29 @@
 /* ROW 1 — Brand + Paiements */
 .row1 {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
+  gap: 32px;
   flex-wrap: wrap;
 }
 
-.brand {
+/* FOOTER BRAND */
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footerLogoWrap {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,35 +56,100 @@
 
 .logo span {
   font-family: 'Fraunces', 'Times New Roman', serif;
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 600;
   color: #FFFFFF;
+  font-style: italic;
   line-height: 1;
 }
 
-.brandName {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+.footerName {
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #0A0E13;
+  margin: 0;
   letter-spacing: -0.3px;
 }
 
-/* PAIEMENTS */
-.paymentsWrap {
+.footerTagline {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: #6B6E76;
+  margin: 2px 0 0;
+}
+
+.footerDescription {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #6B6E76;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 340px;
+}
+
+/* FOOTER PAYMENTS */
+.footerPayments {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 14px;
 }
 
-.paymentsLabel {
+.footerPaymentsLabel {
   font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   color: #8A8D95;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+}
+
+.footerPaymentsList {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footerPaymentLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footerPaymentLogoCash {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16A34A, #15803D);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(22, 163, 74, 0.18);
+}
+
+.footerPaymentMore {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FAFAF7;
+  border: 1.5px dashed #C5C2BA;
+  color: #6B6E76;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footerPaymentMore:hover {
+  background: #0A0E13;
+  border-color: #0A0E13;
+  color: #FFFFFF;
+  transform: rotate(90deg);
 }
 
 /* SÉPARATEUR */
@@ -158,7 +230,7 @@
     align-items: flex-start;
     gap: 16px;
   }
-  .paymentsWrap {
+  .footerPayments {
     align-items: flex-start;
   }
   .copyright {

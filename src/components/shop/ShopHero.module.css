@@ -1,1 +1,178 @@
-/* Intentionally empty — vendor card styles removed */
+/* ============================================================
+   HERO BOUTIQUE — SOBRE LUXE ÉDITORIAL
+   Style inspiré : Aimé Leon Dore / The Frankie Shop / APC
+   ============================================================ */
+
+.shopHero {
+  padding: 88px 24px 96px;
+  background: #FAFAF7;
+  position: relative;
+}
+
+.shopHeroInner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Ligne décorative haut/bas */
+.shopHeroDecor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+.shopHeroDecorLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #0A0E13 50%, transparent);
+  opacity: 0.4;
+}
+
+.shopHeroDecorDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #0A0E13;
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+/* Eyebrow */
+.shopHeroEyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 3.5px;
+  color: #6B6E76;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Nom en grand serif italic */
+.shopHeroName {
+  font-family: 'Fraunces', 'Playfair Display', serif;
+  font-size: clamp(54px, 8vw, 96px);
+  font-weight: 500;
+  color: #0A0E13;
+  letter-spacing: -2.5px;
+  line-height: 0.95;
+  margin: 0;
+  font-style: normal;
+}
+
+.shopHeroName em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Tagline italic */
+.shopHeroTagline {
+  font-family: 'Fraunces', 'Playfair Display', serif;
+  font-size: clamp(18px, 2vw, 22px);
+  font-style: italic;
+  font-weight: 400;
+  color: #404552;
+  margin: 4px 0 0;
+  line-height: 1.4;
+  letter-spacing: -0.3px;
+  max-width: 560px;
+}
+
+/* Description complète */
+.shopHeroDescription {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #525560;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 580px;
+  letter-spacing: -0.1px;
+}
+
+/* CTA minimaliste underline */
+.shopHeroCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  color: #0A0E13;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  transition: gap 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 8px;
+}
+
+.shopHeroCta::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #0A0E13;
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shopHeroCta:hover {
+  gap: 20px;
+}
+
+.shopHeroCta:hover::after {
+  transform: scaleX(1.05);
+}
+
+.shopHeroCta svg {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shopHeroCta:hover svg {
+  transform: translateX(4px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .shopHero {
+    padding: 64px 20px 72px;
+  }
+  .shopHeroInner {
+    gap: 20px;
+  }
+  .shopHeroName {
+    font-size: clamp(44px, 12vw, 72px);
+    letter-spacing: -1.8px;
+  }
+  .shopHeroTagline {
+    font-size: 17px;
+  }
+  .shopHeroDescription {
+    font-size: 14px;
+    line-height: 1.65;
+  }
+}
+
+@media (max-width: 480px) {
+  .shopHero {
+    padding: 48px 16px 56px;
+  }
+  .shopHeroName {
+    font-size: clamp(38px, 14vw, 56px);
+  }
+}
