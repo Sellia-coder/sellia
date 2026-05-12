@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Heart, Plus, Star } from "lucide-react";
+import { Heart, Plus, Check, Star } from "lucide-react";
 import {
   addToCart,
   isFavorite,
@@ -117,7 +117,12 @@ export default function ProductCard({
       productType: product.productType ?? "physical",
     });
     refresh();
-    setTimeout(() => setIsAdding(false), 800);
+    window.dispatchEvent(
+      new CustomEvent("sellia:toast", {
+        detail: { message: `${product.name} ajouté au panier`, type: "success" },
+      })
+    );
+    setTimeout(() => setIsAdding(false), 2000);
   };
 
   return (
@@ -193,24 +198,26 @@ export default function ProductCard({
           </div>
         </div>
 
-        <div className={styles.actions}>
+        <div className={styles.productActions}>
+          <span
+            className={styles.productBtnView}
+            style={{ "--shop-primary": primaryColor } as React.CSSProperties}
+          >
+            Voir le produit
+          </span>
           <button
             type="button"
-            className={`${styles.quickAddBtn} ${isAdding ? styles.quickAddBtnSuccess : ""}`}
+            className={`${styles.productBtnAdd} ${isAdding ? styles.productBtnAddSuccess : ""}`}
             onClick={handleQuickAdd}
+            disabled={isAdding}
             aria-label="Ajouter au panier"
-            style={
-              isAdding
-                ? {
-                    backgroundColor: primaryColor,
-                    borderColor: primaryColor,
-                    color: "#FFFFFF",
-                  }
-                : undefined
-            }
+            style={{ "--shop-primary": primaryColor } as React.CSSProperties}
           >
-            <Plus size={18} strokeWidth={2.5} />
-            <span>Ajouter au panier</span>
+            {isAdding ? (
+              <Check size={16} strokeWidth={2.6} />
+            ) : (
+              <Plus size={16} strokeWidth={2.6} />
+            )}
           </button>
         </div>
       </div>

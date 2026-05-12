@@ -96,6 +96,7 @@ export default function SeliaMenuPro({ shop }: Props) {
               <ShoppingBag size={18} strokeWidth={2.2} />
               {cartCount > 0 && (
                 <span
+                  key={cartCount}
                   className={styles.badge}
                   style={{ backgroundColor: primaryColor }}
                 >

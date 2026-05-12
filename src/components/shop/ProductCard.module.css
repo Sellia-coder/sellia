@@ -253,60 +253,116 @@
   line-height: 1;
 }
 
-/* ACTIONS — Bouton unique "Ajouter au panier" */
-.actions {
+/* ============================================================
+   BOUTONS PRODUCT CARD — Voir + Ajouter (80/20)
+   ============================================================ */
+
+.productActions {
   display: flex;
   gap: 6px;
+  width: 100%;
   margin-top: 12px;
 }
 
-.quickAddBtn {
+.productBtnView {
   flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 16px;
+  background: #FFFFFF;
+  border: 1.5px solid #0A0E13;
+  border-radius: 10px;
+  color: #0A0E13;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 42px;
-  padding: 0 14px;
-  background: #FFFFFF;
-  border: 1.5px solid #DDD9D0;
-  color: #0A0E13;
-  cursor: pointer;
-  border-radius: 9px;
-  font-family: 'Inter', sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: -0.1px;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  outline: none;
 }
 
-.quickAddBtn:hover {
-  background: #0A0E13;
-  border-color: #0A0E13;
+.productBtnView:hover {
+  background: var(--shop-primary, #E84B1F);
+  border-color: var(--shop-primary, #E84B1F);
   color: #FFFFFF;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(14, 17, 22, 0.18);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.quickAddBtn:active {
+.productBtnView:active {
   transform: translateY(0);
 }
 
-.quickAddBtnSuccess {
-  color: #FFFFFF !important;
-  animation: addPulse 0.4s ease;
+.productBtnAdd {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: #FFFFFF;
+  border: 1.5px solid #0A0E13;
+  border-radius: 10px;
+  color: #0A0E13;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  padding: 0;
 }
 
-@keyframes addPulse {
+.productBtnAdd:hover:not(:disabled) {
+  background: var(--shop-primary, #E84B1F);
+  border-color: var(--shop-primary, #E84B1F);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.productBtnAdd:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.productBtnAddSuccess {
+  background: #16A34A !important;
+  border-color: #16A34A !important;
+  color: #FFFFFF !important;
+  cursor: default !important;
+  animation: bouncePulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.productBtnAddSuccess:hover {
+  background: #16A34A !important;
+  border-color: #16A34A !important;
+  color: #FFFFFF !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+@keyframes bouncePulse {
   0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
 
-.quickAddBtn svg {
+.productBtnAdd svg {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
   pointer-events: none;
+}
+
+.productBtnAddSuccess svg {
+  animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0) rotate(-90deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
 }
 
 /* RESPONSIVE */
@@ -338,15 +394,25 @@
     top: 10px;
     right: 10px;
   }
-  .quickAddBtn {
+  .productBtnView {
     font-size: 13px;
+    height: 40px;
+    padding: 0 12px;
+  }
+  .productBtnAdd {
+    width: 40px;
     height: 40px;
   }
 }
 
 @media (max-width: 480px) {
-  .quickAddBtn {
+  .productBtnView {
     font-size: 12.5px;
-    height: 38px;
+    padding: 0 10px;
+    height: 40px;
+  }
+  .productBtnAdd {
+    width: 40px;
+    height: 40px;
   }
 }

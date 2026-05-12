@@ -8,6 +8,7 @@ import { CartProvider } from "@/components/shop/CartProvider";
 import SeliaMenuPro from "@/components/shop/SeliaMenuPro";
 import ShopFooter from "@/components/shop/ShopFooter";
 import PreFooterTrust from "@/components/shop/PreFooterTrust";
+import ToastProvider from "@/components/shop/ToastProvider";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
@@ -95,6 +96,7 @@ export default async function ShopLayout({ children, params }: Props) {
           <main className="shop-main">{children}</main>
           <PreFooterTrust />
           <ShopFooter shop={shop} />
+          <ToastProvider />
         </div>
       </CartProvider>
     </>
