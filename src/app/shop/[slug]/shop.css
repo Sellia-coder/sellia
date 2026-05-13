@@ -4052,3 +4052,31 @@ button.shop-header-icon-btn svg {
     font-size: 12px;
   }
 }
+
+/* Product detail — note unifiée (alignée grille boutique) */
+.shop-product-detail-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.shop-product-detail-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.shop-product-detail-rating-value {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0E1116;
+  margin-left: 4px;
+}
+
+.shop-product-detail-rating-count {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  color: #6E7178;
+}

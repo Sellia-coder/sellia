@@ -16,6 +16,7 @@ import {
 import { addToCart } from "@/lib/cart";
 import { useCartContext } from "./CartProvider";
 import { buildProductGalleryImages } from "@/lib/shop-data";
+import { getProductRating, getRatingAriaLabel } from "@/lib/utils/product-rating";
 import ProductReviews from "./ProductReviews";
 import styles from "./ProductDetail.module.css";
 
@@ -166,12 +167,19 @@ export default function ProductDetail({
     createdAt: r.createdAt,
   }));
 
+  const syntheticRating = getProductRating(product.id);
   const ratingValue =
     reviews.length > 0
       ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-      : 4.8;
+      : syntheticRating.value;
   const reviewsCountDisplay =
-    reviews.length > 0 ? reviews.length : 1000;
+    reviews.length > 0 ? reviews.length : syntheticRating.count;
+  const ratingFormatted =
+    reviews.length > 0 ? ratingValue.toFixed(1) : syntheticRating.formatted;
+  const ratingAria =
+    reviews.length > 0
+      ? `Note moyenne : ${ratingFormatted} étoiles sur 5 (${reviewsCountDisplay} avis)`
+      : getRatingAriaLabel(syntheticRating);
 
   const unlimited = product.unlimitedStock ?? true;
   const rawStock = hasVariants ? effectiveStock : (product.stock ?? 0);
@@ -256,22 +264,38 @@ export default function ProductDetail({
               <h1 className={styles.name}>{product.name}</h1>
 
               <div className={styles.ratingRow}>
-                <div className={styles.ratingStars}>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      strokeWidth={0}
-                      fill={
-                        i <= Math.round(ratingValue) ? "#FFB800" : "#E5E2DA"
-                      }
-                    />
-                  ))}
-                  <span className={styles.ratingValue}>
-                    {ratingValue.toFixed(1)}/5
+                <div
+                  className="shop-product-detail-rating"
+                  aria-label={ratingAria}
+                >
+                  <div className="shop-product-detail-stars">
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const filled = star <= Math.floor(ratingValue);
+                      const halfFilled =
+                        !filled &&
+                        star === Math.ceil(ratingValue) &&
+                        ratingValue % 1 >= 0.3;
+                      return (
+                        <svg
+                          key={star}
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill={filled || halfFilled ? "#FBBF24" : "none"}
+                          stroke="#FBBF24"
+                          strokeWidth="1.5"
+                          aria-hidden
+                        >
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      );
+                    })}
+                  </div>
+                  <span className="shop-product-detail-rating-value">
+                    {ratingFormatted}/5
                   </span>
-                  <span className={styles.ratingCount}>
-                    ({reviewsCountDisplay.toLocaleString("fr-FR")}+ clients)
+                  <span className="shop-product-detail-rating-count">
+                    ({reviewsCountDisplay} avis)
                   </span>
                 </div>
                 <div className={styles.securePay}>
