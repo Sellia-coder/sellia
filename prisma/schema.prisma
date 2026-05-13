@@ -108,6 +108,8 @@ model Shop {
   products       Product[]
   orders         Order[]
   reviews        Review[]
+  cartevoTransactions CartevoTransaction[]
+  payouts             Payout[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -347,12 +349,133 @@ model Order {
   deliveredAt       DateTime?
   cancelledAt       DateTime?
 
+  cartevoTransaction CartevoTransaction? @relation("OrderCartevoTx")
+
   @@index([shopId])
   @@index([orderNumber])
   @@index([qrCode])
   @@index([status])
   @@index([paymentStatus])
   @@index([createdAt])
+}
+
+// ============================================
+// CARTEVO PAYMENT INTEGRATION
+// ============================================
+
+/// Transaction Cartevo (collecte client OU payout marchand)
+model CartevoTransaction {
+  id                String   @id @default(cuid())
+
+  cartevoTxId       String   @unique @map("cartevo_tx_id")
+  cartevoExternalId String?  @map("cartevo_external_id")
+
+  type              CartevoTxType
+  status            CartevoTxStatus @default(INITIATED)
+
+  amount            Decimal  @db.Decimal(14, 2)
+  currency          String
+  feeCartevo        Decimal  @default(0) @db.Decimal(14, 2) @map("fee_cartevo")
+  feeSellia         Decimal  @default(0) @db.Decimal(14, 2) @map("fee_sellia")
+  netAmount         Decimal  @db.Decimal(14, 2) @map("net_amount")
+
+  operator          String
+  country           String
+  phoneNumber       String   @map("phone_number")
+
+  shopId            String?  @map("shop_id")
+  shop              Shop?    @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  orderId           String?  @unique @map("order_id")
+  order             Order?   @relation("OrderCartevoTx", fields: [orderId], references: [id], onDelete: SetNull)
+  payoutId          String?  @unique @map("payout_id")
+  payout            Payout?  @relation("PayoutCartevoTx", fields: [payoutId], references: [id], onDelete: SetNull)
+
+  errorMessage      String?  @map("error_message") @db.Text
+  rawRequest        Json?    @map("raw_request")
+  rawResponse       Json?    @map("raw_response")
+  initiatedAt       DateTime @default(now()) @map("initiated_at")
+  completedAt       DateTime? @map("completed_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([shopId, type, status])
+  @@index([cartevoTxId])
+  @@index([createdAt])
+  @@map("cartevo_transactions")
+}
+
+model Payout {
+  id              String   @id @default(cuid())
+
+  shopId          String   @map("shop_id")
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  amount          Decimal  @db.Decimal(14, 2)
+  feeCartevo      Decimal  @default(0) @db.Decimal(14, 2) @map("fee_cartevo")
+  netAmount       Decimal  @db.Decimal(14, 2) @map("net_amount")
+  currency        String   @default("XAF")
+
+  operator        String
+  country         String
+  phoneNumber     String   @map("phone_number")
+
+  status          PayoutStatus @default(PENDING)
+
+  cartevoTx       CartevoTransaction? @relation("PayoutCartevoTx")
+
+  errorMessage    String?  @map("error_message") @db.Text
+  requestedAt     DateTime @default(now()) @map("requested_at")
+  processedAt     DateTime? @map("processed_at")
+  completedAt     DateTime? @map("completed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([shopId, status])
+  @@index([createdAt])
+  @@map("payouts")
+}
+
+model CartevoWebhookLog {
+  id               String   @id @default(cuid())
+
+  webhookId        String   @unique @map("webhook_id")
+
+  event            String
+  cartevoTxId      String?  @map("cartevo_tx_id")
+
+  processed        Boolean  @default(false)
+  processedAt      DateTime? @map("processed_at")
+  errorMessage     String?  @map("error_message") @db.Text
+
+  rawHeaders       Json     @map("raw_headers")
+  rawBody          Json     @map("raw_body")
+  signatureValid   Boolean  @default(false) @map("signature_valid")
+  receivedAt       DateTime @default(now()) @map("received_at")
+
+  @@index([cartevoTxId])
+  @@index([receivedAt])
+  @@map("cartevo_webhook_logs")
+}
+
+enum CartevoTxType {
+  COLLECT
+  PAYOUT
+}
+
+enum CartevoTxStatus {
+  INITIATED
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  CANCELLED
 }
 
 model Review {
