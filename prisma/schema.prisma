@@ -421,6 +421,8 @@ model Payout {
 
   status          PayoutStatus @default(PENDING)
 
+  version         Int          @default(0)
+
   cartevoTx       CartevoTransaction? @relation("PayoutCartevoTx")
 
   errorMessage    String?  @map("error_message") @db.Text
