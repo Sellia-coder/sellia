@@ -69,16 +69,27 @@ export default function DashboardLayoutClient({
             aria-label={`Voir la boutique ${shop.name}`}
           >
             <div className="dash-sidebar-shop-logo" style={{ background: primary }}>
-              <span>{shop.name?.charAt(0)?.toUpperCase() || "S"}</span>
+              {shop.name?.charAt(0)?.toUpperCase() || "S"}
             </div>
             <div className="dash-sidebar-shop-info">
               <div className="dash-sidebar-shop-name">{shop.name}</div>
               <div className="dash-sidebar-shop-url">
-                {shop.slug}.getsellia.com
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="dash-sidebar-shop-icon">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
+                <span className="dash-sidebar-shop-url-text">
+                  {shop.slug}.getsellia.com
+                </span>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  className="dash-sidebar-shop-icon"
+                  aria-hidden
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
                 </svg>
               </div>
             </div>

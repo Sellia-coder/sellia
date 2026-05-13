@@ -11245,7 +11245,8 @@ footer {
   .dash-topbar { padding: 0 16px; }
   .dash-topbar-search { max-width: none; }
   .dash-topbar-shortcut { display: none; }
-  .dash-btn-view-shop { display: none; }
+  .dash-btn-view-shop,
+  .dash-topbar-shop-btn { display: none; }
   .dash-topbar-divider { display: none; }
   .dash-content { padding: 20px 16px; }
   .dash-page-title { font-size: 26px; }
@@ -14621,4 +14622,134 @@ footer {
   color: #6B6E76;
   position: relative;
   z-index: 1;
+}
+
+/* ========== Phase F — sidebar boutique + topbar (Stripe-style fixes) ========== */
+.dash-sidebar-shop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 0 12px 20px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e1d8;
+  text-decoration: none;
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.dash-sidebar-shop:hover {
+  background: #fafaf7;
+  border-color: #d4d0c7;
+  box-shadow: 0 1px 3px rgba(14, 17, 22, 0.04);
+}
+
+.dash-sidebar-shop:hover .dash-sidebar-shop-icon {
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+.dash-sidebar-shop-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  letter-spacing: -0.3px;
+}
+
+.dash-sidebar-shop-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dash-sidebar-shop-name {
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: #0e1116;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.1px;
+}
+
+.dash-sidebar-shop-url {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  color: #6e7178;
+  overflow: hidden;
+  white-space: nowrap;
+  letter-spacing: -0.1px;
+}
+
+.dash-sidebar-shop-url-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-sidebar-shop-icon {
+  opacity: 0.5;
+  transition: all 0.12s ease;
+  flex-shrink: 0;
+  color: #6e7178;
+}
+
+.dash-sidebar-shop-placeholder {
+  margin: 0 12px 20px;
+  padding: 10px 12px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--dash-text-tertiary, #6e7178);
+  line-height: 1.4;
+  border: 1px dashed var(--dash-border, #e5e1d8);
+  border-radius: 8px;
+}
+
+.dash-topbar-shop-btn {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #e5e1d8;
+  border-radius: 7px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0e1116;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.12s ease;
+  line-height: 1;
+}
+
+.dash-topbar-shop-btn svg {
+  flex-shrink: 0;
+  color: #6e7178;
+}
+
+.dash-topbar-shop-btn:hover {
+  background: #fafaf7;
+  border-color: #d4d0c7;
+  color: #0e1116;
+  box-shadow: 0 1px 2px rgba(14, 17, 22, 0.04);
+}
+
+.dash-topbar-shop-btn:hover svg {
+  color: #e84b1f;
 }
