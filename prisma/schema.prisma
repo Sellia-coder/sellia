@@ -449,6 +449,10 @@ model CartevoWebhookLog {
   processedAt      DateTime? @map("processed_at")
   errorMessage     String?  @map("error_message") @db.Text
 
+  retryCount       Int      @default(0) @map("retry_count")
+  nextRetryAt      DateTime? @map("next_retry_at")
+  lastRetryAt      DateTime? @map("last_retry_at")
+
   rawHeaders       Json     @map("raw_headers")
   rawBody          Json     @map("raw_body")
   signatureValid   Boolean  @default(false) @map("signature_valid")
@@ -456,6 +460,7 @@ model CartevoWebhookLog {
 
   @@index([cartevoTxId])
   @@index([receivedAt])
+  @@index([processed, nextRetryAt])
   @@map("cartevo_webhook_logs")
 }
 

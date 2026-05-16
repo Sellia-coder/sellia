@@ -656,21 +656,12 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                                   onClick={() => setMomoOperator(op.code)}
                                   style={
                                     isActive
-                                      ? {
-                                          borderColor: op.color,
-                                          backgroundColor: `${op.color}10`,
-                                        }
+                                      ? { borderColor: op.color, color: op.color }
                                       : undefined
                                   }
                                 >
-                                  <span
-                                    className={styles.operatorLogo}
-                                    style={{ color: op.color }}
-                                  >
-                                    {op.logoEmoji}
-                                  </span>
                                   <span className={styles.operatorName}>
-                                    {op.shortName}
+                                    {op.name}
                                   </span>
                                 </button>
                               );

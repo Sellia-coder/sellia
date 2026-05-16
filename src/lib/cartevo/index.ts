@@ -78,6 +78,13 @@ export { handleCartevoRefund, type RefundEvent } from "./refund-handler";
 export { reconcilePendingTransactions, type ReconcileResult } from "./reconciliation";
 
 export {
+  computeNextRetryAt,
+  describeRetryDelay,
+  MAX_RETRY_COUNT,
+  WEBHOOK_ERROR_STATUS,
+} from "./webhook-retry";
+
+export {
   ORDER_STATUS,
   PAYMENT_STATUS,
   PAYMENT_METHOD,

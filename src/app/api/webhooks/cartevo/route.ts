@@ -18,7 +18,10 @@ import {
   computeRefundDeadline,
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
-import type { CartevoTxStatus } from "@/lib/cartevo/types";
+import {
+  computeNextRetryAt,
+  WEBHOOK_ERROR_STATUS,
+} from "@/lib/cartevo/webhook-retry";
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request.headers);
@@ -66,11 +69,8 @@ export async function POST(request: NextRequest) {
     where: { webhookId },
   });
 
-  if (existing) {
-    safeLogger.info("Webhook already processed (idempotent)", {
-      webhookId,
-      transactionId,
-    });
+  if (existing?.processed) {
+    safeLogger.info("Webhook already processed (idempotent)", { webhookId });
     return NextResponse.json({ ok: true, deduplicated: true });
   }
 
@@ -80,52 +80,46 @@ export async function POST(request: NextRequest) {
   });
 
   let webhookLog;
-  try {
-    webhookLog = await db.cartevoWebhookLog.create({
-      data: {
-        webhookId,
-        event,
-        cartevoTxId: transactionId,
-        processed: false,
-        rawHeaders: headersObj as Prisma.InputJsonValue,
-        rawBody: { raw: rawBody, hash: bodyHash } as Prisma.InputJsonValue,
-        signatureValid: true,
-        receivedAt: new Date(),
-      },
-    });
-  } catch (err) {
-    safeLogger.error("Failed to log webhook", { error: String(err) });
-    return NextResponse.json({ error: "DB error" }, { status: 500 });
+  if (existing) {
+    webhookLog = existing;
+  } else {
+    try {
+      webhookLog = await db.cartevoWebhookLog.create({
+        data: {
+          webhookId,
+          event,
+          cartevoTxId: transactionId,
+          processed: false,
+          rawHeaders: headersObj as Prisma.InputJsonValue,
+          rawBody: { raw: rawBody, hash: bodyHash } as Prisma.InputJsonValue,
+          signatureValid: true,
+          receivedAt: new Date(),
+        },
+      });
+    } catch (err) {
+      safeLogger.error("Failed to log webhook", { error: String(err) });
+      return NextResponse.json({ error: "DB error" }, { status: 500 });
+    }
   }
 
   let verified;
   try {
     verified = await verifyTransactionWithCartevo(transactionId);
   } catch (err) {
-    safeLogger.error("Verify-on-pull failed", {
+    safeLogger.error("Verify-on-pull threw", {
       transactionId,
       error: err instanceof Error ? err.message : String(err),
     });
     await db.cartevoWebhookLog.update({
       where: { id: webhookLog.id },
       data: {
-        errorMessage: "verify_on_pull_failed",
-        processedAt: new Date(),
+        errorMessage: WEBHOOK_ERROR_STATUS.VERIFY_FAILED,
+        lastRetryAt: new Date(),
+        retryCount: { increment: 1 },
+        nextRetryAt: computeNextRetryAt(webhookLog.retryCount + 1),
       },
     });
-    return NextResponse.json({ ok: false, error: "verify_failed" });
-  }
-
-  if (!verified.found) {
-    safeLogger.warn("Webhook for unknown Cartevo transaction", { transactionId });
-    await db.cartevoWebhookLog.update({
-      where: { id: webhookLog.id },
-      data: {
-        errorMessage: "transaction_not_found_at_cartevo",
-        processedAt: new Date(),
-      },
-    });
-    return NextResponse.json({ ok: true, ignored: "tx_not_found" });
+    return NextResponse.json({ ok: false, error: "verify_failed_will_retry" });
   }
 
   const cartevoTx = await db.cartevoTransaction.findUnique({
@@ -133,16 +127,69 @@ export async function POST(request: NextRequest) {
     include: { order: true },
   });
 
-  if (!cartevoTx) {
-    safeLogger.warn("Webhook for unknown local transaction", { transactionId });
+  if (!cartevoTx && !verified.found) {
+    safeLogger.warn("Webhook truly fake (no local tx, no cartevo tx)", {
+      transactionId,
+    });
     await db.cartevoWebhookLog.update({
       where: { id: webhookLog.id },
       data: {
-        errorMessage: "no_local_transaction",
+        errorMessage: WEBHOOK_ERROR_STATUS.NO_LOCAL_TX,
+        processed: true,
         processedAt: new Date(),
       },
     });
-    return NextResponse.json({ ok: true, ignored: "no_local_tx" });
+    return NextResponse.json({ ok: true, ignored: "fake_webhook" });
+  }
+
+  if (cartevoTx && !verified.found) {
+    const newRetryCount = webhookLog.retryCount + 1;
+    const nextRetry = computeNextRetryAt(newRetryCount);
+
+    safeLogger.warn("Webhook pending propagation at Cartevo (race condition)", {
+      transactionId,
+      retryCount: newRetryCount,
+      nextRetryAt: nextRetry?.toISOString(),
+    });
+
+    await db.cartevoWebhookLog.update({
+      where: { id: webhookLog.id },
+      data: {
+        errorMessage: nextRetry
+          ? WEBHOOK_ERROR_STATUS.PENDING_PROPAGATION
+          : WEBHOOK_ERROR_STATUS.INVESTIGATION_NEEDED,
+        processed: false,
+        retryCount: newRetryCount,
+        lastRetryAt: new Date(),
+        nextRetryAt: nextRetry,
+      },
+    });
+
+    return NextResponse.json({
+      ok: true,
+      pending_propagation: true,
+      retry_count: newRetryCount,
+      next_retry_at: nextRetry?.toISOString() ?? null,
+    });
+  }
+
+  if (!cartevoTx && verified.found) {
+    safeLogger.warn("Webhook for unknown local transaction (but Cartevo knows it)", {
+      transactionId,
+    });
+    await db.cartevoWebhookLog.update({
+      where: { id: webhookLog.id },
+      data: {
+        errorMessage: WEBHOOK_ERROR_STATUS.NO_LOCAL_TX,
+        processed: true,
+        processedAt: new Date(),
+      },
+    });
+    return NextResponse.json({ ok: true, ignored: "no_local_tx_but_cartevo_has" });
+  }
+
+  if (!cartevoTx) {
+    return NextResponse.json({ ok: false }, { status: 500 });
   }
 
   const comparison = compareWithExpected(verified, {
@@ -158,20 +205,13 @@ export async function POST(request: NextRequest) {
     await db.cartevoWebhookLog.update({
       where: { id: webhookLog.id },
       data: {
-        errorMessage: `amount_mismatch: ${comparison.reason}`,
+        errorMessage: `${WEBHOOK_ERROR_STATUS.AMOUNT_MISMATCH}: ${comparison.reason}`,
+        processed: true,
         processedAt: new Date(),
       },
     });
     return NextResponse.json({ ok: false, error: "amount_mismatch" });
   }
-
-  const terminalStatuses: CartevoTxStatus[] = [
-    "SUCCESS",
-    "FAILED",
-    "CANCELLED",
-  ];
-  const isTerminal =
-    verified.status !== undefined && terminalStatuses.includes(verified.status);
 
   try {
     await db.$transaction(async (tx) => {
@@ -179,7 +219,12 @@ export async function POST(request: NextRequest) {
         where: { id: cartevoTx.id },
         data: {
           status: verified.status ?? cartevoTx.status,
-          completedAt: isTerminal ? new Date() : null,
+          completedAt:
+            verified.status === "SUCCESS" ||
+            verified.status === "FAILED" ||
+            verified.status === "CANCELLED"
+              ? new Date()
+              : null,
           errorMessage: verified.errorMessage,
           rawResponse: verified as unknown as Prisma.InputJsonValue,
         },
@@ -215,6 +260,7 @@ export async function POST(request: NextRequest) {
         data: {
           processed: true,
           processedAt: new Date(),
+          errorMessage: null,
         },
       });
     });

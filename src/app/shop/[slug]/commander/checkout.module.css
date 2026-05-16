@@ -1195,9 +1195,9 @@
   }
 }
 
-/* Sélecteur opérateur MoMo (G2.1.B) */
+/* Sélecteur opérateur — style Apple Pay / Stripe (G2.1.C) */
 .operatorSelector {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .operatorSelectorLabel {
@@ -1206,30 +1206,30 @@
   font-size: 13px;
   font-weight: 600;
   color: #0a0e13;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  letter-spacing: -0.1px;
 }
 
 .operatorGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .operatorCard {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 14px 12px;
+  padding: 16px 14px;
   background: #ffffff;
-  border: 1.5px solid #ece9e2;
+  border: 1px solid #ece9e2;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: all 0.16s ease;
   font-family: "Inter", sans-serif;
-  min-height: 76px;
+  min-height: 56px;
+  color: #0a0e13;
 }
 
 .operatorCard:hover {
@@ -1238,34 +1238,38 @@
 }
 
 .operatorCardActive {
-  border-width: 2px;
+  border-width: 1.5px;
   font-weight: 600;
-}
-
-.operatorLogo {
-  font-size: 26px;
-  line-height: 1;
-  filter: saturate(1.1);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(232, 75, 31, 0.08);
 }
 
 .operatorName {
-  font-size: 12px;
-  font-weight: 600;
-  color: #0a0e13;
+  font-size: 13.5px;
+  font-weight: 500;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.3;
+  letter-spacing: -0.1px;
 }
 
 .operatorHint {
   display: block;
   font-family: "Inter", sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #8a8d95;
-  margin-top: -2px;
+  margin-top: 6px;
 }
 
 @media (max-width: 480px) {
   .operatorGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .operatorCard {
+    padding: 14px 10px;
+    min-height: 52px;
+  }
+  .operatorName {
+    font-size: 12.5px;
   }
 }

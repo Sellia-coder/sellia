@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { Loader2, X } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { X, RotateCw, CheckCircle } from "lucide-react";
 import styles from "./payment-pending.module.css";
 import { getOperatorInfo } from "@/lib/cartevo/operators-catalog";
 
@@ -18,8 +18,11 @@ interface Props {
   onCancel: () => void;
 }
 
-const COUNTDOWN_SECONDS = 5 * 60;
-const POLL_INTERVAL_MS = 3000;
+function getNextDelayMs(pollCount: number): number {
+  if (pollCount < 5) return 2000;
+  if (pollCount < 12) return 5000;
+  return 10000;
+}
 
 export default function PaymentPendingPolling({
   shopSlug,
@@ -33,79 +36,98 @@ export default function PaymentPendingPolling({
   onFailed,
   onCancel,
 }: Props) {
-  const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
   const [pollCount, setPollCount] = useState(0);
+  const [isManualChecking, setIsManualChecking] = useState(false);
   const cancelledRef = useRef(false);
 
   const operator = getOperatorInfo(countryCode, operatorCode);
-
   const operatorName = operator?.name ?? "Mobile Money";
-  const operatorColor = operator?.color ?? primaryColor;
   const ussd = operator?.ussd;
 
-  useEffect(() => {
-    if (secondsLeft <= 0) {
-      cancelledRef.current = true;
-      onFailed("Délai d'attente dépassé. Aucun montant n'a été débité.");
-      return;
+  const performPoll = useCallback(async (): Promise<
+    "success" | "failed" | "pending"
+  > => {
+    const res = await fetch(
+      `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/status`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return "pending";
+    const data = await res.json();
+    if (data.paymentStatus === "paid_escrow") return "success";
+    if (data.paymentStatus === "failed" || data.paymentStatus === "cancelled") {
+      return "failed";
     }
-    const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [secondsLeft, onFailed]);
+    return "pending";
+  }, [shopSlug, orderNumber]);
 
   useEffect(() => {
     cancelledRef.current = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let currentCount = 0;
 
-    const poll = async () => {
+    const loop = async () => {
       if (cancelledRef.current) return;
       try {
-        const res = await fetch(
-          `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/status`,
-          { cache: "no-store" }
-        );
+        const result = await performPoll();
         if (cancelledRef.current) return;
-        if (!res.ok) {
-          timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
-          return;
-        }
-        const data = await res.json();
-        if (cancelledRef.current) return;
-
-        if (data.paymentStatus === "paid_escrow") {
+        if (result === "success") {
           cancelledRef.current = true;
           onSuccess();
           return;
         }
-        if (
-          data.paymentStatus === "failed" ||
-          data.paymentStatus === "cancelled"
-        ) {
+        if (result === "failed") {
           cancelledRef.current = true;
-          onFailed(
-            data.paymentStatus === "cancelled"
-              ? "Paiement annulé"
-              : "Le paiement a échoué"
-          );
+          onFailed("Le paiement n'a pas pu être finalisé.");
           return;
         }
-
-        setPollCount((c) => c + 1);
-        timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
       } catch {
-        if (!cancelledRef.current) {
-          timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
-        }
+        // retry on network error
+      }
+      currentCount += 1;
+      setPollCount(currentCount);
+      if (!cancelledRef.current) {
+        const delay = getNextDelayMs(currentCount);
+        timeoutId = setTimeout(loop, delay);
       }
     };
 
-    timeoutId = setTimeout(poll, 2000);
+    timeoutId = setTimeout(loop, 2000);
 
     return () => {
       cancelledRef.current = true;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [shopSlug, orderNumber, onSuccess, onFailed]);
+  }, [performPoll, onSuccess, onFailed]);
+
+  const handleManualCheck = async () => {
+    if (isManualChecking || cancelledRef.current) return;
+    setIsManualChecking(true);
+    try {
+      const reconcileRes = await fetch(
+        `/api/admin/reconcile/${encodeURIComponent(orderNumber)}`,
+        { method: "POST", cache: "no-store" }
+      );
+      if (cancelledRef.current) return;
+
+      if (reconcileRes.ok) {
+        const data = await reconcileRes.json();
+        if (data.reconciled && data.new_payment_status === "paid_escrow") {
+          cancelledRef.current = true;
+          onSuccess();
+          return;
+        }
+        if (data.reconciled && data.new_payment_status === "failed") {
+          cancelledRef.current = true;
+          onFailed("Le paiement a échoué.");
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsManualChecking(false);
+    }
+  };
 
   const handleCancelClick = () => {
     if (cancelledRef.current) return;
@@ -113,79 +135,73 @@ export default function PaymentPendingPolling({
     onCancel();
   };
 
-  const minutes = Math.floor(secondsLeft / 60);
-  const seconds = secondsLeft % 60;
-  const timeString = `${minutes.toString().padStart(2, "0")}:${seconds
-    .toString()
-    .padStart(2, "0")}`;
-
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
-        <div
-          className={styles.loaderRing}
-          style={{ borderTopColor: operatorColor }}
-        >
-          <Loader2 size={28} className={styles.loaderIcon} />
+        <div className={styles.dots} aria-hidden="true">
+          <span className={styles.dot} style={{ background: primaryColor }} />
+          <span className={styles.dot} style={{ background: primaryColor }} />
+          <span className={styles.dot} style={{ background: primaryColor }} />
         </div>
 
-        <h2 className={styles.title}>Confirmer sur votre téléphone</h2>
+        <h2 className={styles.title}>Paiement en cours de vérification</h2>
 
         <p className={styles.subtitle}>
-          Une notification{" "}
-          <strong style={{ color: operatorColor }}>{operatorName}</strong> a été
-          envoyée à votre numéro.
-          <br />
           Confirmez le paiement de{" "}
           <strong>
             {total.toLocaleString("fr-FR")} {currency}
-          </strong>
-          .
+          </strong>{" "}
+          sur votre téléphone via <strong>{operatorName}</strong>.
+          <br />
+          Nous vérifions automatiquement.
         </p>
 
+        <div className={styles.orderRef}>
+          Référence&nbsp;: <span>{orderNumber}</span>
+        </div>
+
         {ussd && (
-          <div className={styles.ussdBox}>
-            <div className={styles.ussdEmoji}>💡</div>
-            <div className={styles.ussdContent}>
-              <div className={styles.ussdHint}>
-                Pas de notification après 30 secondes ?
-              </div>
-              <div className={styles.ussdCode}>
-                Composez <strong>{ussd}</strong> sur votre téléphone
-              </div>
-            </div>
+          <div className={styles.ussdHint}>
+            Pas reçu de notification ? Composez{" "}
+            <span className={styles.ussdCode}>{ussd}</span> sur votre téléphone.
           </div>
         )}
 
-        <div className={styles.countdown}>
-          <span className={styles.countdownLabel}>Temps restant</span>
-          <span
-            className={styles.countdownValue}
-            style={{ color: secondsLeft < 30 ? "#DC2626" : "inherit" }}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            onClick={handleManualCheck}
+            disabled={isManualChecking}
+            style={{ borderColor: primaryColor, color: primaryColor }}
           >
-            {timeString}
-          </span>
-        </div>
+            {isManualChecking ? (
+              <>
+                <RotateCw size={14} className={styles.spinIcon} />
+                Vérification...
+              </>
+            ) : (
+              <>
+                <CheckCircle size={14} />
+                J&apos;ai payé, vérifier
+              </>
+            )}
+          </button>
 
-        <div className={styles.orderRef}>
-          Référence : <span>{orderNumber}</span>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={handleCancelClick}
+          >
+            <X size={13} />
+            Annuler
+          </button>
         </div>
-
-        <button
-          type="button"
-          className={styles.cancelBtn}
-          onClick={handleCancelClick}
-        >
-          <X size={14} strokeWidth={2.2} />
-          Annuler le paiement
-        </button>
 
         {process.env.NODE_ENV === "development" && (
           <div className={styles.debug}>polls: {pollCount}</div>
         )}
       </div>
-
-      <div className={styles.bgPulse} style={{ background: operatorColor }} />
     </div>
   );
 }
