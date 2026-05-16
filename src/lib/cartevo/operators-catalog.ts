@@ -300,3 +300,21 @@ export function normalizePhoneNumber(rawPhone: string, country: string): string 
 
   return phone;
 }
+
+export function getOperatorsForCountry(countryCode: string): OperatorInfo[] {
+  const info = getCountryInfo(countryCode);
+  return info?.operators ?? [];
+}
+
+export function formatPhoneDisplay(phone: string, countryCode: string): string {
+  const info = getCountryInfo(countryCode);
+  if (!info) return phone;
+
+  const digits = phone.replace(/\D/g, "");
+
+  if (countryCode === "CM" && digits.length === 12) {
+    return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 12)}`;
+  }
+
+  return digits;
+}

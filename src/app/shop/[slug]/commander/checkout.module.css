@@ -1194,3 +1194,78 @@
     border-radius: 6px;
   }
 }
+
+/* Sélecteur opérateur MoMo (G2.1.B) */
+.operatorSelector {
+  margin-bottom: 20px;
+}
+
+.operatorSelectorLabel {
+  display: block;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a0e13;
+  margin-bottom: 10px;
+}
+
+.operatorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.operatorCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 12px;
+  background: #ffffff;
+  border: 1.5px solid #ece9e2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: "Inter", sans-serif;
+  min-height: 76px;
+}
+
+.operatorCard:hover {
+  border-color: #c5c2bc;
+  background: #fafaf7;
+}
+
+.operatorCardActive {
+  border-width: 2px;
+  font-weight: 600;
+}
+
+.operatorLogo {
+  font-size: 26px;
+  line-height: 1;
+  filter: saturate(1.1);
+}
+
+.operatorName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0a0e13;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.operatorHint {
+  display: block;
+  font-family: "Inter", sans-serif;
+  font-size: 11.5px;
+  color: #8a8d95;
+  margin-top: -2px;
+}
+
+@media (max-width: 480px) {
+  .operatorGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

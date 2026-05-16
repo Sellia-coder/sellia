@@ -96,7 +96,9 @@ export {
   getOperatorInfo,
   getAllCountries,
   getDefaultCountry,
+  getOperatorsForCountry,
   normalizePhoneNumber,
+  formatPhoneDisplay,
   type OperatorInfo,
   type CountryInfo,
 } from "./operators-catalog";

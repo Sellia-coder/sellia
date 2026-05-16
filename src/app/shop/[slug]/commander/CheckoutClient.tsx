@@ -43,7 +43,14 @@ import {
   type ShopWithProducts,
 } from "@/lib/shop-data";
 import PaymentLogos from "@/components/shop/PaymentLogos";
+import PaymentPendingPolling from "@/components/shop/PaymentPendingPolling";
 import CountryFlag from "@/components/shared/CountryFlag";
+import { createOrderAction } from "@/app/actions/order";
+import {
+  getOperatorsForCountry,
+  normalizePhoneNumber,
+} from "@/lib/cartevo/operators-catalog";
+import type { CartevoOperator, CartevoCountry } from "@/lib/cartevo/types";
 import styles from "./checkout.module.css";
 
 function currencyLabel(c: string | null | undefined): string {
@@ -105,7 +112,17 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
   const [paymentSubMethod, setPaymentSubMethod] = useState<"mobile_money" | "card">("mobile_money");
   const [momoCountry, setMomoCountry] = useState<string>("CM");
   const [momoNumber, setMomoNumber] = useState("");
+  const [momoOperator, setMomoOperator] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [pendingCartevoTxId, setPendingCartevoTxId] = useState<string | null>(
+    null
+  );
+  const [orderQrCode, setOrderQrCode] = useState<string | null>(null);
+  const [paymentWasEscrow, setPaymentWasEscrow] = useState(false);
+
+  useEffect(() => {
+    setMomoOperator(null);
+  }, [momoCountry]);
 
   const zones = parseShippingZones(shop.shippingZones);
   const escrowAvail = Boolean(shop.paymentOnlineEscrow);
@@ -146,7 +163,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
   useEffect(() => {
     if (!mounted) return;
     const cart = getCart(shop.slug);
-    if (cart.length === 0 && currentStep < 4) {
+    if (cart.length === 0 && currentStep <= 3) {
       router.replace(`/shop/${shop.slug}/panier`);
     }
   }, [mounted, shop.slug, router, currentStep]);
@@ -169,7 +186,8 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     { id: 1, label: "Panier", Icon: ShoppingBag },
     { id: 2, label: "Livraison", Icon: Truck },
     { id: 3, label: "Paiement", Icon: CreditCard },
-    { id: 4, label: "Confirmation", Icon: CheckCircle2 },
+    { id: 4, label: "Confirmation", Icon: RefreshCw },
+    { id: 5, label: "Succès", Icon: CheckCircle2 },
   ] as const;
 
   const paymentChoiceBoth = escrowAvail && codAvail;
@@ -209,7 +227,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
       return;
     }
 
-    setCurrentStep((s) => Math.min(s + 1, 4));
+    setCurrentStep((s) => Math.min(s + 1, 3));
   };
 
   const handleBack = () => {
@@ -219,11 +237,10 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
 
   const canProceedToPayment =
     formData.paymentMethod === "cash_on_delivery" ||
-    (
-      formData.paymentMethod === "online_escrow" &&
+    (formData.paymentMethod === "online_escrow" &&
       paymentSubMethod === "mobile_money" &&
-      isValidMomoNumber(momoCountry, momoNumber)
-    );
+      !!momoOperator &&
+      isValidMomoNumber(momoCountry, momoNumber));
 
   const handleProceedToPayment = async () => {
     if (isProcessingPayment) return;
@@ -253,48 +270,65 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     setIsProcessingPayment(true);
 
     try {
-      const response = await fetch(`/api/shop/${shop.slug}/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: formData.fullName,
-          customerPhone: formData.phone,
-          customerEmail: formData.email || null,
-          deliveryAddress: formData.address,
-          deliveryCity: formData.city,
-          deliveryNotes: null,
-          paymentMethod: formData.paymentMethod,
-          paymentSubMethod: formData.paymentMethod === "online_escrow" ? paymentSubMethod : null,
-          paymentProvider: null,
-          momoCountry: paymentSubMethod === "mobile_money" ? momoCountry : null,
-          momoNumber: paymentSubMethod === "mobile_money" ? momoNumber : null,
-          items: items.map((i) => ({
-            productId: i.productId,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            imageUrl: i.imageUrl,
-          })),
-          subtotal,
-          shippingFee: shippingPrice,
-          total,
-        }),
-      });
+      const isMoMo =
+        formData.paymentMethod === "online_escrow" &&
+        paymentSubMethod === "mobile_money" &&
+        !!momoOperator;
 
-      const result = await response.json();
+      const payload: Parameters<typeof createOrderAction>[0] = {
+        shopSlug: shop.slug,
+        customerName: formData.fullName,
+        customerPhone: formData.phone,
+        customerEmail: formData.email || "",
+        customerCity: formData.city || "",
+        customerAddress: formData.address || "",
+        customerNotes: "",
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+        shippingZoneId: formData.shippingZoneId || undefined,
+        paymentMethod: isMoMo
+          ? "online_mobile_money"
+          : formData.paymentMethod,
+      };
 
-      if (!result.success) {
-        setError(result.error || "Erreur lors du paiement. Réessayez.");
+      if (isMoMo) {
+        const normalizedPhone = normalizePhoneNumber(momoNumber, momoCountry);
+        payload.moMo = {
+          country: momoCountry as CartevoCountry,
+          operator: momoOperator as CartevoOperator,
+          phoneNumber: normalizedPhone,
+        };
+      }
+
+      const result = await createOrderAction(payload);
+
+      if (!result.ok) {
+        setError(result.error || "Erreur lors de la création de la commande");
         setIsProcessingPayment(false);
         return;
       }
 
-      clearCart(shop.slug);
-      refresh();
-      router.push(`/shop/${shop.slug}/commande/${result.orderNumber}`);
+      setLastOrderNumber(result.order.orderNumber);
+      setOrderQrCode(result.order.qrCode ?? null);
+
+      if (
+        result.order.requiresConfirmation &&
+        result.order.cartevoTransactionId
+      ) {
+        setPaymentWasEscrow(true);
+        setPendingCartevoTxId(result.order.cartevoTransactionId);
+        setCurrentStep(4);
+      } else {
+        setPaymentWasEscrow(false);
+        clearCart(shop.slug);
+        refresh();
+        setCurrentStep(5);
+      }
     } catch (err) {
-      console.error("[checkout] Error:", err);
-      setError("Erreur réseau. Vérifiez votre connexion.");
+      setError(err instanceof Error ? err.message : "Erreur réseau");
+    } finally {
       setIsProcessingPayment(false);
     }
   };
@@ -315,14 +349,14 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     );
   }
 
-  if (items.length === 0 && currentStep < 4) {
+  if (items.length === 0 && currentStep <= 3) {
     return null;
   }
 
   return (
     <div className={styles.checkout} style={checkoutRootStyle}>
       <div className={styles.checkoutContainer}>
-        {currentStep < 4 ? (
+        {currentStep <= 3 ? (
           <Link href={`/shop/${shop.slug}/panier`} className={styles.backLink}>
             <ArrowLeft size={16} strokeWidth={2.2} />
             Retour au panier
@@ -606,6 +640,51 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                       </div>
 
                       {paymentSubMethod === "mobile_money" && (
+                        <>
+                        <div className={styles.operatorSelector}>
+                          <label className={styles.operatorSelectorLabel}>
+                            Choisissez votre opérateur
+                          </label>
+                          <div className={styles.operatorGrid}>
+                            {getOperatorsForCountry(momoCountry).map((op) => {
+                              const isActive = momoOperator === op.code;
+                              return (
+                                <button
+                                  type="button"
+                                  key={op.code}
+                                  className={`${styles.operatorCard} ${isActive ? styles.operatorCardActive : ""}`}
+                                  onClick={() => setMomoOperator(op.code)}
+                                  style={
+                                    isActive
+                                      ? {
+                                          borderColor: op.color,
+                                          backgroundColor: `${op.color}10`,
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  <span
+                                    className={styles.operatorLogo}
+                                    style={{ color: op.color }}
+                                  >
+                                    {op.logoEmoji}
+                                  </span>
+                                  <span className={styles.operatorName}>
+                                    {op.shortName}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {!momoOperator &&
+                            getOperatorsForCountry(momoCountry).length > 0 && (
+                              <span className={styles.operatorHint}>
+                                Sélectionnez l&apos;opérateur de votre numéro de
+                                paiement.
+                              </span>
+                            )}
+                        </div>
+
                         <div className={styles.momoFieldWrap}>
                           <label className={styles.momoLabel}>Numéro Mobile Money</label>
                           <div className={styles.momoField}>
@@ -650,6 +729,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                             Le numéro qui sera débité pour cette commande.
                           </span>
                         </div>
+                        </>
                       )}
                     </div>
                   )}
@@ -721,30 +801,74 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                 </div>
               )}
 
-              {currentStep === 4 && lastOrderNumber && (
+              {currentStep === 4 &&
+                pendingCartevoTxId &&
+                lastOrderNumber &&
+                momoOperator && (
+                  <PaymentPendingPolling
+                    shopSlug={shop.slug}
+                    orderNumber={lastOrderNumber}
+                    operatorCode={momoOperator}
+                    countryCode={momoCountry}
+                    total={total}
+                    currency={cur}
+                    primaryColor={primaryColor}
+                    onSuccess={() => {
+                      clearCart(shop.slug);
+                      refresh();
+                      setCurrentStep(5);
+                    }}
+                    onFailed={(reason) => {
+                      setError(reason);
+                      setCurrentStep(3);
+                      setPendingCartevoTxId(null);
+                    }}
+                    onCancel={() => {
+                      setError("Paiement annulé.");
+                      setCurrentStep(3);
+                      setPendingCartevoTxId(null);
+                    }}
+                  />
+                )}
+
+              {currentStep === 5 && lastOrderNumber && (
                 <div className={`${styles.formBlock} ${styles.successBlock}`}>
                   <CheckCircle2
                     size={40}
                     strokeWidth={2}
                     style={{ color: "#16A34A", marginBottom: 12 }}
                   />
-                  <h2 className={styles.formTitle}>Commande enregistrée</h2>
+                  <h2 className={styles.formTitle}>
+                    {paymentWasEscrow
+                      ? "Paiement confirmé — fonds en escrow"
+                      : "Commande enregistrée"}
+                  </h2>
                   <p>
                     Merci ! Ta commande{" "}
-                    <strong>{lastOrderNumber}</strong> a bien été créée.
+                    <strong>{lastOrderNumber}</strong>{" "}
+                    {paymentWasEscrow
+                      ? "est payée. Tes fonds sont protégés par Sellia jusqu'à la livraison."
+                      : "a bien été créée."}
                   </p>
+                  {paymentWasEscrow && orderQrCode && (
+                    <p className={styles.stepCartHint}>
+                      Ton QR code de validation :{" "}
+                      <strong>{orderQrCode}</strong> — présente-le au marchand à
+                      la livraison.
+                    </p>
+                  )}
                   <Link
                     href={`/shop/${shop.slug}/commande/${lastOrderNumber}`}
                     className={styles.successLink}
                     style={{ color: primaryColor }}
                   >
-                    Voir les détails de la commande
+                    Voir les détails et le QR code
                   </Link>
                 </div>
               )}
             </div>
 
-            {currentStep < 4 && (
+            {currentStep <= 3 && (
               <div className={styles.stepActions}>
                 {currentStep > 1 && (
                   <button
@@ -796,7 +920,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
             )}
           </div>
 
-          {currentStep < 4 ? (
+          {currentStep <= 3 ? (
             <aside className={styles.summary}>
               <div className={styles.summaryCard}>
                 <h3 className={styles.summaryTitle}>Récapitulatif</h3>
