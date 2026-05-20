@@ -128,6 +128,8 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
       hasVariants: false,
       variantAxes: [],
       variants: [],
+      feeMode: "merchant_absorbs" as const,
+      codAvailable: false,
       included: true,
     };
   });

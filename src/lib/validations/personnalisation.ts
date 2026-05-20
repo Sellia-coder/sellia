@@ -187,6 +187,11 @@ export const productEditSchema = z
     variantAxes: z.array(variantAxisSchema).max(2).default([]),
     variants: z.array(variantSchema).default([]),
 
+    feeMode: z
+      .enum(["merchant_absorbs", "customer_pays", "split_50_50"])
+      .default("merchant_absorbs"),
+    codAvailable: z.boolean().default(false),
+
     included: z.boolean(),
   })
   .refine((p) => !p.comparePrice || p.comparePrice > p.price, {

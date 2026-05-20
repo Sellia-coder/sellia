@@ -19,6 +19,7 @@ import {
   getCountryInfo,
 } from "@/lib/cartevo/operators-catalog";
 import { initOrderCollect } from "@/lib/cartevo/order-collect";
+import type { FeeMode, SelliaPlan } from "@/lib/cartevo/pricing";
 import {
   PAYMENT_STATUS,
   ORDER_STATUS,
@@ -207,7 +208,13 @@ export async function createOrderAction(input: CreateOrderInput) {
     (sum, i) => sum + i.price * i.quantity,
     0
   );
-  const total = subtotal + shippingPrice;
+  const baseTotal = subtotal + shippingPrice;
+
+  const firstProduct = shop.products.find(
+    (p) => p.id === itemsSnapshot[0]?.productId
+  );
+  const orderFeeMode = (firstProduct?.feeMode ??
+    "merchant_absorbs") as FeeMode;
 
   const qrCode = randomBytes(8).toString("hex").toUpperCase();
 
@@ -230,7 +237,8 @@ export async function createOrderAction(input: CreateOrderInput) {
         shippingPrice,
         shippingZone: shippingZoneName,
         shippingEta,
-        total,
+        total: baseTotal,
+        feeMode: orderFeeMode,
         paymentMethod: effectivePaymentMethod,
         paymentSubMethod:
           effectivePaymentMethod === PAYMENT_METHOD.ONLINE_MOBILE_MONEY
@@ -250,7 +258,8 @@ export async function createOrderAction(input: CreateOrderInput) {
       orderNumber: order.orderNumber,
       shopId: shop.id,
       paymentMethod: effectivePaymentMethod,
-      total,
+      total: baseTotal,
+      feeMode: orderFeeMode,
     });
 
     if (
@@ -272,15 +281,20 @@ export async function createOrderAction(input: CreateOrderInput) {
 
       const countryInfo = getCountryInfo(data.moMo.country)!;
 
+      const shopPlan = (["free", "pro", "business"].includes(shop.plan)
+        ? shop.plan
+        : "free") as SelliaPlan;
+
       const collectResult = await initOrderCollect({
         orderId: order.id,
         shopId: shop.id,
-        amount: total,
+        baseAmount: baseTotal,
         currency: countryInfo.currency,
         country: data.moMo.country,
         operator: data.moMo.operator,
         phoneNumber: normalizedPhone,
-        shopPlan: (shop.plan as "free" | "pro") || "free",
+        shopPlan,
+        feeMode: orderFeeMode,
       });
 
       if (!collectResult.ok) {
@@ -300,12 +314,17 @@ export async function createOrderAction(input: CreateOrderInput) {
 
       revalidatePath(`/shop/${shop.slug}`);
 
+      const refreshed = await db.order.findUnique({
+        where: { id: order.id },
+        select: { total: true },
+      });
+
       return {
         ok: true,
         order: {
           id: order.id,
           orderNumber: order.orderNumber,
-          total: order.total,
+          total: refreshed?.total ?? order.total,
           paymentMethod: order.paymentMethod,
           paymentStatus: PAYMENT_STATUS.AWAITING_CONFIRMATION,
           qrCode: order.qrCode,
@@ -315,6 +334,7 @@ export async function createOrderAction(input: CreateOrderInput) {
           cartevoTransactionId: collectResult.cartevoTransactionId,
           operatorCode: data.moMo.operator,
           country: data.moMo.country,
+          customerPays: collectResult.customerPays,
         },
       } as const;
     }

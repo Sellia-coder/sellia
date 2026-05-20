@@ -5,7 +5,11 @@
 import type { Prisma } from "@prisma/client";
 import { cartevoCollect } from "./client";
 import { CartevoError } from "./types";
-import { calculateSelliaCommission } from "./commission";
+import {
+  computeCollectFees,
+  type FeeMode,
+  type SelliaPlan,
+} from "./pricing";
 import { db } from "@/lib/db";
 import { safeLogger } from "@/lib/security/redact";
 import type { CartevoCountry, CartevoOperator, CartevoCurrency } from "./types";
@@ -14,12 +18,13 @@ import { PAYMENT_STATUS, ORDER_STATUS } from "./order-status";
 export interface InitOrderCollectInput {
   orderId: string;
   shopId: string;
-  amount: number;
+  baseAmount: number;
   currency: CartevoCurrency;
   country: CartevoCountry;
   operator: CartevoOperator;
   phoneNumber: string;
-  shopPlan: "free" | "pro";
+  shopPlan: SelliaPlan;
+  feeMode: FeeMode;
 }
 
 export interface InitOrderCollectResult {
@@ -27,6 +32,7 @@ export interface InitOrderCollectResult {
   cartevoTransactionId?: string;
   cartevoExternalId?: string;
   status?: string;
+  customerPays?: number;
   error?: string;
 }
 
@@ -36,26 +42,34 @@ export async function initOrderCollect(
   const {
     orderId,
     shopId,
-    amount,
+    baseAmount,
     currency,
     country,
     operator,
     phoneNumber,
     shopPlan,
+    feeMode,
   } = input;
 
-  const commission = calculateSelliaCommission(amount, shopPlan);
+  const fees = computeCollectFees({
+    baseAmount,
+    country,
+    operator,
+    shopPlan,
+    feeMode,
+  });
+
   safeLogger.info("Initiating Cartevo collect", {
     orderId,
     shopId,
-    amount,
+    baseAmount,
+    customerPays: fees.customerPays,
     currency,
     operator,
     country,
-    commission: {
-      rate: commission.commissionRate,
-      amount: commission.commissionAmount,
-    },
+    feeMode,
+    cartevoRate: fees.cartevoRate,
+    selliaRate: fees.selliaRate,
   });
 
   let cartevoResult;
@@ -64,7 +78,7 @@ export async function initOrderCollect(
       operator,
       country,
       phone_number: phoneNumber,
-      amount,
+      amount: fees.customerPays,
       currency,
       notify_url: process.env.CARTEVO_NOTIFY_URL,
     });
@@ -94,11 +108,15 @@ export async function initOrderCollect(
         cartevoExternalId: data.external_id,
         type: "COLLECT",
         status: "INITIATED",
-        amount,
+        amount: fees.customerPays,
         currency,
-        feeCartevo: 0,
-        feeSellia: commission.commissionAmount,
-        netAmount: commission.netAmount,
+        feeCartevo: fees.cartevoFee,
+        feeSellia: fees.selliaFee,
+        netAmount: fees.merchantReceives,
+        cartevoRate: fees.cartevoRate,
+        selliaRate: fees.selliaRate,
+        shopPlanAtTime: shopPlan,
+        feeMode,
         operator,
         country,
         phoneNumber,
@@ -108,8 +126,10 @@ export async function initOrderCollect(
           operator,
           country,
           phone_number: phoneNumber,
-          amount,
+          amount: fees.customerPays,
+          baseAmount,
           currency,
+          feeMode,
         } as Prisma.InputJsonValue,
         rawResponse: data as unknown as Prisma.InputJsonValue,
         initiatedAt: new Date(),
@@ -119,6 +139,7 @@ export async function initOrderCollect(
     await db.order.update({
       where: { id: orderId },
       data: {
+        total: Math.round(fees.customerPays),
         paymentStatus: PAYMENT_STATUS.AWAITING_CONFIRMATION,
         status: ORDER_STATUS.AWAITING_CONFIRMATION,
       },
@@ -128,6 +149,7 @@ export async function initOrderCollect(
       orderId,
       cartevoTxId: data.transaction_id,
       status: data.status,
+      customerPays: fees.customerPays,
     });
 
     return {
@@ -135,6 +157,7 @@ export async function initOrderCollect(
       cartevoTransactionId: cartevoTx.id,
       cartevoExternalId: data.external_id,
       status: data.status,
+      customerPays: fees.customerPays,
     };
   } catch (err) {
     safeLogger.error("Failed to persist CartevoTransaction", {

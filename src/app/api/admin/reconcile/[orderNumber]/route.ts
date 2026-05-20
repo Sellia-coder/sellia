@@ -11,6 +11,7 @@ import {
   computeRefundDeadline,
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
+import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
 
 export async function POST(
   _request: NextRequest,
@@ -102,6 +103,8 @@ export async function POST(
       safeLogger.info("Manual reconcile: order marked paid_escrow", {
         orderNumber: decoded,
       });
+
+      await trySendOrderConfirmationEmail(order.id);
 
       return NextResponse.json({
         ok: true,

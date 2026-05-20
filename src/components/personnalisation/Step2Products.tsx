@@ -46,6 +46,8 @@ const EMPTY_PRODUCT = (id: string): ProductEditInput => ({
   hasVariants: false,
   variantAxes: [],
   variants: [],
+  feeMode: "merchant_absorbs" as const,
+  codAvailable: false,
   included: true,
 });
 

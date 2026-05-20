@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
+import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
 import { db } from "@/lib/db";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/security/rate-limit";
 import {
@@ -270,6 +271,10 @@ export async function POST(request: NextRequest) {
       status: verified.status,
       orderNumber: cartevoTx.order?.orderNumber,
     });
+
+    if (verified.status === "SUCCESS" && cartevoTx.orderId) {
+      await trySendOrderConfirmationEmail(cartevoTx.orderId);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

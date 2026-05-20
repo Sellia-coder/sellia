@@ -1,12 +1,11 @@
 /**
  * Calcule la commission Sellia sur une transaction.
- * - Plan Free : 6% de commission
- * - Plan Pro : 4% de commission
- *
- * Les frais Cartevo ne sont PAS inclus ici (gérés séparément).
+ * Délègue aux taux G2.1.D : Free 3% / Pro 1.5% / Business 1%.
  */
 
-export type SelliaPlan = "free" | "pro";
+import { getSelliaRate, type SelliaPlan } from "./pricing";
+
+export type { SelliaPlan } from "./pricing";
 
 export interface CommissionBreakdown {
   grossAmount: number;
@@ -19,7 +18,8 @@ export function calculateSelliaCommission(
   grossAmount: number,
   plan: SelliaPlan
 ): CommissionBreakdown {
-  const rate = plan === "pro" ? 0.04 : 0.06;
+  const ratePercent = getSelliaRate(plan);
+  const rate = ratePercent / 100;
   const commission = Math.round(grossAmount * rate * 100) / 100;
   const net = grossAmount - commission;
 

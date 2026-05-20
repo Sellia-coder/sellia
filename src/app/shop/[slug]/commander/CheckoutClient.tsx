@@ -51,6 +51,11 @@ import {
   normalizePhoneNumber,
 } from "@/lib/cartevo/operators-catalog";
 import type { CartevoOperator, CartevoCountry } from "@/lib/cartevo/types";
+import {
+  computeCollectFees,
+  type FeeMode,
+  type SelliaPlan,
+} from "@/lib/cartevo/pricing";
 import styles from "./checkout.module.css";
 
 function currencyLabel(c: string | null | undefined): string {
@@ -179,8 +184,39 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     hasPhysicalLines && selectedZone ? selectedZone.price : 0;
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total =
+  const baseTotal =
     subtotal + (hasPhysicalLines && selectedZone ? shippingPrice : 0);
+
+  const cartFeeMode = (() => {
+    const firstId = items[0]?.productId;
+    const p = shop.products.find((pr) => pr.id === firstId);
+    return (p?.feeMode ?? "merchant_absorbs") as FeeMode;
+  })();
+
+  const shopPlan = (["free", "pro", "business"].includes(shop.plan)
+    ? shop.plan
+    : "free") as SelliaPlan;
+
+  const collectFeesPreview =
+    formData.paymentMethod === "online_escrow" &&
+    momoCountry &&
+    momoOperator
+      ? (() => {
+          try {
+            return computeCollectFees({
+              baseAmount: baseTotal,
+              country: momoCountry,
+              operator: momoOperator,
+              shopPlan,
+              feeMode: cartFeeMode,
+            });
+          } catch {
+            return null;
+          }
+        })()
+      : null;
+
+  const total = collectFeesPreview?.customerPays ?? baseTotal;
 
   const steps = [
     { id: 1, label: "Panier", Icon: ShoppingBag },
@@ -831,7 +867,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                   />
                   <h2 className={styles.formTitle}>
                     {paymentWasEscrow
-                      ? "Paiement confirmé — fonds en escrow"
+                      ? "Paiement confirmé"
                       : "Commande enregistrée"}
                   </h2>
                   <p>
@@ -988,10 +1024,26 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                   </span>
                 </div>
 
+                {collectFeesPreview && collectFeesPreview.totalFeesAdded > 0 && (
+                  <div className={styles.feesRecap}>
+                    <div className={styles.feesRow}>
+                      <span>Sous-total</span>
+                      <span>{baseTotal.toLocaleString("fr-FR")} {cur}</span>
+                    </div>
+                    <div className={styles.feesRow}>
+                      <span>Frais opérateur Mobile Money</span>
+                      <span>
+                        +{collectFeesPreview.totalFeesAdded.toLocaleString("fr-FR")}{" "}
+                        {cur}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className={styles.summaryDivider} />
 
                 <div className={styles.summaryTotal}>
-                  <span>Total</span>
+                  <span>{collectFeesPreview ? "À payer" : "Total"}</span>
                   <span
                     className={styles.summaryTotalAmount}
                     style={{ color: primaryColor }}
@@ -999,6 +1051,12 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                     {total.toLocaleString("fr-FR")} {cur}
                   </span>
                 </div>
+
+                {collectFeesPreview?.totalFeesAdded === 0 && (
+                  <div className={styles.feesNote}>
+                    Aucun frais pour vous — pris en charge par le marchand.
+                  </div>
+                )}
 
                 <div className={styles.summaryTrust}>
                   <div className={styles.summaryTrustItem}>

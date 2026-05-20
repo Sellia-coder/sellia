@@ -1805,12 +1805,32 @@ footer{
 
 .pricing-v2-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  max-width: 920px;
+  max-width: 1200px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
+}
+
+.pricing-v2-details-link {
+  text-align: center;
+  margin: 28px auto 0;
+  max-width: 1200px;
+  position: relative;
+  z-index: 1;
+}
+
+.pricing-v2-details-link a {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ember, #E84B1F);
+  text-decoration: none;
+}
+
+.pricing-v2-details-link a:hover {
+  text-decoration: underline;
 }
 
 .pricing-v2-card {
@@ -2211,6 +2231,7 @@ footer{
 @media (max-width: 768px) {
   .pricing-v2-header { margin-bottom: 36px; }
   .pricing-v2-grid { grid-template-columns: 1fr; gap: 32px; max-width: 480px; }
+  .pricing-v2-details-link { margin-top: 20px; }
   .pricing-v2-card { padding: 28px 24px; }
   .pricing-v2-card-featured { margin-top: 14px; }
   .pricing-v2-price-amount { font-size: 40px; }

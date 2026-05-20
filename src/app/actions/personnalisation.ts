@@ -277,6 +277,8 @@ export async function publishShopAction(input: PublishShopInput) {
                     })),
                   }
                 : undefined,
+              feeMode: p.feeMode ?? "merchant_absorbs",
+              codAvailable: p.codAvailable ?? false,
               status: "active",
               position: i,
             },

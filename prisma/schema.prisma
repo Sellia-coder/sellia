@@ -93,9 +93,19 @@ model Shop {
   // Status
   isPublished    Boolean  @default(false)
   status         String   @default("SETUP") // SETUP, ACTIVE, MAINTENANCE
-  plan           String   @default("free") // free, pro
+  plan           String   @default("free") // free, pro, business
   planActivatedAt DateTime?
   planExpiresAt   DateTime?
+  proSince             DateTime? @map("pro_since")
+  businessSince        DateTime? @map("business_since")
+  planRenewalAt        DateTime? @map("plan_renewal_at")
+
+  cartevoPayinBalance     Decimal?  @map("cartevo_payin_balance") @db.Decimal(15, 2)
+  cartevoPayoutBalance    Decimal?  @map("cartevo_payout_balance") @db.Decimal(15, 2)
+  cartevoBalanceUpdatedAt DateTime? @map("cartevo_balance_updated_at")
+
+  codEnabled              Boolean   @default(false) @map("cod_enabled")
+  codCommissionRate       Float     @default(0) @map("cod_commission_rate")
   currency       String   @default("XAF")
   views          Int      @default(0)
   publishedAt    DateTime?
@@ -167,6 +177,9 @@ model Product {
   hasVariants   Boolean  @default(false)
   variantAxes   Json?    // [{ name, values, swatches? }]
   variants      ProductVariant[]
+
+  feeMode              String   @default("merchant_absorbs") @map("fee_mode")
+  codAvailable         Boolean  @default(false) @map("cod_available")
 
   // Statut
   status      String   @default("active")
@@ -343,6 +356,10 @@ model Order {
   refundedAt        DateTime?
   refundDeadline    DateTime?
 
+  notifiedAt           DateTime? @map("notified_at")
+  notifiedAdminAt      DateTime? @map("notified_admin_at")
+  feeMode              String    @default("merchant_absorbs") @map("fee_mode")
+
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   confirmedAt       DateTime?
@@ -377,7 +394,11 @@ model CartevoTransaction {
   currency          String
   feeCartevo        Decimal  @default(0) @db.Decimal(14, 2) @map("fee_cartevo")
   feeSellia         Decimal  @default(0) @db.Decimal(14, 2) @map("fee_sellia")
-  netAmount         Decimal  @db.Decimal(14, 2) @map("net_amount")
+  netAmount         Decimal  @default(0) @db.Decimal(14, 2) @map("net_amount")
+  cartevoRate       Float    @default(0) @map("cartevo_rate")
+  selliaRate        Float    @default(0) @map("sellia_rate")
+  shopPlanAtTime    String   @default("free") @map("shop_plan_at_time")
+  feeMode           String   @default("merchant_absorbs") @map("fee_mode_snapshot")
 
   operator          String
   country           String

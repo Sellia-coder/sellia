@@ -11,6 +11,7 @@ import {
   computeRefundDeadline,
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
+import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
 import {
   computeNextRetryAt,
   WEBHOOK_ERROR_STATUS,
@@ -94,6 +95,9 @@ export async function GET(request: NextRequest) {
           cartevoTxId: tx.cartevoTxId,
           orderNumber: tx.order?.orderNumber,
         });
+        if (tx.orderId) {
+          await trySendOrderConfirmationEmail(tx.orderId);
+        }
       } else if (
         verified.status === "FAILED" ||
         verified.status === "CANCELLED"
@@ -227,6 +231,9 @@ export async function GET(request: NextRequest) {
           });
         });
         stats.successCount++;
+        if (localTx.orderId) {
+          await trySendOrderConfirmationEmail(localTx.orderId);
+        }
       } else if (
         verified.status === "FAILED" ||
         verified.status === "CANCELLED"

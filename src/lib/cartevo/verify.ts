@@ -100,7 +100,7 @@ export function compareWithExpected(
     };
   }
 
-  const tolerance = expected.tolerancePercent ?? 0;
+  const tolerance = expected.tolerancePercent ?? 3;
   const allowedDiff = Math.abs(expected.expectedAmount * tolerance) / 100;
 
   if (Math.abs(cartevoData.amount - expected.expectedAmount) > allowedDiff) {

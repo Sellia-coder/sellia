@@ -1273,3 +1273,41 @@
     font-size: 12.5px;
   }
 }
+
+.feesRecap {
+  background: #fafaf7;
+  border: 1px solid #ece9e2;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 12px 0;
+}
+
+.feesRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #6b6e76;
+  padding: 3px 0;
+}
+
+.feesRowTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0a0e13;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #ece9e2;
+}
+
+.feesNote {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #15803d;
+  text-align: left;
+}

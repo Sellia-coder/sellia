@@ -103,9 +103,51 @@ export async function cartevoGetBalance(): Promise<CartevoBalanceResponse> {
   return cartevoFetch<CartevoBalanceResponse>("/payment/balance");
 }
 
+export interface CartevoBalanceData {
+  currency: string;
+  country: string;
+  payin: number;
+  payout: number;
+}
+
+/**
+ * Lit payin_balance et payout_balance (pas `balance` qui vaut 0 sur wallets XAF/XOF).
+ */
+export async function cartevoGetWalletBalance(params: {
+  country: string;
+  currency: string;
+}): Promise<CartevoBalanceData> {
+  const json = await cartevoFetch<{
+    success?: boolean;
+    data?: { balances?: Array<Record<string, unknown>> };
+  }>("/payment/balance");
+
+  const balances = json?.data?.balances ?? [];
+  const match = balances.find(
+    (b) => b.country === params.country && b.currency === params.currency
+  );
+
+  if (!match) {
+    return {
+      currency: params.currency,
+      country: params.country,
+      payin: 0,
+      payout: 0,
+    };
+  }
+
+  return {
+    currency: String(match.currency ?? params.currency),
+    country: String(match.country ?? params.country),
+    payin: Number(match.payin_balance ?? 0),
+    payout: Number(match.payout_balance ?? 0),
+  };
+}
+
 export const cartevoClient = {
   collect: cartevoCollect,
   payout: cartevoPayout,
   getStatus: cartevoGetTransactionStatus,
   getBalance: cartevoGetBalance,
+  getWalletBalance: cartevoGetWalletBalance,
 };

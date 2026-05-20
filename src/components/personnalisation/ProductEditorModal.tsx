@@ -634,6 +634,89 @@ export default function ProductEditorModal({
             </div>
           </div>
 
+          <div className="perso-form-section">
+            <h3 className="perso-form-section-title">Frais de paiement</h3>
+            <p className="perso-form-help" style={{ marginBottom: 12 }}>
+              Qui paie les frais Mobile Money lors du checkout ?
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 8,
+              }}
+            >
+              {[
+                {
+                  value: "merchant_absorbs" as const,
+                  label: "J'absorbe",
+                  hint: "Prix affiché pour le client",
+                },
+                {
+                  value: "customer_pays" as const,
+                  label: "Le client paie",
+                  hint: "Frais ajoutés au prix",
+                },
+                {
+                  value: "split_50_50" as const,
+                  label: "50/50",
+                  hint: "Partagés équitablement",
+                },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => update("feeMode", opt.value)}
+                  style={{
+                    padding: 12,
+                    textAlign: "left",
+                    borderRadius: 10,
+                    border:
+                      (draft.feeMode ?? "merchant_absorbs") === opt.value
+                        ? "1.5px solid #E84B1F"
+                        : "1px solid #ECE9E2",
+                    background:
+                      (draft.feeMode ?? "merchant_absorbs") === opt.value
+                        ? "#FFFCFB"
+                        : "#FFFFFF",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{opt.label}</div>
+                  <div style={{ fontSize: 11, color: "#6B6E76", marginTop: 4 }}>
+                    {opt.hint}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="perso-form-section">
+            <label
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={draft.codAvailable ?? false}
+                onChange={(e) => update("codAvailable", e.target.checked)}
+                style={{ marginTop: 2 }}
+              />
+              <span>
+                <strong style={{ display: "block", fontSize: 13.5 }}>
+                  Paiement à la livraison
+                </strong>
+                <span style={{ fontSize: 11.5, color: "#6B6E76" }}>
+                  Le client peut commander sans payer en ligne.
+                </span>
+              </span>
+            </label>
+          </div>
+
           {error && <div className="perso-alert-error perso-alert-error-inline">{error}</div>}
         </div>
 

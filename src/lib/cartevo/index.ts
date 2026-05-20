@@ -48,8 +48,6 @@ export {
   type ShopBalance,
 } from "./commission";
 
-export type { SelliaPlan } from "./commission";
-
 export {
   cartevoOperatorSchema,
   cartevoCountrySchema,
@@ -83,6 +81,30 @@ export {
   MAX_RETRY_COUNT,
   WEBHOOK_ERROR_STATUS,
 } from "./webhook-retry";
+
+export {
+  CARTEVO_FEES,
+  SELLIA_PLANS,
+  FEE_MODE_LABELS,
+  COUNTRY_LABELS,
+  getCartevoPayinRate,
+  getCartevoPayoutRate,
+  getSelliaRate,
+  computeCollectFees,
+  computePayoutFees,
+  projectedPayoutAmount,
+  getSupportedCountries,
+  type CartevoCountryCode,
+  type Currency,
+  type SelliaPlan,
+  type SelliaPlanConfig,
+  type FeeMode,
+  type FeeBreakdown,
+  type PayoutBreakdown,
+} from "./pricing";
+
+export { syncShopCartevoBalance } from "./sync-balance";
+export { cartevoGetWalletBalance, type CartevoBalanceData } from "./client";
 
 export {
   ORDER_STATUS,
