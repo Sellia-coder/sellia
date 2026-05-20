@@ -14,6 +14,7 @@ import { db } from "@/lib/db";
 import { safeLogger } from "@/lib/security/redact";
 import type { CartevoCountry, CartevoOperator, CartevoCurrency } from "./types";
 import { PAYMENT_STATUS, ORDER_STATUS } from "./order-status";
+import { snapshotPayinBalance } from "./balance-delta";
 
 export interface InitOrderCollectInput {
   orderId: string;
@@ -72,6 +73,11 @@ export async function initOrderCollect(
     selliaRate: fees.selliaRate,
   });
 
+  const payinBalanceBefore = await snapshotPayinBalance({
+    country,
+    currency,
+  });
+
   let cartevoResult;
   try {
     cartevoResult = await cartevoCollect({
@@ -122,6 +128,8 @@ export async function initOrderCollect(
         phoneNumber,
         shopId,
         orderId,
+        payinBalanceBefore,
+        balanceMatchAttempts: 0,
         rawRequest: {
           operator,
           country,

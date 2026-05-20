@@ -937,7 +937,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                       </>
                     ) : (
                       <>
-                        Procéder au paiement
+                        Payer {total.toLocaleString("fr-FR")} {cur}
                         <ArrowRight size={16} strokeWidth={2.4} />
                       </>
                     )}

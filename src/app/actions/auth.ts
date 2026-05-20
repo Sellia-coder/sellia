@@ -145,7 +145,24 @@ export async function verifyOTPAction(formData: FormData) {
     }
   }
 
-  return { success: true };
+  if (tokenType === "EMAIL_VERIFICATION") {
+    const publishedShop = await db.shop.findFirst({
+      where: {
+        ownerId: user.id,
+        OR: [{ status: "published" }, { isPublished: true }],
+      },
+      select: { id: true },
+    });
+
+    return {
+      success: true,
+      redirectTo: publishedShop
+        ? "/dashboard"
+        : "/personnaliser-ma-boutique",
+    };
+  }
+
+  return { success: true, redirectTo: "/dashboard" };
 }
 
 // ============================================

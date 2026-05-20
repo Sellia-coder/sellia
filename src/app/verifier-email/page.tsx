@@ -17,6 +17,7 @@ function VerifierEmailContent() {
 
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resendCount, setResendCount] = useState(0);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -110,7 +111,13 @@ function VerifierEmailContent() {
     const result = await verifyOTPAction(formData);
 
     if (result.success) {
-      router.push("/dashboard");
+      const redirectTo =
+        "redirectTo" in result && result.redirectTo
+          ? result.redirectTo
+          : "/personnaliser-ma-boutique";
+      setTransitioning(true);
+      await new Promise((r) => setTimeout(r, 600));
+      router.push(redirectTo);
     } else {
       setError(result.error || "Code invalide.");
       setIsVerifying(false);
@@ -365,6 +372,23 @@ function VerifierEmailContent() {
           <Link href="/cookies">Cookies</Link>
         </div>
       </main>
+
+      {transitioning && (
+        <div className="auth-transition-overlay" role="status" aria-live="polite">
+          <div className="auth-transition-content">
+            <div className="auth-transition-logo">SELLIA</div>
+            <div className="auth-transition-title">Préparation de votre boutique</div>
+            <div className="auth-transition-subtitle">
+              Un instant, nous configurons votre espace...
+            </div>
+            <div className="auth-transition-spinner">
+              <span className="auth-transition-dot" />
+              <span className="auth-transition-dot" />
+              <span className="auth-transition-dot" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

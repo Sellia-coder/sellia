@@ -41,19 +41,94 @@ export default function PaymentPendingPolling({
 }: Props) {
   const [pollCount, setPollCount] = useState(0);
   const [isManualChecking, setIsManualChecking] = useState(false);
+  const [forcedAggressive, setForcedAggressive] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackKind>("idle");
   const [feedbackText, setFeedbackText] = useState<string | null>(null);
   const cancelledRef = useRef(false);
-  const aggressiveRef = useRef(false);
-  const aggressivePollsRef = useRef(0);
+  const aggressiveUntilRef = useRef(0);
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const operator = getOperatorInfo(countryCode, operatorCode);
   const operatorName = operator?.name ?? "Mobile Money";
   const ussd = operator?.ussd;
 
+  const showFeedback = useCallback(
+    (
+      kind: "info" | "warning" | "success" | "error",
+      text: string,
+      durationMs = 6000
+    ) => {
+      if (feedbackTimeoutRef.current) {
+        clearTimeout(feedbackTimeoutRef.current);
+        feedbackTimeoutRef.current = null;
+      }
+      const mapped: FeedbackKind =
+        kind === "success"
+          ? "success"
+          : kind === "error"
+            ? "failed"
+            : kind === "info"
+              ? "checking"
+              : "pending";
+      setFeedback(mapped);
+      setFeedbackText(text);
+      if (durationMs > 0) {
+        feedbackTimeoutRef.current = setTimeout(() => {
+          setFeedback((f) => (f === mapped ? "pending" : f));
+          if (mapped !== "success" && mapped !== "failed") {
+            setFeedbackText(
+              "Nous vérifions automatiquement votre paiement Mobile Money."
+            );
+          }
+        }, durationMs);
+      }
+    },
+    []
+  );
+
+  const performBalanceMatch = useCallback(async (): Promise<
+    "success" | "failed" | "pending"
+  > => {
+    try {
+      const res = await fetch(
+        `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/balance-match`,
+        { method: "POST", cache: "no-store" }
+      );
+      if (!res.ok) return "pending";
+      const data = await res.json();
+      if (data.matched && data.new_payment_status === "paid_escrow") {
+        return "success";
+      }
+      if (
+        data.already_finalized &&
+        data.new_payment_status === "paid_escrow"
+      ) {
+        return "success";
+      }
+      if (
+        data.already_finalized &&
+        (data.new_payment_status === "failed" ||
+          data.new_payment_status === "cancelled")
+      ) {
+        return "failed";
+      }
+    } catch {
+      // fallback status passif
+    }
+    return "pending";
+  }, [shopSlug, orderNumber]);
+
   const performPoll = useCallback(async (): Promise<
     "success" | "failed" | "pending"
   > => {
+    const aggressive =
+      forcedAggressive || Date.now() < aggressiveUntilRef.current;
+
+    if (aggressive) {
+      const balanceResult = await performBalanceMatch();
+      if (balanceResult !== "pending") return balanceResult;
+    }
+
     const res = await fetch(
       `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/status`,
       { cache: "no-store" }
@@ -65,25 +140,79 @@ export default function PaymentPendingPolling({
       return "failed";
     }
     return "pending";
-  }, [shopSlug, orderNumber]);
+  }, [shopSlug, orderNumber, forcedAggressive, performBalanceMatch]);
 
-  const runReconcile = useCallback(async (): Promise<
-    "success" | "failed" | "pending"
-  > => {
-    const reconcileRes = await fetch(
-      `/api/admin/reconcile/${encodeURIComponent(orderNumber)}`,
-      { method: "POST", cache: "no-store" }
-    );
-    if (!reconcileRes.ok) return "pending";
-    const data = await reconcileRes.json();
-    if (data.reconciled && data.new_payment_status === "paid_escrow") {
-      return "success";
+  const handleManualCheck = async () => {
+    if (isManualChecking || cancelledRef.current) return;
+    setIsManualChecking(true);
+    showFeedback("info", "Vérification en cours auprès de l'opérateur...");
+
+    try {
+      const res = await fetch(
+        `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/balance-match`,
+        { method: "POST", cache: "no-store" }
+      );
+
+      if (cancelledRef.current) return;
+
+      if (!res.ok) {
+        showFeedback(
+          "warning",
+          "Vérification difficile pour l'instant. Nous continuons automatiquement.",
+          8000
+        );
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.matched && data.new_payment_status === "paid_escrow") {
+        showFeedback("success", "Paiement confirmé ! Redirection...");
+        cancelledRef.current = true;
+        setTimeout(() => onSuccess(), 800);
+        return;
+      }
+
+      if (
+        data.already_finalized &&
+        data.new_payment_status === "paid_escrow"
+      ) {
+        showFeedback("success", "Paiement déjà confirmé ! Redirection...");
+        cancelledRef.current = true;
+        setTimeout(() => onSuccess(), 800);
+        return;
+      }
+
+      if (
+        data.already_finalized &&
+        (data.new_payment_status === "failed" ||
+          data.new_payment_status === "cancelled")
+      ) {
+        showFeedback("error", "Le paiement n'a pas abouti.");
+        cancelledRef.current = true;
+        setTimeout(() => onFailed("Paiement non abouti"), 1500);
+        return;
+      }
+
+      showFeedback(
+        "info",
+        "Votre paiement est en cours de traitement. Nous vérifions automatiquement toutes les 2 secondes.",
+        0
+      );
+      aggressiveUntilRef.current = Date.now() + 60_000;
+      setForcedAggressive(true);
+    } catch {
+      if (!cancelledRef.current) {
+        showFeedback(
+          "warning",
+          "Problème réseau. Nous continuons en arrière-plan.",
+          6000
+        );
+      }
+    } finally {
+      setIsManualChecking(false);
     }
-    if (data.reconciled && data.new_payment_status === "failed") {
-      return "failed";
-    }
-    return "pending";
-  }, [orderNumber]);
+  };
 
   useEffect(() => {
     cancelledRef.current = false;
@@ -109,6 +238,11 @@ export default function PaymentPendingPolling({
           return;
         }
         setFeedback((f) => (f === "idle" ? "pending" : f));
+        if (!feedbackText) {
+          setFeedbackText(
+            "Nous vérifions automatiquement votre paiement Mobile Money."
+          );
+        }
       } catch {
         // retry on network error
       }
@@ -116,15 +250,14 @@ export default function PaymentPendingPolling({
       currentCount += 1;
       setPollCount(currentCount);
 
-      if (aggressiveRef.current) {
-        aggressivePollsRef.current += 1;
-        if (aggressivePollsRef.current >= 15) {
-          aggressiveRef.current = false;
-        }
+      const aggressive =
+        forcedAggressive || Date.now() < aggressiveUntilRef.current;
+      if (Date.now() >= aggressiveUntilRef.current && forcedAggressive) {
+        setForcedAggressive(false);
       }
 
       if (!cancelledRef.current) {
-        const delay = getNextDelayMs(currentCount, aggressiveRef.current);
+        const delay = getNextDelayMs(currentCount, aggressive);
         timeoutId = setTimeout(loop, delay);
       }
     };
@@ -134,55 +267,9 @@ export default function PaymentPendingPolling({
     return () => {
       cancelledRef.current = true;
       if (timeoutId) clearTimeout(timeoutId);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
-  }, [performPoll, onSuccess, onFailed]);
-
-  const handleManualCheck = async () => {
-    if (isManualChecking || cancelledRef.current) return;
-    setIsManualChecking(true);
-    setFeedback("checking");
-    setFeedbackText("Vérification en cours auprès de l'opérateur…");
-    aggressiveRef.current = true;
-    aggressivePollsRef.current = 0;
-
-    try {
-      const reconcileResult = await runReconcile();
-      if (cancelledRef.current) return;
-
-      if (reconcileResult === "success") {
-        cancelledRef.current = true;
-        setFeedback("success");
-        setFeedbackText("Paiement confirmé !");
-        onSuccess();
-        return;
-      }
-      if (reconcileResult === "failed") {
-        cancelledRef.current = true;
-        setFeedback("failed");
-        onFailed("Le paiement a échoué.");
-        return;
-      }
-
-      const pollResult = await performPoll();
-      if (pollResult === "success") {
-        cancelledRef.current = true;
-        setFeedback("success");
-        setFeedbackText("Paiement confirmé !");
-        onSuccess();
-        return;
-      }
-
-      setFeedback("pending");
-      setFeedbackText(
-        "Pas encore confirmé côté opérateur. Nous vérifions toutes les 2 secondes pendant 30 secondes."
-      );
-    } catch {
-      setFeedback("pending");
-      setFeedbackText("Erreur réseau. Nouvelle tentative automatique…");
-    } finally {
-      setIsManualChecking(false);
-    }
-  };
+  }, [performPoll, onSuccess, onFailed, forcedAggressive]);
 
   const handleCancelClick = () => {
     if (cancelledRef.current) return;

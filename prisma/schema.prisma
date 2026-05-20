@@ -414,6 +414,13 @@ model CartevoTransaction {
   errorMessage      String?  @map("error_message") @db.Text
   rawRequest        Json?    @map("raw_request")
   rawResponse       Json?    @map("raw_response")
+
+  payinBalanceBefore   Decimal?  @map("payin_balance_before") @db.Decimal(15, 2)
+  payinBalanceAfter    Decimal?  @map("payin_balance_after") @db.Decimal(15, 2)
+  balanceMatchedAt     DateTime? @map("balance_matched_at")
+  balanceMatchAttempts Int       @default(0) @map("balance_match_attempts")
+  balanceMatchSource   String?   @map("balance_match_source")
+
   initiatedAt       DateTime @default(now()) @map("initiated_at")
   completedAt       DateTime? @map("completed_at")
   createdAt         DateTime @default(now()) @map("created_at")
