@@ -142,7 +142,7 @@ export default function MotDePasseOublie() {
                         setEmail(e.target.value);
                         if (error) setError("");
                       }}
-                      placeholder="vous@entreprise.com"
+                      placeholder="Adresse email"
                       autoComplete="email"
                       autoFocus
                     />

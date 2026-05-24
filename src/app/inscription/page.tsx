@@ -359,7 +359,7 @@ function InscriptionContent() {
                     setEmail(e.target.value);
                     if (errors.email) setErrors({ ...errors, email: "" });
                   }}
-                  placeholder="vous@entreprise.com"
+                  placeholder="Adresse email"
                   autoComplete="email"
                 />
                 {isValidEmail && (

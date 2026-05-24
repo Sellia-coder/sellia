@@ -10,6 +10,7 @@ import {
 } from "@/lib/cart";
 import { getProductRating, getRatingAriaLabel } from "@/lib/utils/product-rating";
 import { useCartContext } from "./CartProvider";
+import ProductImagePlaceholder from "./ProductImagePlaceholder";
 import styles from "./ProductCard.module.css";
 
 export interface ProductCardProduct {
@@ -162,9 +163,7 @@ export default function ProductCard({
               className={styles.image}
             />
           ) : (
-            <div className={styles.placeholder}>
-              <span>{product.name.charAt(0).toUpperCase()}</span>
-            </div>
+            <ProductImagePlaceholder productName={product.name} size="md" />
           )}
         </div>
       </div>

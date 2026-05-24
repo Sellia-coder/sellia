@@ -232,11 +232,22 @@ export const step4Schema = z.object({
 export const appearanceBackgroundSchema = z.enum(["ivory", "white", "cream"]);
 export const appearanceFontSchema = z.enum(["classic", "modern", "editorial"]);
 
+export const heroTemplateSchema = z.enum([
+  "jewelry",
+  "tech",
+  "beauty",
+  "food",
+  "home",
+  "universal",
+]);
+
 export const stepAppearanceSchema = z.object({
   primaryColor: z.string().min(4).max(32),
   accentColor: z.string().min(4).max(32),
   backgroundStyle: appearanceBackgroundSchema,
   fontStyle: appearanceFontSchema,
+  heroTemplate: heroTemplateSchema.default("universal"),
+  heroImageUrl: z.string().max(500).nullable().optional(),
 });
 
 export type StepAppearanceInput = z.infer<typeof stepAppearanceSchema>;

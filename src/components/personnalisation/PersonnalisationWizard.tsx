@@ -143,6 +143,8 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
     accentColor: draft.accentColor ?? "#0A0E13",
     backgroundStyle: draft.backgroundStyle ?? "ivory",
     fontStyle: draft.fontStyle ?? "classic",
+    heroTemplate: "universal",
+    heroImageUrl: null,
   });
   const [step2, setStep2] = useState<Step2Input>({ products: initialProducts });
   const [step3, setStep3] = useState<Step3Input>({

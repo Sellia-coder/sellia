@@ -227,6 +227,74 @@
   font-family: "Geist Mono", monospace;
 }
 
+.redirectOverlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #fafaf7 0%, #f5f2ec 100%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.redirectContent {
+  text-align: center;
+  max-width: 400px;
+}
+
+.redirectSuccess {
+  margin-bottom: 24px;
+  animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.redirectCheck {
+  animation: drawCheck 0.6s ease-out 0.3s both;
+}
+
+@keyframes drawCheck {
+  from {
+    stroke-dasharray: 0 200;
+  }
+  to {
+    stroke-dasharray: 200 0;
+  }
+}
+
+.redirectTitle {
+  font-family: "Fraunces", serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: #0a0e13;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.redirectSubtitle {
+  font-size: 14.5px;
+  color: #6b6e76;
+}
+
 @media (max-width: 640px) {
   .card {
     padding: 36px 24px;

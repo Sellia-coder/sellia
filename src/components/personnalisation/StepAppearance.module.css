@@ -392,6 +392,220 @@
   cursor: pointer;
 }
 
+.heroSourceSection {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.heroSourceLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a0e13;
+  margin-bottom: 4px;
+}
+
+.heroSourceLabelHint {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: #6b6e76;
+  margin-top: 2px;
+}
+
+.heroSourceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.heroSourceCard,
+.heroSourceCardStatic {
+  padding: 20px 16px;
+  background: #ffffff;
+  border: 1.5px solid #ece9e2;
+  border-radius: 14px;
+  text-align: left;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.heroSourceCard {
+  cursor: pointer;
+}
+
+.heroSourceCard:hover:not(:disabled) {
+  border-color: #c5c2bc;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(10, 14, 19, 0.06);
+}
+
+.heroSourceCard:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.heroSourceCardStatic {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.heroSourceIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.heroSourceTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a0e13;
+  line-height: 1.3;
+}
+
+.heroSourceDesc {
+  font-size: 11.5px;
+  color: #6b6e76;
+  line-height: 1.4;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.heroError {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: #991b1b;
+}
+
+.heroPreview {
+  margin-top: 16px;
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #ece9e2;
+}
+
+.heroPreview img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.heroRemove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.heroRemove:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.heroTemplateSection {
+  margin-top: 8px;
+}
+
+.heroTemplateLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a0e13;
+  margin-bottom: 4px;
+}
+
+.heroTemplateLabelHint {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: #6b6e76;
+  margin-top: 2px;
+}
+
+.heroTemplateGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.heroTemplateCard {
+  padding: 0;
+  background: #ffffff;
+  border: 2px solid #ece9e2;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: left;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.heroTemplateCard:hover {
+  border-color: #c5c2bc;
+  transform: translateY(-2px);
+}
+
+.heroTemplateCardActive {
+  border-color: #e84b1f;
+  box-shadow: 0 4px 12px rgba(232, 75, 31, 0.15);
+}
+
+.heroTemplatePreview {
+  width: 100%;
+  height: 60px;
+  background-size: cover;
+}
+
+.heroTemplateInfo {
+  padding: 10px 12px;
+}
+
+.heroTemplateName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a0e13;
+  margin-bottom: 2px;
+}
+
+.heroTemplateDesc {
+  font-size: 11px;
+  color: #8a8d95;
+}
+
 @media (max-width: 700px) {
   .paletteGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -401,6 +615,12 @@
   }
   .bgGrid,
   .fontGrid {
+    grid-template-columns: 1fr;
+  }
+  .heroTemplateGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .heroSourceGrid {
     grid-template-columns: 1fr;
   }
 }

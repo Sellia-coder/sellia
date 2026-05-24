@@ -77,6 +77,11 @@ model Shop {
   logoUrl         String?
   faviconUrl      String?
   ogImageUrl      String?
+  heroTemplate    String?  @default("universal") @map("hero_template")
+  heroImageUrl    String?  @map("hero_image_url") @db.Text
+  heroImageGeneratedAt DateTime? @map("hero_image_generated_at")
+  heroImageGenerations Int       @default(0) @map("hero_image_generations")
+  heroImagePrompt      String?   @map("hero_image_prompt") @db.Text
 
   // SEO
   seoTitle       String?

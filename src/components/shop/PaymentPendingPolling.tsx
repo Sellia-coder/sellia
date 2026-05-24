@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { X, RotateCw, CheckCircle } from "lucide-react";
 import styles from "./payment-pending.module.css";
 import { getOperatorInfo } from "@/lib/cartevo/operators-catalog";
@@ -13,6 +14,8 @@ interface Props {
   total: number;
   currency: string;
   primaryColor?: string;
+  /** Si false, reste sur la page et refresh (ex. page commande premium). */
+  autoRedirect?: boolean;
   onSuccess: () => void;
   onFailed: (reason: string) => void;
   onCancel: () => void;
@@ -35,10 +38,13 @@ export default function PaymentPendingPolling({
   total,
   currency,
   primaryColor = "#E84B1F",
+  autoRedirect = true,
   onSuccess,
   onFailed,
   onCancel,
 }: Props) {
+  const router = useRouter();
+  const [redirecting, setRedirecting] = useState(false);
   const [pollCount, setPollCount] = useState(0);
   const [isManualChecking, setIsManualChecking] = useState(false);
   const [forcedAggressive, setForcedAggressive] = useState(false);
@@ -51,6 +57,24 @@ export default function PaymentPendingPolling({
   const operator = getOperatorInfo(countryCode, operatorCode);
   const operatorName = operator?.name ?? "Mobile Money";
   const ussd = operator?.ussd;
+
+  const completeSuccess = useCallback(() => {
+    cancelledRef.current = true;
+    setFeedback("success");
+    setFeedbackText("Paiement confirmé ! Redirection...");
+    setRedirecting(true);
+    onSuccess();
+    setTimeout(() => {
+      if (autoRedirect) {
+        router.push(
+          `/shop/${shopSlug}/commande/${encodeURIComponent(orderNumber)}`
+        );
+      } else {
+        router.refresh();
+        setRedirecting(false);
+      }
+    }, 800);
+  }, [autoRedirect, onSuccess, orderNumber, router, shopSlug]);
 
   const showFeedback = useCallback(
     (
@@ -167,9 +191,7 @@ export default function PaymentPendingPolling({
       const data = await res.json();
 
       if (data.matched && data.new_payment_status === "paid_escrow") {
-        showFeedback("success", "Paiement confirmé ! Redirection...");
-        cancelledRef.current = true;
-        setTimeout(() => onSuccess(), 800);
+        completeSuccess();
         return;
       }
 
@@ -177,9 +199,7 @@ export default function PaymentPendingPolling({
         data.already_finalized &&
         data.new_payment_status === "paid_escrow"
       ) {
-        showFeedback("success", "Paiement déjà confirmé ! Redirection...");
-        cancelledRef.current = true;
-        setTimeout(() => onSuccess(), 800);
+        completeSuccess();
         return;
       }
 
@@ -225,10 +245,7 @@ export default function PaymentPendingPolling({
         const result = await performPoll();
         if (cancelledRef.current) return;
         if (result === "success") {
-          cancelledRef.current = true;
-          setFeedback("success");
-          setFeedbackText("Paiement confirmé !");
-          onSuccess();
+          completeSuccess();
           return;
         }
         if (result === "failed") {
@@ -269,7 +286,7 @@ export default function PaymentPendingPolling({
       if (timeoutId) clearTimeout(timeoutId);
       if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
-  }, [performPoll, onSuccess, onFailed, forcedAggressive]);
+  }, [performPoll, completeSuccess, onFailed, forcedAggressive]);
 
   const handleCancelClick = () => {
     if (cancelledRef.current) return;
@@ -278,6 +295,21 @@ export default function PaymentPendingPolling({
   };
 
   return (
+    <>
+    {redirecting && (
+      <div className={styles.redirectOverlay} role="status" aria-live="polite">
+        <div className={styles.redirectContent}>
+          <div className={styles.redirectSuccess}>
+            <svg width="64" height="64" viewBox="0 0 64 64" className={styles.redirectCheck} aria-hidden>
+              <circle cx="32" cy="32" r="28" stroke="#16A34A" strokeWidth="3" fill="none" />
+              <path d="M20 32 L28 40 L44 24" stroke="#16A34A" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div className={styles.redirectTitle}>Paiement confirmé</div>
+          <div className={styles.redirectSubtitle}>Préparation de votre commande...</div>
+        </div>
+      </div>
+    )}
     <div className={styles.wrap}>
       <div className={styles.card}>
         <div className={styles.dots} aria-hidden="true">
@@ -362,5 +394,6 @@ export default function PaymentPendingPolling({
         )}
       </div>
     </div>
+    </>
   );
 }

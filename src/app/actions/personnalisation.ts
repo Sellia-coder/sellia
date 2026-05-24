@@ -9,6 +9,7 @@ import {
   SLUG_REGEX,
   type PublishShopInput,
 } from "@/lib/validations/personnalisation";
+import { generateHeroImage } from "@/lib/ai/generate-hero-image";
 
 type DraftGeneratedProduct = {
   id?: string;
@@ -204,6 +205,8 @@ export async function publishShopAction(input: PublishShopInput) {
           bodyFont,
           backgroundStyle: appearance.backgroundStyle,
           fontStyle: appearance.fontStyle,
+          heroTemplate: appearance.heroTemplate ?? "universal",
+          heroImageUrl: appearance.heroImageUrl ?? null,
           logoUrl: data.step1.logoUrl ?? null,
           whatsappNumber: data.step3.whatsappNumber,
           contactEmail: data.step3.contactEmail,
@@ -298,6 +301,32 @@ export async function publishShopAction(input: PublishShopInput) {
 
       return createdShop;
     });
+
+    if (!appearance.heroImageUrl) {
+      const aiResult = await generateHeroImage({
+        shopId: shop.id,
+        shopName: shop.name,
+        tagline: shop.tagline,
+        category: shop.category,
+        primaryColor: shop.primaryColor,
+      });
+
+      if (aiResult.success && aiResult.imageUrl) {
+        await db.shop.update({
+          where: { id: shop.id },
+          data: {
+            heroImageUrl: aiResult.imageUrl,
+            heroImagePrompt: aiResult.prompt ?? null,
+            heroImageGenerations: 1,
+            heroImageGeneratedAt: new Date(),
+          },
+        });
+      } else {
+        console.warn(
+          `[publishShop] Hero AI failed (${aiResult.error}), fallback template`
+        );
+      }
+    }
 
     revalidatePath("/dashboard");
     revalidatePath("/personnaliser-ma-boutique");

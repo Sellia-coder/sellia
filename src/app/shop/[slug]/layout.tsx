@@ -7,7 +7,6 @@ import {
 import { CartProvider } from "@/components/shop/CartProvider";
 import SeliaMenuPro from "@/components/shop/SeliaMenuPro";
 import ShopFooter from "@/components/shop/ShopFooter";
-import PreFooterTrust from "@/components/shop/PreFooterTrust";
 import ToastProvider from "@/components/shop/ToastProvider";
 import "./shop.css";
 
@@ -94,7 +93,6 @@ export default async function ShopLayout({ children, params }: Props) {
         <div className={`shop-root shop-template-${template}`} style={cssVars}>
           <SeliaMenuPro shop={shop} />
           <main className="shop-main">{children}</main>
-          <PreFooterTrust />
           <ShopFooter shop={shop} />
           <ToastProvider />
         </div>

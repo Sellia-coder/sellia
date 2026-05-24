@@ -86,7 +86,7 @@ export default function Step3Contact({ value, onChange, onNext, onBack }: Props)
           type="email"
           value={value.contactEmail}
           onChange={(e) => onChange({ ...value, contactEmail: e.target.value })}
-          placeholder="contact@maboutique.com"
+          placeholder="Email de contact"
           className="perso-input"
         />
       </div>

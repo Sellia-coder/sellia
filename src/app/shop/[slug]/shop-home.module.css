@@ -1,0 +1,459 @@
+/* G2.1.G — Shop Home Premium */
+
+.wrap {
+  background: #ffffff;
+  font-family: "Inter", sans-serif;
+  color: #0a0e13;
+}
+
+.hero {
+  background-size: cover;
+  background-position: center;
+  padding: 72px 16px 88px;
+  color: #ffffff;
+}
+
+.heroContent {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.heroEyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 16px;
+}
+
+.heroTitle {
+  font-family: "Fraunces", serif;
+  font-size: clamp(40px, 7vw, 72px);
+  font-weight: 500;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin: 0 0 16px;
+  color: #ffffff;
+}
+
+.heroTagline {
+  font-family: "Fraunces", serif;
+  font-size: clamp(22px, 3.5vw, 36px);
+  font-weight: 400;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+  margin: 0 0 20px;
+  color: rgba(255, 255, 255, 0.95);
+  max-width: 640px;
+}
+
+.heroDescription {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 32px;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 480px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.heroCtaPrimary,
+.heroCtaSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.heroCtaPrimary {
+  background: #ffffff;
+  color: #0a0e13;
+}
+
+.heroCtaPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.25);
+}
+
+.heroCtaSecondary {
+  background: transparent;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+.heroCtaSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+.heroBadge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 100px;
+  width: fit-content;
+  margin-top: 24px;
+}
+
+.heroBadgeText {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #8a8d95;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-family: "Fraunces", serif;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 500;
+  color: #0a0e13;
+  letter-spacing: -0.8px;
+  margin: 0;
+  line-height: 1.15;
+  max-width: 600px;
+}
+
+.sectionHeader {
+  margin-bottom: 32px;
+}
+
+.categoriesSection {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 72px 16px;
+  background: #fafaf7;
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.categoryCard {
+  background: #ffffff;
+  border: 1px solid #ece9e2;
+  border-radius: 18px;
+  padding: 28px 20px;
+  text-decoration: none;
+  color: #0a0e13;
+  transition: all 0.25s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.categoryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(10, 14, 19, 0.08);
+  border-color: var(--shop-primary, #e84b1f);
+}
+
+.categoryEmoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.categoryName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.categoryCount {
+  font-size: 12px;
+  color: #8a8d95;
+}
+
+.categoryDiscover {
+  font-size: 12px;
+  color: var(--shop-primary, #e84b1f);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.productsSection {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 72px 16px;
+}
+
+.productsSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.viewAllLink {
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.productCard {
+  background: #ffffff;
+  border: 1px solid #ece9e2;
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #0a0e13;
+  transition: all 0.25s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.productCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(10, 14, 19, 0.1);
+  border-color: var(--shop-primary, #e84b1f);
+}
+
+.productBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 100px;
+  z-index: 2;
+}
+
+.productFav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #ece9e2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b6e76;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.productImageWrap {
+  background: #fafaf7;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.productCard:hover .productImage {
+  transform: scale(1.05);
+}
+
+.productInfo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.productName {
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  min-height: 40px;
+}
+
+.productRating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.productRatingCount {
+  font-size: 11.5px;
+  color: #8a8d95;
+  margin-left: 6px;
+}
+
+.productPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.productPrice {
+  font-family: "Fraunces", serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+}
+
+.productCurrency {
+  font-size: 11.5px;
+  color: #8a8d95;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.productComparePrice {
+  font-size: 13px;
+  color: #8a8d95;
+  text-decoration: line-through;
+}
+
+.productCardCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: #0a0e13;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 16px 16px;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.productCard:hover .productCardCta {
+  background: var(--shop-primary, #e84b1f);
+}
+
+.testimonialsSection {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 72px 16px;
+}
+
+.testimonialsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.testimonialCard {
+  background: #ffffff;
+  border: 1px solid #ece9e2;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.testimonialName {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.testimonialRating {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+
+.testimonialText {
+  font-size: 13.5px;
+  color: #6b6e76;
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+.testimonialProduct {
+  font-size: 12px;
+  color: #8a8d95;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    padding: 56px 16px 72px;
+  }
+
+  .categoriesSection,
+  .productsSection,
+  .testimonialsSection {
+    padding: 56px 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .productInfo {
+    padding: 12px;
+  }
+
+  .productName {
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  .productPrice {
+    font-size: 17px;
+  }
+
+  .productCardCta {
+    margin: 0 12px 12px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+}

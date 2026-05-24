@@ -1,256 +1,372 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, type CSSProperties } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  CheckCircle2,
+  ShieldCheck,
   Download,
+  Mail,
   Copy,
   Check,
-  ShieldCheck,
-  Mail,
-  Loader2,
+  ArrowLeft,
 } from "lucide-react";
 import styles from "./confirmation.module.css";
+import PaymentPendingPolling from "@/components/shop/PaymentPendingPolling";
+import TrustSection from "@/components/shop/TrustSection";
 
-export interface OrderConfirmationData {
+export interface OrderConfirmationItem {
+  id: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface OrderConfirmationProps {
+  shopSlug: string;
+  shopName: string;
+  shopPrimaryColor?: string | null;
   orderNumber: string;
-  customerName: string;
-  customerEmail: string | null;
-  subtotal: number;
-  total: number;
-  feesAdded: number;
-  shippingPrice: number;
-  paymentMethod: string;
   paymentStatus: string;
-  paidAt: string | null;
-  refundDeadline: string | null;
-  items: Array<{ name: string; quantity: number; price: number }>;
-  shop: {
-    slug: string;
-    name: string;
-    primaryColor: string | null;
-    phone: string | null;
-    whatsappNumber: string | null;
-  };
-  qrApiUrl: string;
-  qrDownloadPngUrl: string;
-  qrDownloadSvgUrl: string;
+  paymentMethod: string;
+  customerEmail?: string | null;
+  total: number;
+  subTotal: number;
+  shipping?: number;
+  feesAdded?: number;
+  currency: string;
+  paidAt?: string | null;
+  refundDeadline?: string | null;
+  items: OrderConfirmationItem[];
+  qrPngUrl: string;
+}
+
+interface PaymentPollingProps {
+  operatorCode: string;
+  countryCode: string;
+  total: number;
+  currency: string;
 }
 
 interface Props {
-  order: OrderConfirmationData;
+  order: OrderConfirmationProps;
+  paymentPolling?: PaymentPollingProps | null;
 }
 
-export default function OrderConfirmationClient({ order }: Props) {
-  const primaryColor = order.shop.primaryColor ?? "#E84B1F";
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [emailSending, setEmailSending] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
-
+export default function OrderConfirmationClient({
+  order,
+  paymentPolling = null,
+}: Props) {
+  const router = useRouter();
+  const primary = order.shopPrimaryColor || "#E84B1F";
   const isPaid =
-    order.paymentStatus === "paid_escrow" || order.paymentStatus === "delivered";
+    order.paymentStatus === "paid_escrow" ||
+    order.paymentStatus === "delivered";
   const isCashOnDelivery = order.paymentMethod === "cash_on_delivery";
+  const showConfirmation = isPaid || isCashOnDelivery;
 
-  useEffect(() => {
-    if (!isPaid || isCashOnDelivery) return;
+  const [copied, setCopied] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
-    fetch(`${order.qrApiUrl}?format=dataurl`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.dataUrl) setQrDataUrl(data.dataUrl);
-      })
-      .catch(() => {
-        import("qrcode").then((QRCode) =>
-          QRCode.toDataURL(order.qrApiUrl.replace("?format=dataurl", ""), {
-            width: 400,
-            margin: 2,
-            color: { dark: "#0A0E13", light: "#FFFFFF" },
-          }).then(setQrDataUrl)
-        );
-      });
-  }, [order, isPaid, isCashOnDelivery]);
+  const rootStyle = { "--shop-primary": primary } as CSSProperties;
 
-  const handleDownloadQR = () => {
-    window.open(order.qrDownloadPngUrl, "_blank");
+  if (paymentPolling) {
+    return (
+      <div className={styles.pendingWrap}>
+        <PaymentPendingPolling
+          shopSlug={order.shopSlug}
+          orderNumber={order.orderNumber}
+          operatorCode={paymentPolling.operatorCode}
+          countryCode={paymentPolling.countryCode}
+          total={paymentPolling.total}
+          currency={paymentPolling.currency}
+          primaryColor={primary}
+          autoRedirect={false}
+          onSuccess={() => router.refresh()}
+          onFailed={() => router.refresh()}
+          onCancel={() => router.push(`/shop/${order.shopSlug}`)}
+        />
+      </div>
+    );
+  }
+
+  if (!showConfirmation) {
+    return (
+      <div className={styles.wrap} style={rootStyle}>
+        <div className={styles.container}>
+          <div className={styles.successBanner}>
+            <div className={styles.successText}>
+              <h1 className={styles.successTitle}>Commande enregistrée</h1>
+              <p className={styles.successSubtitle}>
+                Votre commande est en cours de traitement.
+              </p>
+            </div>
+            <div className={styles.orderNumberPill}>
+              <span className={styles.orderLabel}>N°</span>
+              <code>{order.orderNumber}</code>
+            </div>
+          </div>
+          <Link href={`/shop/${order.shopSlug}`} className={styles.backLink}>
+            <ArrowLeft size={14} />
+            Retour à la boutique
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(order.orderNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
   };
 
-  const handleCopyOrderNumber = () => {
-    navigator.clipboard.writeText(order.orderNumber);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleDownloadQR = async (format: "png" | "svg") => {
+    setDownloading(true);
+    try {
+      const url = `/api/shop/${order.shopSlug}/orders/${encodeURIComponent(order.orderNumber)}/qr?format=${format}`;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `sellia-${order.orderNumber}-qr.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } finally {
+      setTimeout(() => setDownloading(false), 1000);
+    }
   };
 
   const handleSendEmail = async () => {
+    if (!order.customerEmail) return;
     setEmailSending(true);
     setEmailError(null);
     try {
       const res = await fetch(
-        `/api/shop/${order.shop.slug}/orders/${encodeURIComponent(order.orderNumber)}/send-qr`,
+        `/api/shop/${order.shopSlug}/orders/${encodeURIComponent(order.orderNumber)}/send-qr`,
         { method: "POST" }
       );
       const data = await res.json();
-      if (data.ok && data.sent) {
+      if (res.ok && data.ok && data.sent) {
         setEmailSent(true);
+        setTimeout(() => setEmailSent(false), 4000);
       } else {
         setEmailError(
           data.message ?? "Impossible d'envoyer l'email. Vérifiez l'adresse client."
         );
       }
     } catch {
-      setEmailError("Erreur réseau. Réessayez.");
+      setEmailError("Problème réseau");
     } finally {
       setEmailSending(false);
     }
   };
 
-  return (
-    <div className={styles.confirmation}>
-      <div className={styles.container}>
-        <div className={styles.successHeader}>
-          <div
-            className={styles.successIcon}
-            style={{ backgroundColor: "#16A34A" }}
-          >
-            <CheckCircle2 size={36} strokeWidth={2.2} />
-          </div>
-          <h1 className={styles.successTitle}>
-            {isCashOnDelivery
-              ? "Commande confirmée"
-              : isPaid
-                ? "Paiement confirmé"
-                : "Commande enregistrée"}
-          </h1>
-          <p className={styles.successSubtitle}>
-            {isCashOnDelivery
-              ? "Le marchand vous contactera pour la livraison."
-              : isPaid
-                ? "Vos fonds sont protégés par Sellia jusqu'à la livraison."
-                : "Votre commande a bien été enregistrée."}
-          </p>
+  const formatPrice = (n: number) => n.toLocaleString("fr-FR");
+  const refundDate = order.refundDeadline
+    ? new Date(order.refundDeadline).toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "long",
+      })
+    : null;
 
-          <div className={styles.orderNumber}>
-            <span className={styles.orderNumberLabel}>N° de commande</span>
-            <span className={styles.orderNumberValue}>{order.orderNumber}</span>
+  const title = isCashOnDelivery
+    ? "Commande confirmée"
+    : "Paiement confirmé";
+  const subtitle = isCashOnDelivery
+    ? "Le marchand vous contactera pour la livraison."
+    : "Vos fonds sont protégés par Sellia jusqu'à la livraison";
+
+  return (
+    <div className={styles.wrap} style={rootStyle}>
+      <div className={styles.container}>
+        <div className={styles.successBanner}>
+          <div className={styles.successIcon}>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden>
+              <circle cx="12" cy="12" r="11" stroke="#16A34A" strokeWidth="2" />
+              <path
+                d="M7 12 L11 16 L17 9"
+                stroke="#16A34A"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <div className={styles.successText}>
+            <h1 className={styles.successTitle}>{title}</h1>
+            <p className={styles.successSubtitle}>{subtitle}</p>
+          </div>
+          <div className={styles.orderNumberPill}>
+            <span className={styles.orderLabel}>N°</span>
+            <code>{order.orderNumber}</code>
             <button
               type="button"
-              className={styles.orderNumberCopy}
-              onClick={handleCopyOrderNumber}
+              onClick={handleCopy}
+              className={styles.copyBtn}
+              title="Copier"
             >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
+              {copied ? (
+                <Check size={13} color="#16A34A" />
+              ) : (
+                <Copy size={13} />
+              )}
             </button>
           </div>
         </div>
 
-        {isPaid && !isCashOnDelivery && (
-          <div className={styles.protectionBanner}>
-            <ShieldCheck size={18} />
-            <div>
-              <strong>Protection acheteur active</strong>
-              <p>
-                Remboursement automatique si non livré avant le{" "}
-                {order.refundDeadline
-                  ? new Date(order.refundDeadline).toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "long",
-                    })
-                  : "6 jours"}
-                .
+        <div
+          className={`${styles.mainGrid} ${isCashOnDelivery ? styles.mainGridCodOnly : ""}`}
+        >
+          {!isCashOnDelivery && (
+            <div className={styles.qrCard}>
+              <div className={styles.qrLabel}>
+                <ShieldCheck size={14} />
+                <span>Votre QR code de livraison</span>
+              </div>
+              <div className={styles.qrImageWrap}>
+                <img
+                  src={order.qrPngUrl}
+                  alt="QR code de livraison"
+                  className={styles.qrImage}
+                />
+              </div>
+              <p className={styles.qrInstruction}>
+                Présentez ce code au marchand{" "}
+                <strong>uniquement</strong> lorsque vous êtes satisfait de votre
+                commande.
               </p>
-            </div>
-          </div>
-        )}
-
-        {qrDataUrl && isPaid && !isCashOnDelivery && (
-          <div className={styles.qrSection}>
-            <h2 className={styles.sectionTitle}>Votre QR de livraison</h2>
-            <p className={styles.qrHint}>
-              Présentez ce code au marchand uniquement lorsque vous êtes satisfait
-              de votre commande.
-            </p>
-            <div className={styles.qrFrame}>
-              <img src={qrDataUrl} alt="QR livraison" className={styles.qrImage} />
-            </div>
-            <div className={styles.qrActions}>
-              <button
-                type="button"
-                className={styles.qrBtn}
-                onClick={handleDownloadQR}
-                style={{ borderColor: primaryColor, color: primaryColor }}
-              >
-                <Download size={14} />
-                Télécharger PNG
-              </button>
-              <a
-                href={order.qrDownloadSvgUrl}
-                className={styles.qrBtnSecondary}
-                download
-              >
-                Télécharger SVG
-              </a>
-              {order.customerEmail && (
+              <div className={styles.qrActions}>
                 <button
                   type="button"
-                  className={styles.qrBtnSecondary}
-                  onClick={handleSendEmail}
-                  disabled={emailSending || emailSent}
+                  onClick={() => handleDownloadQR("png")}
+                  disabled={downloading}
+                  className={styles.qrActionBtn}
                 >
-                  {emailSending ? (
-                    <Loader2 size={14} className={styles.spin} />
-                  ) : (
-                    <Mail size={14} />
-                  )}
-                  {emailSent ? "Email envoyé" : "Envoyer par email"}
+                  <Download size={13} />
+                  <span>PNG</span>
                 </button>
-              )}
+                <button
+                  type="button"
+                  onClick={() => handleDownloadQR("svg")}
+                  disabled={downloading}
+                  className={styles.qrActionBtnSecondary}
+                >
+                  <Download size={13} />
+                  <span>SVG</span>
+                </button>
+                {order.customerEmail && (
+                  <button
+                    type="button"
+                    onClick={handleSendEmail}
+                    disabled={emailSending || emailSent}
+                    className={styles.qrActionBtnSecondary}
+                  >
+                    {emailSent ? (
+                      <Check size={13} color="#16A34A" />
+                    ) : (
+                      <Mail size={13} />
+                    )}
+                    <span>
+                      {emailSent
+                        ? "Envoyé !"
+                        : emailSending
+                          ? "..."
+                          : "Email"}
+                    </span>
+                  </button>
+                )}
+              </div>
+              {emailError && <div className={styles.qrError}>{emailError}</div>}
             </div>
-            {emailError && (
-              <p className={styles.emailError}>{emailError}</p>
+          )}
+
+          <div className={styles.summaryCol}>
+            {!isCashOnDelivery && (
+              <div className={styles.protectionCard}>
+                <div className={styles.protectionIcon}>
+                  <ShieldCheck size={16} color="#15803D" />
+                </div>
+                <div>
+                  <div className={styles.protectionTitle}>
+                    Protection acheteur active
+                  </div>
+                  {refundDate && (
+                    <div className={styles.protectionSubtitle}>
+                      Remboursement automatique si non livré avant le{" "}
+                      <strong>{refundDate}</strong>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-          </div>
-        )}
 
-        <div className={styles.recapSection}>
-          <h2 className={styles.sectionTitle}>Récapitulatif</h2>
-          {order.items.map((item) => (
-            <div key={`${item.name}-${item.quantity}`} className={styles.recapRow}>
-              <span>
-                {item.name} × {item.quantity}
-              </span>
-              <span>
-                {(item.price * item.quantity).toLocaleString("fr-FR")} FCFA
-              </span>
+            <div className={styles.recapCard}>
+              <div className={styles.recapHeader}>Récapitulatif</div>
+              <div className={styles.recapItems}>
+                {order.items.map((item) => (
+                  <div key={item.id} className={styles.recapItem}>
+                    <span className={styles.recapItemName}>
+                      {item.productName}{" "}
+                      <span className={styles.recapItemQty}>
+                        × {item.quantity}
+                      </span>
+                    </span>
+                    <span className={styles.recapItemPrice}>
+                      {formatPrice(item.unitPrice * item.quantity)}{" "}
+                      {order.currency}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.recapDivider} />
+              <div className={styles.recapLine}>
+                <span>Sous-total</span>
+                <span>
+                  {formatPrice(order.subTotal)} {order.currency}
+                </span>
+              </div>
+              {order.shipping != null && order.shipping > 0 && (
+                <div className={styles.recapLine}>
+                  <span>Livraison</span>
+                  <span>
+                    {formatPrice(order.shipping)} {order.currency}
+                  </span>
+                </div>
+              )}
+              {order.feesAdded != null && order.feesAdded > 0 && (
+                <div className={styles.recapLine}>
+                  <span>Frais opérateur</span>
+                  <span>
+                    +{formatPrice(order.feesAdded)} {order.currency}
+                  </span>
+                </div>
+              )}
+              <div className={styles.recapTotal}>
+                <span>{isCashOnDelivery ? "Total" : "Total payé"}</span>
+                <strong style={{ color: primary }}>
+                  {formatPrice(order.total)} {order.currency}
+                </strong>
+              </div>
             </div>
-          ))}
-          {order.shippingPrice > 0 && (
-            <div className={styles.recapRow}>
-              <span>Livraison</span>
-              <span>{order.shippingPrice.toLocaleString("fr-FR")} FCFA</span>
-            </div>
-          )}
-          {order.feesAdded > 0 && (
-            <div className={styles.recapRowMuted}>
-              <span>Frais opérateur</span>
-              <span>+{order.feesAdded.toLocaleString("fr-FR")} FCFA</span>
-            </div>
-          )}
-          <div className={styles.recapTotal}>
-            <span>Total</span>
-            <strong>{order.total.toLocaleString("fr-FR")} FCFA</strong>
+
+            <Link href={`/shop/${order.shopSlug}`} className={styles.backLink}>
+              <ArrowLeft size={14} />
+              Retour à {order.shopName}
+            </Link>
           </div>
         </div>
 
-        <div className={styles.footerActions}>
-          <Link
-            href={`/shop/${order.shop.slug}`}
-            className={styles.backLink}
-            style={{ color: primaryColor }}
-          >
-            Retour à la boutique
-          </Link>
-        </div>
+      </div>
+
+      <div style={{ margin: "32px -16px -48px" }}>
+        <TrustSection variant="compact" />
       </div>
     </div>
   );

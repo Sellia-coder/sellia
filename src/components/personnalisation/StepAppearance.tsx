@@ -1,6 +1,15 @@
 "use client";
 
-import { Palette, Check, Image as ImageIcon, Type } from "lucide-react";
+import { useState } from "react";
+import {
+  Palette,
+  Check,
+  Image as ImageIcon,
+  Type,
+  Sparkles,
+  Upload,
+  Loader2,
+} from "lucide-react";
 import StepNav from "./StepNav";
 import type { StepAppearanceInput } from "@/lib/validations/personnalisation";
 import styles from "./StepAppearance.module.css";
@@ -10,6 +19,8 @@ interface Props {
   onChange: (value: StepAppearanceInput) => void;
   onNext: () => void;
   onBack: () => void;
+  /** Boutique déjà publiée (régénération via API shop par slug) */
+  shopSlug?: string | null;
 }
 
 const COLOR_PALETTES = [
@@ -40,7 +51,65 @@ export default function StepAppearance({
   onChange,
   onNext,
   onBack,
+  shopSlug = null,
 }: Props) {
+  const [generatingHero, setGeneratingHero] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+
+  const heroImageUrl = value.heroImageUrl ?? null;
+
+  const setHeroImageUrl = (url: string | null) => {
+    onChange({ ...value, heroImageUrl: url });
+  };
+
+  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingHero(true);
+    setGenerationError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload/hero", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok && data.imageUrl) {
+        setHeroImageUrl(data.imageUrl);
+      } else {
+        setGenerationError(data.error || "Échec du téléversement");
+      }
+    } catch {
+      setGenerationError("Problème réseau");
+    } finally {
+      setUploadingHero(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleGenerateHero = async () => {
+    setGeneratingHero(true);
+    setGenerationError(null);
+    try {
+      const endpoint = shopSlug
+        ? `/api/shop/${shopSlug}/regenerate-hero`
+        : "/api/personnalisation/generate-hero";
+      const res = await fetch(endpoint, { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.imageUrl) {
+        setHeroImageUrl(data.imageUrl);
+      } else {
+        setGenerationError(data.error || "Erreur de génération");
+      }
+    } catch {
+      setGenerationError("Problème réseau");
+    } finally {
+      setGeneratingHero(false);
+    }
+  };
+
   const handlePaletteSelect = (palette: (typeof COLOR_PALETTES)[number]) => {
     onChange({
       ...value,
@@ -182,6 +251,94 @@ export default function StepAppearance({
               </span>
             </div>
           </div>
+        </section>
+
+        <section className={styles.heroSourceSection}>
+          <label className={styles.heroSourceLabel}>
+            Image de bannière (hero)
+            <span className={styles.heroSourceLabelHint}>
+              2 options pour votre bannière
+            </span>
+          </label>
+
+          <div className={styles.heroSourceGrid}>
+            <label className={styles.heroSourceCard}>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleHeroUpload}
+                disabled={uploadingHero}
+                style={{ display: "none" }}
+              />
+              <div
+                className={styles.heroSourceIcon}
+                style={{ background: "#FAFAF7", color: "#0A0E13" }}
+              >
+                {uploadingHero ? (
+                  <Loader2 size={18} className={styles.spin} />
+                ) : (
+                  <Upload size={18} />
+                )}
+              </div>
+              <div className={styles.heroSourceTitle}>
+                {uploadingHero ? "Envoi en cours..." : "Téléverser mon image"}
+              </div>
+              <div className={styles.heroSourceDesc}>
+                Si vous avez déjà votre visuel
+              </div>
+            </label>
+
+            <button
+              type="button"
+              className={styles.heroSourceCard}
+              onClick={handleGenerateHero}
+              disabled={generatingHero}
+            >
+              <div
+                className={styles.heroSourceIcon}
+                style={{
+                  background:
+                    "linear-gradient(135deg, #E84B1F 0%, #C2410C 100%)",
+                  color: "#FFFFFF",
+                }}
+              >
+                {generatingHero ? (
+                  <Loader2 size={18} className={styles.spin} />
+                ) : (
+                  <Sparkles size={18} />
+                )}
+              </div>
+              <div className={styles.heroSourceTitle}>
+                {generatingHero
+                  ? "Génération en cours..."
+                  : "Générer avec l'IA"}
+              </div>
+              <div className={styles.heroSourceDesc}>
+                {generatingHero
+                  ? "10-15 secondes"
+                  : shopSlug
+                    ? "Régénérer la bannière (max 3 / 24h)"
+                    : "Image unique pour votre boutique"}
+              </div>
+            </button>
+          </div>
+
+          {generationError && (
+            <div className={styles.heroError}>⚠️ {generationError}</div>
+          )}
+
+          {heroImageUrl && (
+            <div className={styles.heroPreview}>
+              <img src={heroImageUrl} alt="Aperçu bannière" />
+              <button
+                type="button"
+                onClick={() => setHeroImageUrl(null)}
+                className={styles.heroRemove}
+              >
+                ✕ Retirer
+              </button>
+            </div>
+          )}
         </section>
 
         <section className={styles.section}>

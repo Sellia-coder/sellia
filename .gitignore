@@ -31,10 +31,12 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (do not commit secrets; .env.example is tracked)
-.env
-.env.local
-.env.production
-.env.*.local
+.env*
+!.env.example
+
+# Generated hero images
+/public/uploads/heroes/*
+!/public/uploads/heroes/.gitkeep
 
 # vercel
 .vercel

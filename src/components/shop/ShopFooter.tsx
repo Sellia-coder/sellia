@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import PaymentLogos from "./PaymentLogos";
+import { PaymentMethodsGrid } from "@/components/icons/momo-operators";
 import styles from "./ShopFooter.module.css";
 
 interface Props {
@@ -57,21 +57,7 @@ export default function ShopFooter({ shop }: Props) {
         <div className={styles.footerPayments}>
           <span className={styles.footerPaymentsLabel}>Moyens de paiement acceptés</span>
           <div className={styles.footerPaymentsList}>
-            <div className={styles.footerPaymentLogo} title="MTN Mobile Money">
-              <PaymentLogos methods={["mtn_momo"]} size="md" variant="circle" />
-            </div>
-            <div className={styles.footerPaymentLogo} title="Orange Money">
-              <PaymentLogos methods={["orange_money"]} size="md" variant="circle" />
-            </div>
-            <div className={styles.footerPaymentLogo} title="Moov Money">
-              <PaymentLogos methods={["moov_money"]} size="md" variant="circle" />
-            </div>
-            <div className={styles.footerPaymentLogo} title="Visa">
-              <PaymentLogos methods={["visa"]} size="md" variant="rounded" />
-            </div>
-            <div className={styles.footerPaymentLogo} title="Mastercard">
-              <PaymentLogos methods={["mastercard"]} size="md" variant="rounded" />
-            </div>
+            <PaymentMethodsGrid size={26} variant="full" />
 
             {shop.plan === "pro" && shop.paymentCashOnDelivery && (
               <div className={styles.footerPaymentLogoCash} title="Paiement à la livraison">
