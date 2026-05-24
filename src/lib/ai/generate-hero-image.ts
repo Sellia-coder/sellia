@@ -10,6 +10,7 @@
 import OpenAI from "openai";
 import fs from "fs/promises";
 import path from "path";
+import { heroImageApiUrl } from "@/lib/ai/hero-image-url";
 
 const HEROES_DIR = path.join(process.cwd(), "public", "uploads", "heroes");
 
@@ -88,7 +89,7 @@ async function saveBase64Image(b64: string, shopId: string): Promise<string> {
   const filepath = path.join(HEROES_DIR, filename);
   const buffer = Buffer.from(b64, "base64");
   await fs.writeFile(filepath, buffer);
-  return `/uploads/heroes/${filename}`;
+  return heroImageApiUrl(filename);
 }
 
 export async function generateHeroImage(

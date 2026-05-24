@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import StepNav from "./StepNav";
 import type { StepAppearanceInput } from "@/lib/validations/personnalisation";
+import { resolveHeroImageUrl } from "@/lib/ai/hero-image-url";
 import styles from "./StepAppearance.module.css";
 
 interface Props {
@@ -329,7 +330,10 @@ export default function StepAppearance({
 
           {heroImageUrl && (
             <div className={styles.heroPreview}>
-              <img src={heroImageUrl} alt="Aperçu bannière" />
+              <img
+                src={resolveHeroImageUrl(heroImageUrl) ?? heroImageUrl}
+                alt="Aperçu bannière"
+              />
               <button
                 type="button"
                 onClick={() => setHeroImageUrl(null)}

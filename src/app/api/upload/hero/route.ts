@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import { getCurrentUser } from "@/lib/auth/session";
+import { heroImageApiUrl } from "@/lib/ai/hero-image-url";
 
 const HEROES_DIR = path.join(process.cwd(), "public", "uploads", "heroes");
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -41,6 +42,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    imageUrl: `/uploads/heroes/${filename}`,
+    imageUrl: heroImageApiUrl(filename),
   });
 }

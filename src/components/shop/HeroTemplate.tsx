@@ -1,3 +1,5 @@
+import { resolveHeroImageUrl } from "@/lib/ai/hero-image-url";
+
 export type HeroTemplateName =
   | "jewelry"
   | "tech"
@@ -104,8 +106,9 @@ export function getHeroBackground({
   customImageUrl,
   primaryColor,
 }: HeroBackgroundProps): string {
-  if (customImageUrl) {
-    return `linear-gradient(135deg, rgba(10,14,19,0.55) 0%, rgba(10,14,19,0.25) 100%), url(${customImageUrl}) center/cover no-repeat`;
+  const imageUrl = resolveHeroImageUrl(customImageUrl);
+  if (imageUrl) {
+    return `linear-gradient(135deg, rgba(10,14,19,0.55) 0%, rgba(10,14,19,0.25) 100%), url(${imageUrl}) center/cover no-repeat`;
   }
 
   if (template && isHeroTemplateName(template)) {
