@@ -1,4 +1,5 @@
-/* G2.2.A2 — Typography Inter + tokens Sellia dans /dashboard */
+/* G2.2.B — Typography Sellia officielle dans /dashboard
+   Fraunces (titres) + Inter (body) */
 
 .dashboard-wrap,
 .dashboard-wrap * {
@@ -7,7 +8,34 @@
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
-    sans-serif !important;
+    sans-serif;
+}
+
+.dashboard-wrap h1,
+.dashboard-wrap h2,
+.dashboard-wrap h3,
+.dashboard-wrap [class*="Title"],
+.dashboard-wrap [class*="title"]:not([class*="subtitle"]),
+.dashboard-wrap [class*="StatValue"],
+.dashboard-wrap [class*="statValue"] {
+  font-family: "Fraunces", "Times New Roman", serif;
+}
+
+.dashboard-wrap [class*="eyebrow"],
+.dashboard-wrap [class*="Eyebrow"] {
+  font-family: "Inter", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.dashboard-wrap button,
+.dashboard-wrap input,
+.dashboard-wrap select,
+.dashboard-wrap textarea,
+.dashboard-wrap label {
+  font-family: "Inter", sans-serif;
 }
 
 .dashboard-wrap svg,
@@ -16,7 +44,7 @@
 }
 
 .dashboard-wrap,
-.dash-root,
+.dash-app,
 .dash-content {
   --sellia-ember: #e84b1f;
   --sellia-ember-dark: #c2410c;
@@ -33,4 +61,6 @@
   --sellia-warning-bg: #ffedd5;
   --sellia-danger: #b91c1c;
   --sellia-danger-bg: #fee2e2;
+  --sellia-info: #1d4ed8;
+  --sellia-info-bg: #dbeafe;
 }

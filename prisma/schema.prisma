@@ -115,6 +115,12 @@ model Shop {
   views          Int      @default(0)
   publishedAt    DateTime?
 
+  // Retrait marchand (Mobile Money)
+  payoutPhone       String?  @map("payout_phone")
+  payoutOperator    String?  @map("payout_operator")
+  payoutCountry     String?  @map("payout_country")
+  payoutHolderName  String?  @map("payout_holder_name")
+
   // Livraison & paiement
   shippingZones           Json?   // Array<{ id, name, price, eta }>
   paymentCashOnDelivery  Boolean @default(true)
@@ -122,6 +128,7 @@ model Shop {
 
   products       Product[]
   orders         Order[]
+  customers      Customer[]
   reviews        Review[]
   cartevoTransactions CartevoTransaction[]
   payouts             Payout[]
@@ -372,6 +379,7 @@ model Order {
   cancelledAt       DateTime?
 
   cartevoTransaction CartevoTransaction? @relation("OrderCartevoTx")
+  payout             Payout?
 
   @@index([shopId])
   @@index([orderNumber])
@@ -379,6 +387,36 @@ model Order {
   @@index([status])
   @@index([paymentStatus])
   @@index([createdAt])
+}
+
+model Customer {
+  id            String    @id @default(cuid())
+  shopId        String    @map("shop_id")
+  shop          Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  email         String?
+  phone         String
+  fullName      String    @map("full_name")
+
+  city          String?
+  address       String?
+
+  totalOrders   Int       @default(0) @map("total_orders")
+  totalSpent    Int       @default(0) @map("total_spent")
+  averageOrder  Int       @default(0) @map("average_order")
+
+  firstOrderAt  DateTime? @map("first_order_at")
+  lastOrderAt   DateTime? @map("last_order_at")
+
+  tags          String[]  @default([])
+  notes         String?   @db.Text
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@unique([shopId, phone])
+  @@index([shopId, lastOrderAt])
+  @@map("customers")
 }
 
 // ============================================
@@ -443,7 +481,14 @@ model Payout {
   shopId          String   @map("shop_id")
   shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
+  payoutType      PayoutType @default(MERCHANT_REQUESTED) @map("payout_type")
+  orderId         String?  @unique @map("order_id")
+  order           Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
   amount          Decimal  @db.Decimal(14, 2)
+  grossAmount     Decimal? @db.Decimal(14, 2) @map("gross_amount")
+  commissionRate  Decimal? @db.Decimal(5, 2) @map("commission_rate")
+  commissionAmount Decimal? @db.Decimal(14, 2) @map("commission_amount")
   feeCartevo      Decimal  @default(0) @db.Decimal(14, 2) @map("fee_cartevo")
   netAmount       Decimal  @db.Decimal(14, 2) @map("net_amount")
   currency        String   @default("XAF")
@@ -458,6 +503,10 @@ model Payout {
 
   cartevoTx       CartevoTransaction? @relation("PayoutCartevoTx")
 
+  releasedAt      DateTime? @map("released_at")
+  paidOutAt       DateTime? @map("paid_out_at")
+  description     String?  @db.Text
+
   errorMessage    String?  @map("error_message") @db.Text
   requestedAt     DateTime @default(now()) @map("requested_at")
   processedAt     DateTime? @map("processed_at")
@@ -466,6 +515,7 @@ model Payout {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@index([shopId, status])
+  @@index([shopId, releasedAt])
   @@index([createdAt])
   @@map("payouts")
 }
@@ -510,12 +560,24 @@ enum CartevoTxStatus {
   CANCELLED
 }
 
+enum PayoutType {
+  ORDER_DIGITAL
+  ORDER_PHYSICAL
+  ORDER_SERVICE
+  MERCHANT_REQUESTED
+}
+
 enum PayoutStatus {
   PENDING
   PROCESSING
   SUCCESS
   FAILED
   CANCELLED
+  PENDING_ESCROW
+  AVAILABLE
+  REQUESTED
+  PAID
+  REFUNDED
 }
 
 model Review {

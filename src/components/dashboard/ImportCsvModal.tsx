@@ -2,7 +2,14 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { X, Upload, FileText, Check, AlertTriangle, Download } from "lucide-react";
+import {
+  X,
+  UploadSimple,
+  FileText,
+  Check,
+  WarningOctagon,
+  DownloadSimple,
+} from "@phosphor-icons/react";
 import styles from "./import-csv-modal.module.css";
 
 interface Props {
@@ -100,7 +107,7 @@ export default function ImportCsvModal({ onClose }: Props) {
             </p>
           </div>
           <button type="button" onClick={onClose} className={styles.closeBtn}>
-            <X size={18} />
+            <X size={18} weight="bold" />
           </button>
         </div>
 
@@ -109,7 +116,7 @@ export default function ImportCsvModal({ onClose }: Props) {
             <>
               <div className={styles.templateCard}>
                 <div className={styles.templateIcon}>
-                  <FileText size={18} />
+                  <FileText size={18} weight="duotone" />
                 </div>
                 <div className={styles.templateText}>
                   <strong>Téléchargez le modèle CSV</strong>
@@ -123,7 +130,7 @@ export default function ImportCsvModal({ onClose }: Props) {
                   onClick={downloadTemplate}
                   className={styles.templateBtn}
                 >
-                  <Download size={14} /> Modèle
+                  <DownloadSimple size={14} weight="bold" /> Modèle
                 </button>
               </div>
 
@@ -141,13 +148,13 @@ export default function ImportCsvModal({ onClose }: Props) {
                     onClick={() => fileInputRef.current?.click()}
                     className={styles.uploadBtn}
                   >
-                    <Upload size={22} />
+                    <UploadSimple size={22} weight="bold" />
                     <strong>Cliquez pour choisir un fichier CSV</strong>
                     <span>Max 2 MB · 200 produits par import</span>
                   </button>
                 ) : (
                   <div className={styles.filePreview}>
-                    <FileText size={20} />
+                    <FileText size={20} weight="duotone" />
                     <div className={styles.filePreviewInfo}>
                       <strong>{file.name}</strong>
                       <span>{(file.size / 1024).toFixed(1)} KB</span>
@@ -160,7 +167,7 @@ export default function ImportCsvModal({ onClose }: Props) {
                       }}
                       className={styles.filePreviewRemove}
                     >
-                      <X size={14} />
+                      <X size={14} weight="bold" />
                     </button>
                   </div>
                 )}
@@ -168,7 +175,7 @@ export default function ImportCsvModal({ onClose }: Props) {
 
               {error && (
                 <div className={styles.errorBox}>
-                  <AlertTriangle size={14} /> {error}
+                  <WarningOctagon size={14} weight="duotone" /> {error}
                 </div>
               )}
             </>
@@ -177,7 +184,7 @@ export default function ImportCsvModal({ onClose }: Props) {
           {result && (
             <div className={styles.resultBox}>
               <div className={styles.resultIcon}>
-                <Check size={28} />
+                <Check size={28} weight="bold" />
               </div>
               <h3>Import terminé</h3>
               <p>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { CaretLeft } from "@phosphor-icons/react";
 import ProductEditorModal from "@/components/personnalisation/ProductEditorModal";
 import type { ProductEditInput } from "@/lib/validations/personnalisation";
 import { createProductAction } from "@/app/actions/product";
@@ -77,7 +77,7 @@ export default function ProductNewClient(props: Props) {
     <div className={styles.wrap}>
       <div className={styles.topbar}>
         <Link href="/dashboard/produits" className={styles.backLink}>
-          <ArrowLeft size={15} />
+          <CaretLeft size={15} weight="bold" />
           Retour aux produits
         </Link>
         <span className={styles.eyebrow}>NOUVEAU PRODUIT</span>

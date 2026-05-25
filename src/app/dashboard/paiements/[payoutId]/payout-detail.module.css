@@ -1,0 +1,124 @@
+.wrap {
+  padding: 32px 40px 64px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--sellia-muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.backLink:hover {
+  background: var(--sellia-ivory);
+  color: var(--sellia-ink);
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.title {
+  font-family: "Fraunces", serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 13.5px;
+  color: var(--sellia-muted);
+  margin: 0;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.section {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 16px;
+  padding: 24px 26px;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-family: "Fraunces", serif;
+  font-size: 17px;
+  font-weight: 500;
+  margin: 0 0 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 24px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--sellia-subtle);
+  text-transform: uppercase;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+}
+
+.valueLarge {
+  font-family: "Fraunces", serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+}
+
+.orderLink {
+  color: var(--sellia-ember);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.orderLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 20px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

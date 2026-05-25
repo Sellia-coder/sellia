@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, CheckCircle2 } from "lucide-react";
+import {
+  CaretLeft,
+  ArrowSquareOut,
+  CheckCircle,
+} from "@phosphor-icons/react";
 import ProductEditorModal from "@/components/personnalisation/ProductEditorModal";
 import type { ProductEditInput } from "@/lib/validations/personnalisation";
 import {
@@ -72,7 +76,7 @@ export default function ProductEditClient(props: Props) {
     <div className={styles.wrap}>
       <div className={styles.topbar}>
         <Link href="/dashboard/produits" className={styles.backLink}>
-          <ArrowLeft size={15} />
+          <CaretLeft size={15} weight="bold" />
           Retour aux produits
         </Link>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -89,7 +93,7 @@ export default function ProductEditClient(props: Props) {
             rel="noopener noreferrer"
             className={styles.backLink}
           >
-            <ExternalLink size={14} />
+            <ArrowSquareOut size={14} weight="regular" />
             Voir sur la boutique
           </a>
         </div>
@@ -97,7 +101,7 @@ export default function ProductEditClient(props: Props) {
 
       {showCreatedToast && (
         <div className={styles.successBanner}>
-          <CheckCircle2 size={16} />
+          <CheckCircle size={16} weight="duotone" />
           Produit créé avec succès. Il est maintenant visible sur votre boutique.
           <button
             type="button"

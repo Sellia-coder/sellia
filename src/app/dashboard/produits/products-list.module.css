@@ -25,11 +25,11 @@
 }
 
 .title {
-  font-family: "Inter", sans-serif;
-  font-size: 32px;
-  font-weight: 700;
+  font-family: "Fraunces", serif;
+  font-size: 36px;
+  font-weight: 500;
   color: var(--sellia-ink);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.8px;
   margin: 0 0 8px;
   line-height: 1.1;
 }
@@ -109,9 +109,9 @@
 }
 
 .statValue {
-  font-family: "Inter", sans-serif;
-  font-size: 36px;
-  font-weight: 700;
+  font-family: "Fraunces", serif;
+  font-size: 42px;
+  font-weight: 500;
   color: var(--sellia-ink);
   line-height: 1;
   letter-spacing: -1px;
@@ -265,9 +265,9 @@
 }
 
 .emptyState h3 {
-  font-family: "Inter", sans-serif;
-  font-size: 20px;
-  font-weight: 700;
+  font-family: "Fraunces", serif;
+  font-size: 22px;
+  font-weight: 500;
   color: var(--sellia-ink);
   margin: 0 0 8px;
 }
@@ -384,9 +384,9 @@
 }
 
 .cardPrice {
-  font-family: "Inter", sans-serif;
-  font-size: 16px;
-  font-weight: 700;
+  font-family: "Fraunces", serif;
+  font-size: 18px;
+  font-weight: 500;
   color: var(--sellia-ink);
   letter-spacing: -0.3px;
 }

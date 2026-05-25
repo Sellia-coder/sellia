@@ -5,17 +5,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Plus,
-  Upload,
-  Search,
-  LayoutGrid,
-  List,
-  Pencil,
-  Trash2,
-  ExternalLink,
-  AlertTriangle,
+  UploadSimple,
+  MagnifyingGlass,
+  SquaresFour,
+  ListBullets,
+  PencilSimple,
+  Trash,
+  ArrowSquareOut,
+  WarningOctagon,
   Eye,
-  EyeOff,
-} from "lucide-react";
+  EyeSlash,
+} from "@phosphor-icons/react";
 import {
   toggleProductActiveAction,
   deleteProductAction,
@@ -139,10 +139,10 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
             className={styles.btnSecondary}
             onClick={() => setShowImportModal(true)}
           >
-            <Upload size={15} /> Importer CSV
+            <UploadSimple size={15} weight="bold" /> Importer CSV
           </button>
           <Link href="/dashboard/produits/nouveau" className={styles.btnPrimary}>
-            <Plus size={15} /> Nouveau produit
+            <Plus size={15} weight="bold" /> Nouveau produit
           </Link>
         </div>
       </div>
@@ -174,7 +174,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
             className={styles.statPill}
             style={{ background: "#FFEDD5", color: "#C2410C" }}
           >
-            <AlertTriangle size={12} /> Action requise
+            <WarningOctagon size={12} weight="duotone" /> Action requise
           </div>
         </div>
         <div className={styles.statCard}>
@@ -210,7 +210,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
 
         <div className={styles.toolbarRight}>
           <div className={styles.searchWrap}>
-            <Search size={14} className={styles.searchIcon} />
+            <MagnifyingGlass size={14} weight="regular" className={styles.searchIcon} />
             <input
               type="text"
               placeholder="Rechercher..."
@@ -227,7 +227,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
               onClick={() => setView("grid")}
               title="Vue grille"
             >
-              <LayoutGrid size={15} />
+              <SquaresFour size={15} weight="regular" />
             </button>
             <button
               type="button"
@@ -235,7 +235,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
               onClick={() => setView("table")}
               title="Vue tableau"
             >
-              <List size={15} />
+              <ListBullets size={15} weight="regular" />
             </button>
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
               className={styles.btnPrimary}
               style={{ marginTop: 16 }}
             >
-              <Plus size={15} /> Créer un produit
+              <Plus size={15} weight="bold" /> Créer un produit
             </Link>
           )}
         </div>
@@ -332,14 +332,14 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                     className={styles.cardActionBtn}
                     title={p.isActive ? "Mettre en brouillon" : "Publier"}
                   >
-                    {p.isActive ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {p.isActive ? <EyeSlash size={14} weight="regular" /> : <Eye size={14} weight="regular" />}
                   </button>
                   <Link
                     href={`/dashboard/produits/${p.id}`}
                     className={styles.cardActionBtn}
                     title="Modifier"
                   >
-                    <Pencil size={14} />
+                    <PencilSimple size={14} weight="regular" />
                   </Link>
                   <a
                     href={`/shop/${shop.slug}/produit/${p.slug || p.id}`}
@@ -348,7 +348,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                     className={styles.cardActionBtn}
                     title="Voir sur la boutique"
                   >
-                    <ExternalLink size={14} />
+                    <ArrowSquareOut size={14} weight="regular" />
                   </a>
                   <button
                     type="button"
@@ -357,7 +357,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                     className={`${styles.cardActionBtn} ${styles.cardActionDanger}`}
                     title="Supprimer"
                   >
-                    <Trash2 size={14} />
+                    <Trash size={14} weight="regular" />
                   </button>
                 </div>
               </div>
@@ -477,14 +477,14 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                           className={styles.tableActionBtn}
                           title={p.isActive ? "Mettre en brouillon" : "Publier"}
                         >
-                          {p.isActive ? <EyeOff size={14} /> : <Eye size={14} />}
+                          {p.isActive ? <EyeSlash size={14} weight="regular" /> : <Eye size={14} weight="regular" />}
                         </button>
                         <Link
                           href={`/dashboard/produits/${p.id}`}
                           className={styles.tableActionBtn}
                           title="Modifier"
                         >
-                          <Pencil size={14} />
+                          <PencilSimple size={14} weight="regular" />
                         </Link>
                         <a
                           href={`/shop/${shop.slug}/produit/${p.slug || p.id}`}
@@ -493,7 +493,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                           className={styles.tableActionBtn}
                           title="Voir sur la boutique"
                         >
-                          <ExternalLink size={14} />
+                          <ArrowSquareOut size={14} weight="regular" />
                         </a>
                         <button
                           type="button"
@@ -502,7 +502,7 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                           className={`${styles.tableActionBtn} ${styles.tableActionDanger}`}
                           title="Supprimer"
                         >
-                          <Trash2 size={14} />
+                          <Trash size={14} weight="regular" />
                         </button>
                       </div>
                     </td>

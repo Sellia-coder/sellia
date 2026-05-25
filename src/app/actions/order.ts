@@ -26,6 +26,7 @@ import {
   PAYMENT_METHOD,
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
+import { syncCustomerFromOrder } from "@/lib/customers";
 import type { Prisma } from "@prisma/client";
 
 const orderItemSchema = z.object({
@@ -261,6 +262,22 @@ export async function createOrderAction(input: CreateOrderInput) {
       total: baseTotal,
       feeMode: orderFeeMode,
     });
+
+    try {
+      await syncCustomerFromOrder(shop.id, {
+        fullName: order.customerName,
+        phone: order.customerPhone,
+        email: order.customerEmail,
+        city: order.customerCity,
+        address: order.customerAddress,
+        total: order.total,
+        orderDate: order.createdAt,
+      });
+    } catch (syncErr) {
+      safeLogger.error("syncCustomerFromOrder failed", {
+        error: syncErr instanceof Error ? syncErr.message : String(syncErr),
+      });
+    }
 
     if (
       effectivePaymentMethod === PAYMENT_METHOD.ONLINE_MOBILE_MONEY &&
