@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import DashboardLayoutClient from "./DashboardLayoutClient";
+import "./dashboard-typography.css";
 
 export default async function DashboardLayout({
   children,

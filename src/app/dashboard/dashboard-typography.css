@@ -1,0 +1,36 @@
+/* G2.2.A2 — Typography Inter + tokens Sellia dans /dashboard */
+
+.dashboard-wrap,
+.dashboard-wrap * {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif !important;
+}
+
+.dashboard-wrap svg,
+.dashboard-wrap svg * {
+  font-family: inherit;
+}
+
+.dashboard-wrap,
+.dash-root,
+.dash-content {
+  --sellia-ember: #e84b1f;
+  --sellia-ember-dark: #c2410c;
+  --sellia-ember-light: #ffedd5;
+  --sellia-ink: #0a0e13;
+  --sellia-ivory: #fafaf7;
+  --sellia-cream: #f5f2ec;
+  --sellia-border: #ece9e2;
+  --sellia-muted: #6b6e76;
+  --sellia-subtle: #8a8d95;
+  --sellia-success: #15803d;
+  --sellia-success-bg: #dcfce7;
+  --sellia-warning: #c2410c;
+  --sellia-warning-bg: #ffedd5;
+  --sellia-danger: #b91c1c;
+  --sellia-danger-bg: #fee2e2;
+}

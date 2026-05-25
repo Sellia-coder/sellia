@@ -41,7 +41,7 @@ export default function DashboardLayoutClient({
   const primary = shop?.primaryColor || "#E84B1F";
 
   return (
-    <div className={`dash-app ${mobileSidebarOpen ? "sidebar-open" : ""}`}>
+    <div className={`dash-app dashboard-wrap ${mobileSidebarOpen ? "sidebar-open" : ""}`}>
       <div className="dash-sidebar-overlay" onClick={() => setMobileSidebarOpen(false)}></div>
 
       <aside className="dash-sidebar">

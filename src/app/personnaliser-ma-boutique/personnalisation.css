@@ -1168,6 +1168,24 @@
   flex: 1;
 }
 
+.perso-modal-embedded {
+  position: static;
+  max-height: none;
+  height: auto;
+  overflow: visible;
+}
+
+.perso-modal-embedded .perso-modal-body {
+  max-height: none;
+  overflow: visible;
+  flex: none;
+}
+
+.perso-modal-embedded .perso-modal-header,
+.perso-modal-embedded .perso-modal-footer {
+  position: static;
+}
+
 /* ===== MODAL FORM ===== */
 .perso-form-section {
   margin-bottom: 28px;

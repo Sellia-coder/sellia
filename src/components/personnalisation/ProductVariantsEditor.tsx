@@ -75,6 +75,11 @@ export default function ProductVariantsEditor({
   const [bulkStock, setBulkStock] = useState("");
   const [bulkPriceDelta, setBulkPriceDelta] = useState("");
 
+  const totalCombos = useMemo(() => {
+    if (productType !== "physical") return 0;
+    return generateCombinations(axes).length;
+  }, [productType, axes]);
+
   if (productType !== "physical") {
     return (
       <div className={styles.notPhysicalNotice}>
@@ -202,7 +207,6 @@ export default function ProductVariantsEditor({
     setBulkPriceDelta("");
   };
 
-  const totalCombos = useMemo(() => generateCombinations(axes).length, [axes]);
   const allAxesReady = axes.length > 0 && axes.every((a) => a.values.length > 0 && a.name.trim() !== "");
   const isStale = allAxesReady && totalCombos !== variants.length;
 

@@ -1,0 +1,134 @@
+.wrap {
+  min-height: 100vh;
+  background: var(--sellia-ivory, #fafaf7);
+  padding: 24px 0 80px;
+  font-family: "Inter", sans-serif;
+}
+
+.topbar {
+  max-width: 1400px;
+  margin: 0 auto 16px;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b6e76;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: all 0.15s;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.backLink:hover {
+  background: #f0ede5;
+  color: #0a0e13;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--sellia-ember, #e84b1f);
+  text-transform: uppercase;
+}
+
+.errorBanner {
+  max-width: 1400px;
+  margin: 0 auto 16px;
+  padding: 12px 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #991b1b;
+}
+
+.successBanner {
+  max-width: 1400px;
+  margin: 0 auto 16px;
+  padding: 12px 20px;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toastClose {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #15803d;
+  font-size: 14px;
+}
+
+.savingBanner {
+  max-width: 1400px;
+  margin: 0 auto 16px;
+  padding: 12px 20px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1d4ed8;
+}
+
+.editorWrap {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.editorWrap > div,
+.editorWrap > div > * {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.editorWrap :global(.perso-modal-embedded) {
+  width: 100%;
+  max-width: none;
+  max-height: none !important;
+  height: auto !important;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  animation: none;
+  position: static !important;
+}
+
+.editorWrap :global(.perso-modal-embedded .perso-modal-body) {
+  max-height: none !important;
+  overflow: visible !important;
+  flex: none;
+}
+
+.editorWrap :global(.perso-modal-embedded .perso-modal-header),
+.editorWrap :global(.perso-modal-embedded .perso-modal-footer) {
+  position: static;
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 16px;
+  }
+  .editorWrap {
+    padding: 0 16px;
+  }
+}

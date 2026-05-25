@@ -48,6 +48,8 @@ interface Props {
   onSave: (p: ProductEditInput) => void;
   onDelete: () => void;
   onClose: () => void;
+  /** Page dashboard : pas d'overlay modal */
+  embedded?: boolean;
 }
 
 const TYPE_ICONS = {
@@ -177,6 +179,7 @@ export default function ProductEditorModal({
   onSave,
   onDelete,
   onClose,
+  embedded = false,
 }: Props) {
   const [draft, setDraft] = useState<ProductEditInput>(product);
   const [error, setError] = useState<string | null>(null);
@@ -189,11 +192,12 @@ export default function ProductEditorModal({
   }, [product]);
 
   useEffect(() => {
+    if (embedded) return;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [embedded]);
 
   const update = <K extends keyof ProductEditInput>(key: K, val: ProductEditInput[K]) => {
     setDraft((d) => ({ ...d, [key]: val }));
@@ -232,9 +236,14 @@ export default function ProductEditorModal({
     if (e.target === e.currentTarget) onClose();
   };
 
-  return (
-    <div className="perso-modal-overlay" onClick={handleOverlayClick} role="presentation">
-      <div className="perso-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+  const modal = (
+      <div
+        className={embedded ? "perso-modal perso-modal-embedded" : "perso-modal"}
+        data-embedded={embedded ? "true" : undefined}
+        onClick={embedded ? undefined : (e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal={!embedded}
+      >
         <header className="perso-modal-header">
           <h2 className="perso-modal-title">{draft.name || "Nouveau produit"}</h2>
           <button type="button" className="perso-modal-close" onClick={onClose} aria-label="Fermer">
@@ -739,6 +748,19 @@ export default function ProductEditorModal({
           </button>
         </footer>
       </div>
+  );
+
+  if (embedded) {
+    return modal;
+  }
+
+  return (
+    <div
+      className="perso-modal-overlay"
+      onClick={handleOverlayClick}
+      role="presentation"
+    >
+      {modal}
     </div>
   );
 }
