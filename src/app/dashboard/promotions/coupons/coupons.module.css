@@ -1,0 +1,389 @@
+.wrap {
+  padding: 32px 40px 64px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--sellia-muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.backLink:hover {
+  background: var(--sellia-ivory);
+  color: var(--sellia-ink);
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  background: var(--sellia-ember);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btnPrimary:hover {
+  background: var(--sellia-ember-dark);
+  transform: translateY(-1px);
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--sellia-ember);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-family: "Fraunces", serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+  letter-spacing: -0.7px;
+  margin: 0 0 8px;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--sellia-muted);
+  margin: 0;
+  max-width: 600px;
+}
+
+.toolbar {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 100px;
+  font-size: 13px;
+  color: var(--sellia-muted);
+  cursor: pointer;
+  font-weight: 500;
+  font-family: inherit;
+}
+
+.tab:hover {
+  background: var(--sellia-ivory);
+}
+
+.tabActive {
+  background: var(--sellia-ink);
+  color: #ffffff;
+}
+
+.tabCount {
+  font-size: 10.5px;
+  padding: 1px 7px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 100px;
+  font-weight: 600;
+}
+
+.tabActive .tabCount {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.searchWrap {
+  position: relative;
+  width: 260px;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--sellia-subtle);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  background: var(--sellia-ivory);
+  border: 1px solid var(--sellia-border);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--sellia-ember);
+  background: #ffffff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+
+.couponCard {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  transition: all 0.2s;
+}
+
+.couponCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(10, 14, 19, 0.06);
+  border-color: var(--sellia-ember);
+}
+
+.couponInactive {
+  opacity: 0.7;
+}
+
+.couponHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.couponIconBox {
+  width: 40px;
+  height: 40px;
+  background: var(--sellia-ember-light);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.couponMainInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.couponName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sellia-ink);
+  margin-bottom: 4px;
+}
+
+.couponDiscount {
+  font-family: "Fraunces", serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--sellia-ember);
+  letter-spacing: -0.2px;
+}
+
+.couponStatus {
+  flex-shrink: 0;
+}
+
+.statusBadge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.statusActive {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.statusInactive {
+  background: #f5f2ec;
+  color: #6b6e76;
+}
+
+.statusExpired {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.couponCode {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--sellia-ivory);
+  border: 1px dashed var(--sellia-border);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.couponCode:hover {
+  border-color: var(--sellia-ember);
+  background: #fffaf7;
+}
+
+.couponCodeLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--sellia-subtle);
+  text-transform: uppercase;
+}
+
+.couponCodeValue {
+  flex: 1;
+  font-family: "JetBrains Mono", "Menlo", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sellia-ink);
+  letter-spacing: 1px;
+}
+
+.couponDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--sellia-ivory);
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.couponDetail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.detailLabel {
+  color: var(--sellia-muted);
+}
+
+.detailValue {
+  color: var(--sellia-ink);
+  font-weight: 600;
+}
+
+.couponActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--sellia-border);
+}
+
+.actionBtn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--sellia-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionBtn:hover {
+  background: var(--sellia-ivory);
+  color: var(--sellia-ink);
+}
+
+.actionBtnDanger:hover {
+  background: var(--sellia-danger-bg);
+  color: var(--sellia-danger);
+}
+
+.emptyState {
+  background: #ffffff;
+  border: 1px dashed var(--sellia-border);
+  border-radius: 16px;
+  padding: 60px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emptyState h3 {
+  font-family: "Fraunces", serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+  margin: 16px 0 8px;
+}
+
+.emptyState p {
+  font-size: 13.5px;
+  color: var(--sellia-muted);
+  margin: 0;
+  max-width: 360px;
+}
+
+@media (max-width: 768px) {
+  .wrap {
+    padding: 24px 20px;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .searchWrap {
+    width: 100%;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

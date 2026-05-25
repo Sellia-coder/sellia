@@ -1,0 +1,238 @@
+.wrap {
+  padding: 32px 40px 64px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--sellia-muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.backLink:hover {
+  background: var(--sellia-ivory);
+  color: var(--sellia-ink);
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  background: #7c3aed;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #7c3aed;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-family: "Fraunces", serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--sellia-muted);
+  margin: 0;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.statLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--sellia-subtle);
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-family: "Fraunces", serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+  margin-top: 6px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 16px;
+  padding: 20px 22px;
+}
+
+.cardInactive {
+  opacity: 0.65;
+}
+
+.cardCode {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #7c3aed;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.cardAmounts {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.amountBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.amountLabel {
+  font-size: 10.5px;
+  color: var(--sellia-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.amountValue {
+  font-family: "Fraunces", serif;
+  font-size: 18px;
+  color: var(--sellia-ink);
+}
+
+.balance {
+  color: #15803d;
+}
+
+.cardMeta {
+  font-size: 12px;
+  color: var(--sellia-muted);
+  margin-bottom: 12px;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--sellia-border);
+}
+
+.actionBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--sellia-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionBtn:hover {
+  background: var(--sellia-ivory);
+}
+
+.statusBadge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.statusActive {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.statusInactive {
+  background: #f5f2ec;
+  color: #6b6e76;
+}
+
+.emptyState {
+  background: #ffffff;
+  border: 1px dashed var(--sellia-border);
+  border-radius: 16px;
+  padding: 60px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emptyState h3 {
+  font-family: "Fraunces", serif;
+  font-size: 22px;
+  margin: 16px 0 8px;
+}
+
+.emptyState p {
+  font-size: 13.5px;
+  color: var(--sellia-muted);
+}
+
+@media (max-width: 768px) {
+  .wrap {
+    padding: 24px 20px;
+  }
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+}

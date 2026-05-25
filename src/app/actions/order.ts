@@ -27,6 +27,7 @@ import {
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
 import { syncCustomerFromOrder } from "@/lib/customers";
+import { validateCouponForCheckout } from "@/lib/coupons";
 import type { Prisma } from "@prisma/client";
 
 const orderItemSchema = z.object({
@@ -65,6 +66,9 @@ const createOrderSchema = z.object({
   ]),
 
   moMo: moMoSchema.optional(),
+
+  couponCode: z.string().max(30).optional(),
+  couponDiscount: z.number().int().min(0).optional(),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
@@ -209,7 +213,33 @@ export async function createOrderAction(input: CreateOrderInput) {
     (sum, i) => sum + i.price * i.quantity,
     0
   );
-  const baseTotal = subtotal + shippingPrice;
+
+  let couponDiscount = 0;
+  let appliedCouponCode: string | null = null;
+  let appliedCouponId: string | null = null;
+
+  if (data.couponCode?.trim()) {
+    const couponResult = await validateCouponForCheckout({
+      shopId: shop.id,
+      code: data.couponCode,
+      subtotal,
+      customerPhone: data.customerPhone,
+    });
+    if (!couponResult.ok) {
+      return { ok: false, error: couponResult.error } as const;
+    }
+    couponDiscount = couponResult.discount;
+    appliedCouponCode = couponResult.coupon.code;
+    appliedCouponId = couponResult.coupon.id;
+    if (
+      data.couponDiscount !== undefined &&
+      data.couponDiscount !== couponDiscount
+    ) {
+      couponDiscount = couponResult.discount;
+    }
+  }
+
+  const baseTotal = Math.max(0, subtotal + shippingPrice - couponDiscount);
 
   const firstProduct = shop.products.find(
     (p) => p.id === itemsSnapshot[0]?.productId
@@ -239,6 +269,8 @@ export async function createOrderAction(input: CreateOrderInput) {
         shippingZone: shippingZoneName,
         shippingEta,
         total: baseTotal,
+        couponCode: appliedCouponCode,
+        couponDiscount: couponDiscount > 0 ? couponDiscount : null,
         feeMode: orderFeeMode,
         paymentMethod: effectivePaymentMethod,
         paymentSubMethod:
@@ -262,6 +294,23 @@ export async function createOrderAction(input: CreateOrderInput) {
       total: baseTotal,
       feeMode: orderFeeMode,
     });
+
+    if (appliedCouponId && couponDiscount > 0) {
+      await db.$transaction([
+        db.coupon.update({
+          where: { id: appliedCouponId },
+          data: { currentUses: { increment: 1 } },
+        }),
+        db.couponUsage.create({
+          data: {
+            couponId: appliedCouponId,
+            orderId: order.id,
+            customerPhone: order.customerPhone,
+            discountAmount: couponDiscount,
+          },
+        }),
+      ]);
+    }
 
     try {
       await syncCustomerFromOrder(shop.id, {

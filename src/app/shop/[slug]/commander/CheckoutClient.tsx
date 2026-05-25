@@ -110,6 +110,14 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
   const [momoNumber, setMomoNumber] = useState("");
   const [momoOperator, setMomoOperator] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    name: string;
+    discount: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     setMomoOperator(null);
@@ -169,8 +177,14 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     hasPhysicalLines && selectedZone ? selectedZone.price : 0;
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const baseTotal =
-    subtotal + (hasPhysicalLines && selectedZone ? shippingPrice : 0);
+  const shippingAmount =
+    hasPhysicalLines && selectedZone ? shippingPrice : 0;
+  const orderSubtotalBeforeDiscount =
+    subtotal + shippingAmount;
+  const baseTotal = Math.max(
+    0,
+    orderSubtotalBeforeDiscount - (appliedCoupon?.discount || 0)
+  );
 
   const cartFeeMode = useMemo((): FeeMode => {
     const modes = items.map((item) => {
@@ -242,6 +256,45 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     refresh();
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setValidatingCoupon(true);
+    setCouponError(null);
+    try {
+      const res = await fetch(`/api/shop/${shop.slug}/apply-coupon`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: couponCode,
+          subtotal,
+          customerPhone: formData.phone.replace(/\s/g, ""),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponError(data.error || "Code invalide");
+        return;
+      }
+      setAppliedCoupon({
+        code: data.coupon.code,
+        name: data.coupon.name,
+        discount: data.discount,
+      });
+    } catch (err) {
+      setCouponError(
+        err instanceof Error ? err.message : "Erreur lors de la validation"
+      );
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError(null);
+  };
+
   const handleConfirmDelivery = () => {
     if (!deliveryValid) {
       setError("Veuillez compléter vos informations de livraison.");
@@ -298,6 +351,11 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
           operator: momoOperator as CartevoOperator,
           phoneNumber: normalizePhoneNumber(momoNumber, momoCountry),
         };
+      }
+
+      if (appliedCoupon) {
+        payload.couponCode = appliedCoupon.code;
+        payload.couponDiscount = appliedCoupon.discount;
       }
 
       const result = await createOrderAction(payload);
@@ -765,6 +823,49 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
               ))}
             </div>
 
+            <div className={styles.couponSection}>
+              {!appliedCoupon ? (
+                <div className={styles.couponInput}>
+                  <input
+                    type="text"
+                    placeholder="Code promo"
+                    value={couponCode}
+                    onChange={(e) =>
+                      setCouponCode(e.target.value.toUpperCase())
+                    }
+                    className={styles.couponInputField}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={!couponCode.trim() || validatingCoupon}
+                    className={styles.couponApplyBtn}
+                    style={{ borderColor: primaryColor, color: primaryColor }}
+                  >
+                    {validatingCoupon ? "..." : "Appliquer"}
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.couponApplied}>
+                  <div className={styles.couponAppliedInfo}>
+                    <strong>{appliedCoupon.code}</strong>
+                    <span>{appliedCoupon.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className={styles.couponRemove}
+                    aria-label="Retirer le code"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              {couponError && (
+                <div className={styles.couponError}>{couponError}</div>
+              )}
+            </div>
+
             <div className={styles.summarySubtotal}>
               <span>Sous-total</span>
               <span>
@@ -775,7 +876,15 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
               <div className={styles.summarySubtotal}>
                 <span>Livraison</span>
                 <span>
-                  {shippingPrice.toLocaleString("fr-FR")} {cur}
+                  {shippingAmount.toLocaleString("fr-FR")} {cur}
+                </span>
+              </div>
+            )}
+            {appliedCoupon && (
+              <div className={styles.summaryDiscount}>
+                <span>Réduction ({appliedCoupon.code})</span>
+                <span>
+                  -{appliedCoupon.discount.toLocaleString("fr-FR")} {cur}
                 </span>
               </div>
             )}

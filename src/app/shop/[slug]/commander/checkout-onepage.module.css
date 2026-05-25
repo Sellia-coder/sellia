@@ -456,13 +456,107 @@
   }
 }
 
+.couponSection {
+  margin: 12px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f0ede5;
+}
+
+.couponInput {
+  display: flex;
+  gap: 8px;
+}
+
+.couponInputField {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid #ece9e2;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: "JetBrains Mono", "Menlo", monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.couponInputField:focus {
+  outline: none;
+  border-color: var(--shop-primary, #e84b1f);
+}
+
+.couponApplyBtn {
+  padding: 9px 14px;
+  background: #ffffff;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.couponApplyBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.couponApplied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+}
+
+.couponAppliedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.couponAppliedInfo strong {
+  font-family: "JetBrains Mono", "Menlo", monospace;
+  font-size: 13px;
+  color: #15803d;
+}
+
+.couponAppliedInfo span {
+  font-size: 11.5px;
+  color: #6b6e76;
+}
+
+.couponRemove {
+  background: transparent;
+  border: none;
+  color: #6b6e76;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.couponError {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #b91c1c;
+}
+
 .summarySubtotal,
-.summaryFees {
+.summaryFees,
+.summaryDiscount {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: #6B6E76;
+  color: #6b6e76;
   padding: 4px 0;
+}
+
+.summaryDiscount {
+  color: #15803d;
+  font-weight: 500;
 }
 
 .summaryTotal {

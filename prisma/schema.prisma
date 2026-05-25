@@ -132,6 +132,11 @@ model Shop {
   reviews        Review[]
   cartevoTransactions CartevoTransaction[]
   payouts             Payout[]
+  coupons             Coupon[]
+  giftCards           GiftCard[]
+  flashCampaigns      FlashCampaign[]
+  loyaltyAccounts     LoyaltyAccount[]
+  loyaltyConfig       LoyaltyConfig?
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -372,6 +377,14 @@ model Order {
   notifiedAdminAt      DateTime? @map("notified_admin_at")
   feeMode              String    @default("merchant_absorbs") @map("fee_mode")
 
+  couponCode            String?  @map("coupon_code")
+  couponDiscount        Int?     @map("coupon_discount")
+  giftCardCode          String?  @map("gift_card_code")
+  giftCardAmount        Int?     @map("gift_card_amount")
+  flashCampaignId       String?  @map("flash_campaign_id")
+  loyaltyPointsRedeemed Int?     @map("loyalty_points_redeemed")
+  loyaltyPointsEarned   Int?     @map("loyalty_points_earned")
+
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   confirmedAt       DateTime?
@@ -604,4 +617,210 @@ model Review {
   @@index([productId])
   @@index([status])
   @@index([createdAt])
+}
+
+// ============================================================================
+// G2.2.E — PROMOTIONS
+// ============================================================================
+
+model Coupon {
+  id                   String       @id @default(cuid())
+  shopId               String       @map("shop_id")
+  shop                 Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  code                 String
+  name                 String
+  description          String?      @db.Text
+
+  discountType         DiscountType
+  discountValue        Int
+
+  minOrderAmount       Int?         @map("min_order_amount")
+  maxDiscount          Int?         @map("max_discount")
+
+  startsAt             DateTime     @map("starts_at")
+  endsAt               DateTime?    @map("ends_at")
+
+  maxUses              Int?         @map("max_uses")
+  maxUsesPerCustomer   Int?         @default(1) @map("max_uses_per_customer")
+  currentUses          Int          @default(0) @map("current_uses")
+
+  isActive             Boolean      @default(true) @map("is_active")
+  firstOrderOnly       Boolean      @default(false) @map("first_order_only")
+  applicableProductIds String[]     @default([]) @map("applicable_product_ids")
+
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
+
+  usages               CouponUsage[]
+
+  @@unique([shopId, code])
+  @@index([shopId, isActive])
+  @@map("coupons")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+model CouponUsage {
+  id              String   @id @default(cuid())
+  couponId        String   @map("coupon_id")
+  coupon          Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  orderId         String?  @map("order_id")
+  customerPhone   String   @map("customer_phone")
+  discountAmount  Int      @map("discount_amount")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([couponId, customerPhone])
+  @@map("coupon_usages")
+}
+
+model GiftCard {
+  id              String   @id @default(cuid())
+  shopId          String   @map("shop_id")
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  code            String   @unique
+  initialAmount   Int      @map("initial_amount")
+  remainingAmount Int      @map("remaining_amount")
+
+  buyerName       String?  @map("buyer_name")
+  buyerPhone      String?  @map("buyer_phone")
+  recipientName   String?  @map("recipient_name")
+  recipientPhone  String?  @map("recipient_phone")
+  message         String?  @db.Text
+
+  expiresAt       DateTime? @map("expires_at")
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  transactions    GiftCardTransaction[]
+
+  @@index([shopId, isActive])
+  @@map("gift_cards")
+}
+
+model GiftCardTransaction {
+  id           String   @id @default(cuid())
+  giftCardId   String   @map("gift_card_id")
+  giftCard     GiftCard @relation(fields: [giftCardId], references: [id], onDelete: Cascade)
+
+  amount       Int
+  orderId      String?  @map("order_id")
+  balanceAfter Int      @map("balance_after")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("gift_card_transactions")
+}
+
+model FlashCampaign {
+  id            String       @id @default(cuid())
+  shopId        String       @map("shop_id")
+  shop          Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  name          String
+  description   String?      @db.Text
+
+  discountType  DiscountType
+  discountValue Int
+
+  startsAt      DateTime     @map("starts_at")
+  endsAt        DateTime     @map("ends_at")
+
+  productIds    String[]     @default([]) @map("product_ids")
+
+  isActive      Boolean      @default(true) @map("is_active")
+
+  ordersCount   Int          @default(0) @map("orders_count")
+  totalDiscount Int          @default(0) @map("total_discount")
+
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@index([shopId, isActive, startsAt, endsAt])
+  @@map("flash_campaigns")
+}
+
+model LoyaltyAccount {
+  id              String      @id @default(cuid())
+  shopId          String      @map("shop_id")
+  shop            Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customerId      String?     @map("customer_id")
+  customerPhone   String      @map("customer_phone")
+  customerName    String      @map("customer_name")
+
+  points          Int         @default(0)
+  lifetimePoints  Int         @default(0) @map("lifetime_points")
+
+  tier            LoyaltyTier @default(BRONZE)
+
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  transactions    LoyaltyTransaction[]
+
+  @@unique([shopId, customerPhone])
+  @@index([shopId, tier])
+  @@map("loyalty_accounts")
+}
+
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+model LoyaltyTransaction {
+  id          String         @id @default(cuid())
+  accountId   String         @map("account_id")
+  account     LoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  type        LoyaltyTxnType
+  points      Int
+  orderId     String?        @map("order_id")
+  description String?
+
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  @@map("loyalty_transactions")
+}
+
+enum LoyaltyTxnType {
+  EARN
+  REDEEM
+  EXPIRE
+  ADJUST
+}
+
+model LoyaltyConfig {
+  id                       String   @id @default(cuid())
+  shopId                   String   @unique @map("shop_id")
+  shop                     Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  isEnabled                Boolean  @default(false) @map("is_enabled")
+
+  pointsPerCurrency        Int      @default(1) @map("points_per_currency")
+  currencyPerPoint         Int      @default(100) @map("currency_per_point")
+
+  redemptionPointsRequired Int      @default(100) @map("redemption_points_required")
+  redemptionDiscountAmount Int      @default(500) @map("redemption_discount_amount")
+
+  silverThreshold          Int      @default(500) @map("silver_threshold")
+  goldThreshold            Int      @default(2000) @map("gold_threshold")
+  platinumThreshold        Int      @default(5000) @map("platinum_threshold")
+
+  welcomeBonusPoints       Int      @default(0) @map("welcome_bonus_points")
+
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  @@map("loyalty_configs")
 }

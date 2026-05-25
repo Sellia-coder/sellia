@@ -79,17 +79,21 @@ export default async function DashboardHomePage() {
         currency: shop.currency || "XAF",
       }}
       kpis={kpis}
-      topProducts={topProducts}
-      topCustomers={topCustomers.map(
-        (c: (typeof topCustomers)[number]) => ({
-          id: c.id,
-          fullName: c.fullName,
-          phone: c.phone,
-          city: c.city,
-          totalOrders: c.totalOrders,
-          totalSpent: c.totalSpent,
-        })
-      )}
+      topProducts={topProducts.map((p) => ({
+        name: p.name,
+        quantity: p.quantity,
+        revenue: p.revenue,
+        imageUrl: p.imageUrl ?? null,
+        emoji: p.emoji ?? null,
+      }))}
+      topCustomers={topCustomers.map((c) => ({
+        id: c.id,
+        fullName: c.fullName,
+        phone: c.phone,
+        city: c.city ?? null,
+        totalOrders: c.totalOrders,
+        totalSpent: c.totalSpent,
+      }))}
       recentActivity={recentActivity.map(
         (e: (typeof recentActivity)[number]) => ({
           ...e,

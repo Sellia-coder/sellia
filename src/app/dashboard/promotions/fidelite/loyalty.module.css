@@ -1,0 +1,288 @@
+.wrap {
+  padding: 32px 40px 64px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.topbar {
+  margin-bottom: 20px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--sellia-muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.backLink:hover {
+  background: var(--sellia-ivory);
+  color: var(--sellia-ink);
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #15803d;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-family: "Fraunces", serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--sellia-ink);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--sellia-muted);
+  margin: 0;
+}
+
+.configCard {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+}
+
+.configTitle {
+  font-family: "Fraunces", serif;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 18px;
+  color: var(--sellia-ink);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--sellia-border);
+}
+
+.toggleLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sellia-ink);
+}
+
+.toggleHint {
+  font-size: 12.5px;
+  color: var(--sellia-muted);
+  margin-top: 4px;
+}
+
+.toggle {
+  width: 48px;
+  height: 28px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.toggleOn {
+  background: #15803d;
+}
+
+.toggleOff {
+  background: var(--sellia-border);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: left 0.2s;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--sellia-subtle);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--sellia-border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.btnSave {
+  margin-top: 8px;
+  padding: 10px 20px;
+  background: var(--sellia-ink);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.statLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--sellia-subtle);
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-family: "Fraunces", serif;
+  font-size: 20px;
+  margin-top: 4px;
+  color: var(--sellia-ink);
+}
+
+.tableWrap {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--sellia-subtle);
+  text-transform: uppercase;
+  padding: 12px 16px;
+  background: var(--sellia-ivory);
+  border-bottom: 1px solid var(--sellia-border);
+}
+
+.table td {
+  padding: 14px 16px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--sellia-border);
+  color: var(--sellia-ink);
+}
+
+.tierBadge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.tierBRONZE {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.tierSILVER {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.tierGOLD {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.tierPLATINUM {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.emptyState {
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emptyState h3 {
+  font-family: "Fraunces", serif;
+  font-size: 20px;
+  margin: 12px 0 6px;
+}
+
+.emptyState p {
+  font-size: 13px;
+  color: var(--sellia-muted);
+}
+
+.successMsg {
+  font-size: 13px;
+  color: #15803d;
+  margin-top: 8px;
+}
+
+.errorMsg {
+  font-size: 13px;
+  color: var(--sellia-danger);
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .wrap {
+    padding: 24px 20px;
+  }
+  .grid2,
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+}
