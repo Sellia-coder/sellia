@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { MagnifyingGlass, Eye } from "@phosphor-icons/react";
+import EmptyOrders from "@/app/dashboard/empty-states/EmptyOrders";
 import {
   computeDisplayStatus,
   STATUS_CONFIG,
@@ -238,7 +239,7 @@ export default function OrdersListClient({
 
       {filtered.length === 0 ? (
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>📦</div>
+          <EmptyOrders size={180} />
           <h3>Aucune commande</h3>
           <p>
             {filter === "all"

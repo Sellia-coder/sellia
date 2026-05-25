@@ -14740,18 +14740,14 @@ footer {
 }
 
 .dash-sidebar-shop-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-family: "Inter", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 13px;
   flex-shrink: 0;
-  letter-spacing: -0.3px;
+  overflow: hidden;
 }
 
 .dash-sidebar-shop-info {

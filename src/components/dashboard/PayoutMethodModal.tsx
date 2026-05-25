@@ -85,7 +85,7 @@ export default function PayoutMethodModal({
   const [success, setSuccess] = useState(false);
 
   const availableOperators = OPERATORS.filter((op) =>
-    op.countries.includes(country)
+    (op.countries as readonly string[]).includes(country)
   );
 
   useEffect(() => {

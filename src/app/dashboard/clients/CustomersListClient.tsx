@@ -9,6 +9,7 @@ import {
   WhatsappLogo,
   Trophy,
 } from "@phosphor-icons/react";
+import EmptyCustomers from "@/app/dashboard/empty-states/EmptyCustomers";
 import { formatPrice } from "@/lib/order-status";
 import styles from "./customers-list.module.css";
 
@@ -176,7 +177,7 @@ export default function CustomersListClient({
 
       {filtered.length === 0 ? (
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>👥</div>
+          <EmptyCustomers size={180} />
           <h3>Aucun client</h3>
           <p>Les clients apparaîtront ici dès leur première commande.</p>
         </div>

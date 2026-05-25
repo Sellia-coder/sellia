@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/actions/auth";
+import { ArrowSquareOut } from "@phosphor-icons/react";
+import ShopAvatar from "@/components/dashboard/ShopAvatar";
 
 export type DashboardLayoutShop = {
   slug: string;
@@ -38,7 +40,6 @@ export default function DashboardLayoutClient({
 
   const isActive = (path: string) => pathname === path;
   const shopUrl = shop ? `https://${shop.slug}.getsellia.com` : null;
-  const primary = shop?.primaryColor || "#E84B1F";
 
   return (
     <div className={`dash-app dashboard-wrap ${mobileSidebarOpen ? "sidebar-open" : ""}`}>
@@ -68,29 +69,19 @@ export default function DashboardLayoutClient({
             className="dash-sidebar-shop"
             aria-label={`Voir la boutique ${shop.name}`}
           >
-            <div className="dash-sidebar-shop-logo" style={{ background: primary }}>
-              {shop.name?.charAt(0)?.toUpperCase() || "S"}
-            </div>
+            <ShopAvatar shopName={shop.name} size={40} className="dash-sidebar-shop-logo" />
             <div className="dash-sidebar-shop-info">
               <div className="dash-sidebar-shop-name">{shop.name}</div>
               <div className="dash-sidebar-shop-url">
                 <span className="dash-sidebar-shop-url-text">
                   {shop.slug}.getsellia.com
                 </span>
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.4"
+                <ArrowSquareOut
+                  size={11}
+                  weight="regular"
                   className="dash-sidebar-shop-icon"
                   aria-hidden
-                >
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
+                />
               </div>
             </div>
           </a>

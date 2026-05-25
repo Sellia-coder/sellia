@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from "@phosphor-icons/react";
 import PayoutMethodModal from "@/components/dashboard/PayoutMethodModal";
+import EmptyTransactions from "@/app/dashboard/empty-states/EmptyTransactions";
 import styles from "./paiements.module.css";
 
 interface Balances {
@@ -494,7 +495,7 @@ export default function PaiementsClient({
 
         {filtered.length === 0 ? (
           <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>💰</div>
+            <EmptyTransactions size={180} />
             <h3>Aucune transaction</h3>
             <p>
               Vos transactions apparaîtront ici dès vos premières ventes livrées
