@@ -1,8 +1,14 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { getSidebarCounts, type SidebarCounts } from "@/lib/sidebar-counts";
 import DashboardLayoutClient from "./DashboardLayoutClient";
 import "./dashboard-typography.css";
+
+const emptySidebarCounts: SidebarCounts = {
+  products: { lowStock: 0, total: 0 },
+  orders: { pending: 0, toDeliver: 0, actionRequired: 0 },
+};
 
 export default async function DashboardLayout({
   children,
@@ -16,8 +22,19 @@ export default async function DashboardLayout({
 
   const shop = await db.shop.findFirst({
     where: { ownerId: user.id },
-    select: { slug: true, name: true, primaryColor: true, plan: true },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      primaryColor: true,
+      plan: true,
+      customDomain: true,
+    },
   });
+
+  const sidebarCounts = shop
+    ? await getSidebarCounts(shop.id)
+    : emptySidebarCounts;
 
   const displayName =
     [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -36,6 +53,8 @@ export default async function DashboardLayout({
               slug: shop.slug,
               name: shop.name,
               primaryColor: shop.primaryColor,
+              plan: shop.plan ?? "free",
+              customDomain: shop.customDomain,
             }
           : null
       }
@@ -44,6 +63,7 @@ export default async function DashboardLayout({
         initial,
         plan: shop?.plan ?? "free",
       }}
+      sidebarCounts={sidebarCounts}
     >
       {children}
     </DashboardLayoutClient>

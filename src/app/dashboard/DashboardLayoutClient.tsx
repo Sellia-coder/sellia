@@ -4,13 +4,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/actions/auth";
-import { ArrowSquareOut } from "@phosphor-icons/react";
-import ShopAvatar from "@/components/dashboard/ShopAvatar";
+import ShopSidebarCard from "@/components/dashboard/ShopSidebarCard";
+import SidebarBadge from "@/components/dashboard/SidebarBadge";
+import type { SidebarCounts } from "@/lib/sidebar-counts";
 
 export type DashboardLayoutShop = {
   slug: string;
   name: string;
   primaryColor: string;
+  plan: string;
+  customDomain?: string | null;
 };
 
 export type DashboardLayoutUserHeader = {
@@ -23,12 +26,14 @@ interface Props {
   children: React.ReactNode;
   shop: DashboardLayoutShop | null;
   userHeader: DashboardLayoutUserHeader;
+  sidebarCounts: SidebarCounts;
 }
 
 export default function DashboardLayoutClient({
   children,
   shop,
   userHeader,
+  sidebarCounts,
 }: Props) {
   const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -39,7 +44,9 @@ export default function DashboardLayoutClient({
   }, [pathname]);
 
   const isActive = (path: string) => pathname === path;
-  const shopUrl = shop ? `https://${shop.slug}.getsellia.com` : null;
+  const shopUrl = shop
+    ? `https://${shop.customDomain || `${shop.slug}.getsellia.com`}`
+    : null;
 
   return (
     <div className={`dash-app dashboard-wrap ${mobileSidebarOpen ? "sidebar-open" : ""}`}>
@@ -62,29 +69,12 @@ export default function DashboardLayoutClient({
         </div>
 
         {shop && shopUrl ? (
-          <a
-            href={shopUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="dash-sidebar-shop"
-            aria-label={`Voir la boutique ${shop.name}`}
-          >
-            <ShopAvatar shopName={shop.name} size={40} className="dash-sidebar-shop-logo" />
-            <div className="dash-sidebar-shop-info">
-              <div className="dash-sidebar-shop-name">{shop.name}</div>
-              <div className="dash-sidebar-shop-url">
-                <span className="dash-sidebar-shop-url-text">
-                  {shop.slug}.getsellia.com
-                </span>
-                <ArrowSquareOut
-                  size={11}
-                  weight="regular"
-                  className="dash-sidebar-shop-icon"
-                  aria-hidden
-                />
-              </div>
-            </div>
-          </a>
+          <ShopSidebarCard
+            shopName={shop.name}
+            shopSlug={shop.slug}
+            planId={shop.plan}
+            shopDomain={shop.customDomain || `${shop.slug}.getsellia.com`}
+          />
         ) : (
           <div className="dash-sidebar-shop-placeholder">
             Aucune boutique liée à ce compte pour le moment.
@@ -116,14 +106,22 @@ export default function DashboardLayoutClient({
               <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
             Produits
-            <span className="dash-nav-badge muted">12</span>
+            <SidebarBadge
+              count={sidebarCounts.products.lowStock}
+              variant="warning"
+              urgent={sidebarCounts.products.lowStock > 5}
+            />
           </Link>
           <Link className={`dash-nav-item ${pathname.startsWith("/dashboard/commandes") ? "active" : ""}`} href="/dashboard/commandes">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
             Commandes
-            <span className="dash-nav-badge">3</span>
+            <SidebarBadge
+              count={sidebarCounts.orders.actionRequired}
+              variant="danger"
+              urgent={sidebarCounts.orders.actionRequired > 5}
+            />
           </Link>
           <Link className={`dash-nav-item ${pathname.startsWith("/dashboard/clients") ? "active" : ""}`} href="/dashboard/clients">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

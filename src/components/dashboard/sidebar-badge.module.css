@@ -1,0 +1,66 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-left: auto;
+  font-family: "Inter", sans-serif;
+  line-height: 1;
+  transition: all 0.18s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.default {
+  background: var(--sellia-cream, #f5f2ec);
+  color: var(--sellia-muted, #6b6e76);
+}
+
+.warning {
+  background: var(--sellia-ember, #e84b1f);
+  color: #ffffff;
+}
+
+.danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.success {
+  background: #15803d;
+  color: #ffffff;
+}
+
+.urgent {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+}
+
+.warning.urgent {
+  animation: pulse-glow-ember 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow-ember {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 75, 31, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(232, 75, 31, 0);
+  }
+}
