@@ -11,13 +11,12 @@ import {
   Eye,
   EyeSlash,
   CaretLeft,
-  Percent,
-  CurrencyDollar,
   CheckCircle,
 } from "@phosphor-icons/react";
 import { toggleCouponActiveAction, deleteCouponAction } from "@/app/actions/coupons";
 import { useRouter } from "next/navigation";
 import CouponEditorModal from "./CouponEditorModal";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import EmptyCoupons from "../empty-states/EmptyCoupons";
 import styles from "./coupons.module.css";
 
@@ -59,6 +58,7 @@ export default function CouponsClient({ currency, coupons }: Props) {
   const [editing, setEditing] = useState<CouponRow | null | "new">(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const formatPrice = (n: number) => n.toLocaleString("fr-FR");
 
@@ -218,118 +218,111 @@ export default function CouponsClient({ currency, coupons }: Props) {
           )}
         </div>
       ) : (
-        <div className={styles.grid}>
-          {filtered.map((c) => {
-            const expired = isExpired(c);
-            return (
-              <div
-                key={c.id}
-                className={`${styles.couponCard} ${!c.isActive || expired ? styles.couponInactive : ""}`}
-              >
-                <div className={styles.couponHeader}>
-                  <div className={styles.couponIconBox}>
-                    {c.discountType === "PERCENTAGE" ? (
-                      <Percent size={20} weight="duotone" color="#E84B1F" />
-                    ) : (
-                      <CurrencyDollar size={20} weight="duotone" color="#E84B1F" />
-                    )}
-                  </div>
-                  <div className={styles.couponMainInfo}>
-                    <div className={styles.couponName}>{c.name}</div>
-                    <div className={styles.couponDiscount}>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Nom</th>
+                <th>Réduction</th>
+                <th>Validité</th>
+                <th>Utilisations</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c) => {
+                const expired = isExpired(c);
+                return (
+                  <tr
+                    key={c.id}
+                    className={
+                      !c.isActive || expired ? styles.rowInactive : ""
+                    }
+                  >
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyCode(c.code)}
+                        className={styles.cellCode}
+                      >
+                        <span className={styles.codeMono}>{c.code}</span>
+                        {copiedCode === c.code ? (
+                          <CheckCircle size={12} weight="fill" color="#15803D" />
+                        ) : (
+                          <Copy size={11} weight="regular" />
+                        )}
+                      </button>
+                    </td>
+                    <td className={styles.cellName}>{c.name}</td>
+                    <td className={styles.cellDiscount}>
                       {c.discountType === "PERCENTAGE"
-                        ? `${c.discountValue}% de réduction`
-                        : `${formatPrice(c.discountValue)} ${cur} de réduction`}
-                    </div>
-                  </div>
-                  <div className={styles.couponStatus}>
-                    {expired ? (
-                      <span className={`${styles.statusBadge} ${styles.statusExpired}`}>
-                        Expiré
-                      </span>
-                    ) : !c.isActive ? (
-                      <span className={`${styles.statusBadge} ${styles.statusInactive}`}>
-                        Désactivé
-                      </span>
-                    ) : (
-                      <span className={`${styles.statusBadge} ${styles.statusActive}`}>
-                        Actif
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleCopyCode(c.code)}
-                  className={styles.couponCode}
-                >
-                  <span className={styles.couponCodeLabel}>Code</span>
-                  <span className={styles.couponCodeValue}>{c.code}</span>
-                  {copiedCode === c.code ? (
-                    <CheckCircle size={14} weight="fill" color="#15803D" />
-                  ) : (
-                    <Copy size={13} weight="regular" />
-                  )}
-                </button>
-
-                <div className={styles.couponDetails}>
-                  {c.minOrderAmount != null && c.minOrderAmount > 0 && (
-                    <div className={styles.couponDetail}>
-                      <span className={styles.detailLabel}>Commande min</span>
-                      <span className={styles.detailValue}>
-                        {formatPrice(c.minOrderAmount)} {cur}
-                      </span>
-                    </div>
-                  )}
-                  <div className={styles.couponDetail}>
-                    <span className={styles.detailLabel}>Validité</span>
-                    <span className={styles.detailValue}>
-                      {formatDate(c.endsAt)}
-                    </span>
-                  </div>
-                  <div className={styles.couponDetail}>
-                    <span className={styles.detailLabel}>Utilisations</span>
-                    <span className={styles.detailValue}>
+                        ? `${c.discountValue}%`
+                        : `${formatPrice(c.discountValue)} ${cur}`}
+                    </td>
+                    <td className={styles.cellMeta}>{formatDate(c.endsAt)}</td>
+                    <td className={styles.cellUses}>
                       {c.currentUses}
                       {c.maxUses ? ` / ${c.maxUses}` : ""}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.couponActions}>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleActive(c)}
-                    disabled={busyId === c.id}
-                    className={styles.actionBtn}
-                    title={c.isActive ? "Désactiver" : "Activer"}
-                  >
-                    {c.isActive ? (
-                      <EyeSlash size={14} weight="regular" />
-                    ) : (
-                      <Eye size={14} weight="regular" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditing(c)}
-                    className={styles.actionBtn}
-                  >
-                    <PencilSimple size={14} weight="regular" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(c)}
-                    disabled={busyId === c.id}
-                    className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-                  >
-                    <Trash size={14} weight="regular" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                    </td>
+                    <td>
+                      {expired ? (
+                        <span
+                          className={`${styles.statusBadge} ${styles.statusExpired}`}
+                        >
+                          Expiré
+                        </span>
+                      ) : !c.isActive ? (
+                        <span
+                          className={`${styles.statusBadge} ${styles.statusInactive}`}
+                        >
+                          Désactivé
+                        </span>
+                      ) : (
+                        <span
+                          className={`${styles.statusBadge} ${styles.statusActive}`}
+                        >
+                          Actif
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <div className={styles.rowActions}>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleActive(c)}
+                          disabled={busyId === c.id}
+                          className={styles.actionBtn}
+                        >
+                          {c.isActive ? (
+                            <EyeSlash size={13} />
+                          ) : (
+                            <Eye size={13} />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditing(c)}
+                          className={styles.actionBtn}
+                        >
+                          <PencilSimple size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(c)}
+                          disabled={busyId === c.id}
+                          className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                        >
+                          <Trash size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -340,8 +333,16 @@ export default function CouponsClient({ currency, coupons }: Props) {
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);
+            setSuccessMessage("Coupon enregistré avec succès");
             router.refresh();
           }}
+        />
+      )}
+
+      {successMessage && (
+        <SuccessModal
+          title={successMessage}
+          onClose={() => setSuccessMessage(null)}
         />
       )}
     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X } from "@phosphor-icons/react";
 import { createPageAction, updatePageAction } from "@/app/actions/shop-pages";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import styles from "./pages.module.css";
 
 interface PageRow {
@@ -45,6 +46,7 @@ export default function PageEditorModal({ page, onClose, onSaved }: Props) {
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleTitleChange = (v: string) => {
     setTitle(v);
@@ -67,11 +69,12 @@ export default function PageEditorModal({ page, onClose, onSaved }: Props) {
       ? await updatePageAction(page!.id, payload)
       : await createPageAction(payload);
     setSaving(false);
-    if (res.ok) onSaved();
+    if (res.ok) setShowSuccess(true);
     else setError(res.error ?? "Erreur");
   };
 
   return (
+    <>
     <div className={styles.modalBackdrop} onClick={onClose}>
       <div className={styles.modalWide} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
@@ -181,5 +184,16 @@ export default function PageEditorModal({ page, onClose, onSaved }: Props) {
         </div>
       </div>
     </div>
+    {showSuccess && (
+      <SuccessModal
+        title={isEdit ? "Page enregistrée" : "Page créée"}
+        description="Votre contenu a été sauvegardé avec succès."
+        onClose={() => {
+          setShowSuccess(false);
+          onSaved();
+        }}
+      />
+    )}
+    </>
   );
 }

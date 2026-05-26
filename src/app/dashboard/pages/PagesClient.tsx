@@ -13,16 +13,16 @@ import {
   ArrowSquareOut,
   CheckCircle,
   BookOpen,
-  Phone,
-  FileText,
   Truck,
   ArrowUUpLeft,
+  ShieldCheck,
 } from "@phosphor-icons/react";
 import {
   createPageFromTemplateAction,
   deletePageAction,
   updatePageAction,
   deleteFaqAction,
+  generateLegalPagesAction,
 } from "@/app/actions/shop-pages";
 import PageEditorModal from "./PageEditorModal";
 import FaqEditorModal from "./FaqEditorModal";
@@ -58,8 +58,6 @@ interface Props {
 
 const TEMPLATES = [
   { key: "about", title: "À propos", icon: BookOpen, color: "#9333EA", description: "Présentez votre boutique" },
-  { key: "contact", title: "Contact", icon: Phone, color: "#1D4ED8", description: "Coordonnées et horaires" },
-  { key: "cgv", title: "CGV", icon: FileText, color: "#0A0E13", description: "Conditions générales" },
   { key: "shipping", title: "Livraison", icon: Truck, color: "#15803D", description: "Modes et délais" },
   { key: "returns", title: "Retours", icon: ArrowUUpLeft, color: "#DC2626", description: "Politique de retour" },
 ];
@@ -70,10 +68,23 @@ export default function PagesClient({ shopSlug, pages, faqs }: Props) {
   const [editingPage, setEditingPage] = useState<PageRow | null | "new">(null);
   const [editingFaq, setEditingFaq] = useState<FaqRow | null | "new">(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [generatingLegal, setGeneratingLegal] = useState(false);
 
   const existingTemplateKeys = new Set(
     pages.map((p) => p.templateKey).filter(Boolean)
   );
+
+  const hasLegalPages = ["cgv", "confidentialite", "mentions-legales"].every(
+    (slug) => pages.some((p) => p.slug === slug)
+  );
+
+  const handleGenerateLegal = async () => {
+    setGeneratingLegal(true);
+    const res = await generateLegalPagesAction();
+    if (res.ok) router.refresh();
+    else alert(res.error ?? "Erreur");
+    setGeneratingLegal(false);
+  };
 
   const handleCreateFromTemplate = async (templateKey: string) => {
     setBusyId(templateKey);
@@ -138,6 +149,31 @@ export default function PagesClient({ shopSlug, pages, faqs }: Props) {
 
       {activeTab === "pages" && (
         <>
+          {!hasLegalPages && (
+            <div className={styles.legalBanner}>
+              <div className={styles.legalBannerIcon}>
+                <ShieldCheck size={22} weight="duotone" />
+              </div>
+              <div className={styles.legalBannerContent}>
+                <strong>Vos pages légales ne sont pas encore créées</strong>
+                <p>
+                  Toute boutique en ligne doit présenter ses propres conditions
+                  générales, politique de confidentialité et mentions légales.
+                  Sellia peut générer ces pages automatiquement avec les
+                  informations de votre boutique.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleGenerateLegal}
+                disabled={generatingLegal}
+                className={styles.btnPrimary}
+              >
+                {generatingLegal ? "Génération..." : "Générer mes pages légales"}
+              </button>
+            </div>
+          )}
+
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>

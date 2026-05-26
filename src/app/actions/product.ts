@@ -143,7 +143,9 @@ function revalidateShopPaths(slug: string | null) {
 export async function createProductAction(input: {
   shopId: string;
   product: ProductEditInput;
-}): Promise<{ ok: true; productId: string } | { ok: false; error: string }> {
+}): Promise<
+  { ok: true; productId: string; slug: string } | { ok: false; error: string }
+> {
   try {
     const user = await getCurrentUser();
     if (!user?.id) return { ok: false, error: "Non autorisé" };
@@ -177,7 +179,7 @@ export async function createProductAction(input: {
     const shopSlug = await getShopSlugById(input.shopId);
     revalidateShopPaths(shopSlug);
 
-    return { ok: true, productId: product.id };
+    return { ok: true, productId: product.id, slug: product.slug ?? product.id };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[createProductAction]", message);

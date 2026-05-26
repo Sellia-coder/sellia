@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import { addToCart } from "@/lib/cart";
+import { usePixelTracking } from "@/lib/use-pixel-tracking";
 import { useCartContext } from "./CartProvider";
 import { buildProductGalleryImages } from "@/lib/shop-data";
 import { getProductRating, getRatingAriaLabel } from "@/lib/utils/product-rating";
@@ -107,10 +108,10 @@ export default function ProductDetail({
 }: Props) {
   const router = useRouter();
   const { refresh } = useCartContext();
+  const { trackViewContent, trackAddToCart } = usePixelTracking();
   const primaryColor = shop.primaryColor ?? "#E84B1F";
-  const currency = currencyLabel(
-    product.currency ?? shop.currency ?? "XAF"
-  );
+  const currencyCode = product.currency ?? shop.currency ?? "XAF";
+  const currency = currencyLabel(currencyCode);
 
   const variantAxes: VariantAxis[] = Array.isArray(product.variantAxes)
     ? (product.variantAxes as VariantAxis[])
@@ -156,6 +157,16 @@ export default function ProductDetail({
   const [activeTab, setActiveTab] = useState<"description" | "reviews">(
     "description"
   );
+
+  useEffect(() => {
+    trackViewContent({
+      productId: product.id,
+      productName: product.name,
+      price: effectivePrice,
+      currency: currencyCode,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id, effectivePrice]);
 
   const segment = product.slug ?? product.id;
 
@@ -204,12 +215,26 @@ export default function ProductDetail({
   const handleAddToCart = () => {
     if (isOutOfStock) return;
     addToCart(shop.slug, cartLinePayload(), quantity);
+    trackAddToCart({
+      productId: product.id,
+      productName: product.name,
+      price: effectivePrice,
+      currency: currencyCode,
+      quantity,
+    });
     refresh();
   };
 
   const handleBuyNow = () => {
     if (isOutOfStock) return;
     addToCart(shop.slug, cartLinePayload(), quantity);
+    trackAddToCart({
+      productId: product.id,
+      productName: product.name,
+      price: effectivePrice,
+      currency: currencyCode,
+      quantity,
+    });
     refresh();
     router.push(`/shop/${shop.slug}/commander`);
   };

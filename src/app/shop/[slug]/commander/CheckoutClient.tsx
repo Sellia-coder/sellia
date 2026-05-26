@@ -34,6 +34,7 @@ import {
 import { PaymentMethodsGrid } from "@/components/icons/momo-operators";
 import CountryFlag from "@/components/shared/CountryFlag";
 import { createOrderAction } from "@/app/actions/order";
+import { usePixelTracking } from "@/lib/use-pixel-tracking";
 import {
   getOperatorsForCountry,
   normalizePhoneNumber,
@@ -96,6 +97,7 @@ interface Props {
 export default function CheckoutClient({ shop, initialMethod }: Props) {
   const router = useRouter();
   const { refresh } = useCartContext();
+  const { trackInitiateCheckout } = usePixelTracking();
   const primaryColor = shop.primaryColor ?? "#E84B1F";
   const cur = currencyLabel(shop.currency ?? "XAF");
 
@@ -185,6 +187,12 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
     0,
     orderSubtotalBeforeDiscount - (appliedCoupon?.discount || 0)
   );
+
+  useEffect(() => {
+    if (!mounted || items.length === 0) return;
+    trackInitiateCheckout(subtotal, shop.currency ?? "XAF", items.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, items.length, subtotal]);
 
   const cartFeeMode = useMemo((): FeeMode => {
     const modes = items.map((item) => {

@@ -18,6 +18,7 @@ import {
 } from "@/app/actions/flash-campaigns";
 import { useRouter } from "next/navigation";
 import FlashCreateModal from "./FlashCreateModal";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import EmptyFlash from "../empty-states/EmptyFlash";
 import styles from "./flash.module.css";
 
@@ -103,6 +104,7 @@ export default function FlashCampaignsClient({
   const formatPrice = (n: number) => n.toLocaleString("fr-FR");
   const [showModal, setShowModal] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleToggle = async (c: CampaignRow) => {
     setBusyId(c.id);
@@ -165,91 +167,79 @@ export default function FlashCampaignsClient({
           </button>
         </div>
       ) : (
-        <div className={styles.grid}>
-          {campaigns.map((c) => {
-            const phase = getPhase(c);
-            const status = phaseLabel(phase, c.isActive);
-            return (
-              <div key={c.id} className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardName}>
-                    <Lightning
-                      size={18}
-                      weight="duotone"
-                      color="#1D4ED8"
-                      style={{ marginRight: 6, verticalAlign: "middle" }}
-                    />
-                    {c.name}
-                  </div>
-                  <span className={`${styles.statusBadge} ${status.cls}`}>
-                    {status.label}
-                  </span>
-                </div>
-                <div className={styles.discount}>
-                  {c.discountType === "PERCENTAGE" ? (
-                    <>
-                      <Percent
-                        size={16}
-                        style={{ display: "inline", verticalAlign: "middle" }}
-                      />{" "}
-                      {c.discountValue}%
-                    </>
-                  ) : (
-                    <>
-                      <CurrencyDollar
-                        size={16}
-                        style={{ display: "inline", verticalAlign: "middle" }}
-                      />{" "}
-                      {formatPrice(c.discountValue)} {cur}
-                    </>
-                  )}
-                </div>
-                {phase === "live" && c.isActive && (
-                  <Countdown endsAt={c.endsAt} />
-                )}
-                <div className={styles.meta}>
-                  {new Date(c.startsAt).toLocaleString("fr-FR", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}{" "}
-                  →{" "}
-                  {new Date(c.endsAt).toLocaleString("fr-FR", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}
-                </div>
-                <div className={styles.meta}>
-                  {c.productIds.length === 0
-                    ? "Tous les produits"
-                    : `${c.productIds.length} produit(s) ciblé(s)`}
-                  · {c.ordersCount} commande(s) · -
-                  {formatPrice(c.totalDiscount)} {cur}
-                </div>
-                <div className={styles.cardActions}>
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(c)}
-                    disabled={busyId === c.id}
-                    className={styles.actionBtn}
-                  >
-                    {c.isActive ? (
-                      <EyeSlash size={14} />
-                    ) : (
-                      <Eye size={14} />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(c)}
-                    disabled={busyId === c.id}
-                    className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-                  >
-                    <Trash size={14} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Réduction</th>
+                <th>Début</th>
+                <th>Fin</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {campaigns.map((c) => {
+                const phase = getPhase(c);
+                const status = phaseLabel(phase, c.isActive);
+                return (
+                  <tr key={c.id}>
+                    <td className={styles.cellName}>{c.name}</td>
+                    <td className={styles.cellMeta}>
+                      {c.productIds.length === 0
+                        ? "Tous produits"
+                        : `${c.productIds.length} produit(s)`}
+                    </td>
+                    <td className={styles.cellDiscount}>
+                      {c.discountType === "PERCENTAGE"
+                        ? `${c.discountValue}%`
+                        : `${formatPrice(c.discountValue)} ${cur}`}
+                    </td>
+                    <td className={styles.cellMeta}>
+                      {new Date(c.startsAt).toLocaleDateString("fr-FR")}
+                    </td>
+                    <td className={styles.cellMeta}>
+                      {new Date(c.endsAt).toLocaleDateString("fr-FR")}
+                    </td>
+                    <td>
+                      <span className={`${styles.statusBadge} ${status.cls}`}>
+                        {status.label}
+                      </span>
+                      {phase === "live" && c.isActive && (
+                        <Countdown endsAt={c.endsAt} />
+                      )}
+                    </td>
+                    <td>
+                      <div className={styles.rowActions}>
+                        <button
+                          type="button"
+                          onClick={() => handleToggle(c)}
+                          disabled={busyId === c.id}
+                          className={styles.actionBtn}
+                        >
+                          {c.isActive ? (
+                            <EyeSlash size={13} />
+                          ) : (
+                            <Eye size={13} />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(c)}
+                          disabled={busyId === c.id}
+                          className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                        >
+                          <Trash size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -259,8 +249,16 @@ export default function FlashCampaignsClient({
           onClose={() => setShowModal(false)}
           onSaved={() => {
             setShowModal(false);
+            setSuccessMessage("Campagne flash créée avec succès");
             router.refresh();
           }}
+        />
+      )}
+
+      {successMessage && (
+        <SuccessModal
+          title={successMessage}
+          onClose={() => setSuccessMessage(null)}
         />
       )}
     </div>

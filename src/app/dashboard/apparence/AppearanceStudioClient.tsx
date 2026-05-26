@@ -12,6 +12,7 @@ import {
   FloppyDisk,
   CheckCircle,
   Sparkle,
+  Warning,
 } from "@phosphor-icons/react";
 import {
   updateAppearanceAction,
@@ -84,10 +85,23 @@ export default function AppearanceStudioClient({ shop: initialShop }: Props) {
   const [isPending, startTransition] = useTransition();
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [showPreview, setShowPreview] = useState(true);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [iframeError, setIframeError] = useState(false);
 
   useEffect(() => {
     setShop(initialShop);
   }, [initialShop]);
+
+  useEffect(() => {
+    const host = window.location.hostname;
+    const isLocal =
+      host === "localhost" || host === "127.0.0.1" || host.endsWith(".localhost");
+    const url = isLocal
+      ? `/shop/${initialShop.slug}?_preview=${Date.now()}`
+      : `https://${initialShop.slug}.getsellia.com?_preview=${Date.now()}`;
+    setPreviewUrl(url);
+    setIframeError(false);
+  }, [initialShop.slug]);
 
   const updateField = <K extends keyof ShopState>(
     field: K,
@@ -476,11 +490,32 @@ export default function AppearanceStudioClient({ shop: initialShop }: Props) {
               </span>
             </div>
             <div className={styles.previewFrame}>
-              <iframe
-                src={`https://${shop.slug}.getsellia.com`}
-                className={styles.previewIframe}
-                title="Aperçu de la boutique"
-              />
+              {iframeError ? (
+                <div className={styles.iframeError}>
+                  <Warning size={32} weight="duotone" />
+                  <h3>Aperçu indisponible</h3>
+                  <p>
+                    Cliquez sur &quot;Voir en ligne&quot; pour ouvrir votre
+                    boutique dans un nouvel onglet.
+                  </p>
+                  <a
+                    href={previewUrl || `https://${shop.slug}.getsellia.com`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.btnPrimary}
+                  >
+                    Ouvrir la boutique <ArrowSquareOut size={14} />
+                  </a>
+                </div>
+              ) : previewUrl ? (
+                <iframe
+                  src={previewUrl}
+                  className={styles.previewIframe}
+                  title="Aperçu de la boutique"
+                  onLoad={() => setIframeError(false)}
+                  onError={() => setIframeError(true)}
+                />
+              ) : null}
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -11,12 +11,14 @@ import {
   Check,
   ArrowLeft,
 } from "lucide-react";
+import { usePixelTracking } from "@/lib/use-pixel-tracking";
 import styles from "./confirmation.module.css";
 import PaymentPendingPolling from "@/components/shop/PaymentPendingPolling";
 import TrustSection from "@/components/shop/TrustSection";
 
 export interface OrderConfirmationItem {
   id: string;
+  productId: string;
   productName: string;
   quantity: number;
   unitPrice: number;
@@ -58,6 +60,7 @@ export default function OrderConfirmationClient({
   paymentPolling = null,
 }: Props) {
   const router = useRouter();
+  const { trackPurchase } = usePixelTracking();
   const primary = order.shopPrimaryColor || "#E84B1F";
   const isPaid =
     order.paymentStatus === "paid_escrow" ||
@@ -72,6 +75,26 @@ export default function OrderConfirmationClient({
   const [downloading, setDownloading] = useState(false);
 
   const rootStyle = { "--shop-primary": primary } as CSSProperties;
+
+  useEffect(() => {
+    if (!showConfirmation) return;
+    const key = `purchase_tracked_${order.orderNumber}`;
+    if (sessionStorage.getItem(key)) return;
+
+    trackPurchase({
+      orderId: order.orderNumber,
+      total: order.total,
+      currency: order.currency === "FCFA" ? "XAF" : order.currency,
+      items: order.items.map((i) => ({
+        productId: i.productId,
+        productName: i.productName,
+        price: i.unitPrice,
+        quantity: i.quantity,
+      })),
+    });
+    sessionStorage.setItem(key, "1");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order.orderNumber, showConfirmation]);
 
   if (paymentPolling) {
     return (

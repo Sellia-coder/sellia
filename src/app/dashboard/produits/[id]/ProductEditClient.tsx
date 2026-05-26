@@ -9,6 +9,7 @@ import {
   CheckCircle,
 } from "@phosphor-icons/react";
 import ProductEditorModal from "@/components/personnalisation/ProductEditorModal";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import type { ProductEditInput } from "@/lib/validations/personnalisation";
 import {
   updateProductAction,
@@ -36,6 +37,7 @@ export default function ProductEditClient(props: Props) {
 
   const [error, setError] = useState<string | null>(null);
   const [showCreatedToast, setShowCreatedToast] = useState(justCreated);
+  const [showSavedModal, setShowSavedModal] = useState(false);
 
   const handleSave = async (product: ProductEditInput) => {
     setError(null);
@@ -46,6 +48,7 @@ export default function ProductEditClient(props: Props) {
     if (!res.ok) {
       setError(res.error);
     } else {
+      setShowSavedModal(true);
       router.refresh();
     }
   };
@@ -125,6 +128,27 @@ export default function ProductEditClient(props: Props) {
           onClose={handleClose}
         />
       </div>
+
+      {showSavedModal && (
+        <SuccessModal
+          title="Produit modifié"
+          description="Les modifications ont été enregistrées."
+          actions={[
+            {
+              label: "Voir mon produit",
+              href: productPath,
+              variant: "secondary",
+              icon: <ArrowSquareOut size={14} weight="duotone" />,
+            },
+            {
+              label: "Voir mes produits",
+              href: "/dashboard/produits",
+              variant: "primary",
+            },
+          ]}
+          onClose={() => setShowSavedModal(false)}
+        />
+      )}
     </div>
   );
 }

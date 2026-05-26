@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X } from "@phosphor-icons/react";
 import { createFaqAction, updateFaqAction } from "@/app/actions/shop-pages";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import styles from "./pages.module.css";
 
 interface FaqRow {
@@ -25,6 +26,7 @@ export default function FaqEditorModal({ faq, onClose, onSaved }: Props) {
   const [category, setCategory] = useState(faq?.category ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -38,11 +40,12 @@ export default function FaqEditorModal({ faq, onClose, onSaved }: Props) {
         )
       : await createFaqAction(question, answer, category || undefined);
     setSaving(false);
-    if (res.ok) onSaved();
+    if (res.ok) setShowSuccess(true);
     else setError(res.error ?? "Erreur");
   };
 
   return (
+    <>
     <div className={styles.modalBackdrop} onClick={onClose}>
       <div className={styles.modalWide} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
@@ -103,5 +106,15 @@ export default function FaqEditorModal({ faq, onClose, onSaved }: Props) {
         </div>
       </div>
     </div>
+    {showSuccess && (
+      <SuccessModal
+        title={isEdit ? "Question enregistrée" : "Question ajoutée"}
+        onClose={() => {
+          setShowSuccess(false);
+          onSaved();
+        }}
+      />
+    )}
+    </>
   );
 }

@@ -7,6 +7,7 @@ import {
 import { CartProvider } from "@/components/shop/CartProvider";
 import SeliaMenuPro from "@/components/shop/SeliaMenuPro";
 import ShopFooter from "@/components/shop/ShopFooter";
+import ShopPixelScripts from "@/components/shop/ShopPixelScripts";
 import ToastProvider from "@/components/shop/ToastProvider";
 import "./shop.css";
 
@@ -85,6 +86,12 @@ export default async function ShopLayout({ children, params }: Props) {
 
   return (
     <>
+      <ShopPixelScripts
+        ga4Id={shop.ga4MeasurementId}
+        fbPixelId={shop.fbPixelId}
+        tiktokPixelId={shop.tiktokPixelId}
+        snapchatPixelId={shop.snapPixelId}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

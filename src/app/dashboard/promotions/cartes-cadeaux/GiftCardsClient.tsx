@@ -13,6 +13,7 @@ import {
 import { toggleGiftCardActiveAction } from "@/app/actions/giftcards";
 import { useRouter } from "next/navigation";
 import GiftCardCreateModal from "./GiftCardCreateModal";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import EmptyGiftCards from "../empty-states/EmptyGiftCards";
 import styles from "./gift-cards.module.css";
 
@@ -50,6 +51,7 @@ export default function GiftCardsClient({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [createdCode, setCreatedCode] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleCopy = async (code: string) => {
     try {
@@ -151,73 +153,70 @@ export default function GiftCardsClient({
           </button>
         </div>
       ) : (
-        <div className={styles.grid}>
-          {giftCards.map((g) => (
-            <div
-              key={g.id}
-              className={`${styles.card} ${!g.isActive ? styles.cardInactive : ""}`}
-            >
-              <span
-                className={`${styles.statusBadge} ${g.isActive ? styles.statusActive : styles.statusInactive}`}
-              >
-                {g.isActive ? "Active" : "Désactivée"}
-              </span>
-              <button
-                type="button"
-                className={styles.cardCode}
-                onClick={() => handleCopy(g.code)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: 0,
-                }}
-              >
-                {g.code}
-                {copiedCode === g.code ? (
-                  <CheckCircle size={14} weight="fill" color="#15803D" />
-                ) : (
-                  <Copy size={13} />
-                )}
-              </button>
-              <div className={styles.cardAmounts}>
-                <div className={styles.amountBlock}>
-                  <span className={styles.amountLabel}>Initial</span>
-                  <span className={styles.amountValue}>
-                    {formatPrice(g.initialAmount)} {cur}
-                  </span>
-                </div>
-                <div className={styles.amountBlock}>
-                  <span className={styles.amountLabel}>Solde</span>
-                  <span className={`${styles.amountValue} ${styles.balance}`}>
-                    {formatPrice(g.remainingAmount)} {cur}
-                  </span>
-                </div>
-              </div>
-              <div className={styles.cardMeta}>
-                {g.recipientName && <div>Pour : {g.recipientName}</div>}
-                <div>Expire : {formatDate(g.expiresAt)}</div>
-              </div>
-              <div className={styles.cardActions}>
-                <button
-                  type="button"
-                  onClick={() => handleToggle(g)}
-                  disabled={busyId === g.id}
-                  className={styles.actionBtn}
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Montant initial</th>
+                <th>Solde</th>
+                <th>Bénéficiaire</th>
+                <th>Expiration</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {giftCards.map((g) => (
+                <tr
+                  key={g.id}
+                  className={!g.isActive ? styles.rowInactive : ""}
                 >
-                  {g.isActive ? (
-                    <EyeSlash size={14} />
-                  ) : (
-                    <Eye size={14} />
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(g.code)}
+                      className={styles.cellCode}
+                    >
+                      <span className={styles.codeMono}>{g.code}</span>
+                      {copiedCode === g.code ? (
+                        <CheckCircle size={12} weight="fill" color="#15803D" />
+                      ) : (
+                        <Copy size={11} />
+                      )}
+                    </button>
+                  </td>
+                  <td className={styles.cellDiscount}>
+                    {formatPrice(g.initialAmount)} {cur}
+                  </td>
+                  <td>{formatPrice(g.remainingAmount)} {cur}</td>
+                  <td className={styles.cellName}>
+                    {g.recipientName || g.buyerName || "—"}
+                  </td>
+                  <td className={styles.cellMeta}>{formatDate(g.expiresAt)}</td>
+                  <td>
+                    <span
+                      className={`${styles.statusBadge} ${g.isActive ? styles.statusActive : styles.statusInactive}`}
+                    >
+                      {g.isActive ? "Active" : "Désactivée"}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.rowActions}>
+                      <button
+                        type="button"
+                        onClick={() => handleToggle(g)}
+                        disabled={busyId === g.id}
+                        className={styles.actionBtn}
+                      >
+                        {g.isActive ? <EyeSlash size={13} /> : <Eye size={13} />}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -228,8 +227,16 @@ export default function GiftCardsClient({
           onSaved={(code) => {
             setShowModal(false);
             setCreatedCode(code);
+            setSuccessMessage("Carte cadeau créée avec succès");
             router.refresh();
           }}
+        />
+      )}
+
+      {successMessage && (
+        <SuccessModal
+          title={successMessage}
+          onClose={() => setSuccessMessage(null)}
         />
       )}
     </div>

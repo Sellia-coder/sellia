@@ -19,6 +19,7 @@ function parseItems(items: unknown): Array<{
     const r = row as Record<string, unknown>;
     return {
       id: String(r.productId ?? r.id ?? index),
+      productId: String(r.productId ?? r.id ?? index),
       productName: String(r.name ?? "Article"),
       quantity: Number(r.quantity ?? 1),
       unitPrice: Number(r.price ?? 0),

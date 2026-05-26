@@ -20,6 +20,30 @@ const RESERVED_SUBDOMAINS = new Set([
 const PROTECTED_ROUTES = ["/dashboard"];
 const AUTH_ROUTES = ["/connexion", "/inscription", "/verifier-email"];
 
+function applyShopEmbedHeaders(
+  response: NextResponse,
+  hostname: string
+): NextResponse {
+  const hostWithoutPort = hostname.split(":")[0] ?? "";
+  const isShopSubdomain =
+    (hostWithoutPort.endsWith(`.${ROOT_DOMAIN}`) &&
+      !RESERVED_SUBDOMAINS.has(
+        hostWithoutPort.replace(`.${ROOT_DOMAIN}`, "")
+      )) ||
+    hostWithoutPort.endsWith(".lvh.me") ||
+    hostWithoutPort.endsWith(".localhost");
+
+  if (isShopSubdomain) {
+    response.headers.delete("X-Frame-Options");
+    response.headers.set(
+      "Content-Security-Policy",
+      "frame-ancestors 'self' https://*.getsellia.com https://getsellia.com http://localhost:* http://127.0.0.1:* http://192.168.* https://*.vercel.app"
+    );
+  }
+
+  return response;
+}
+
 function tryShopSubdomainRewrite(req: NextRequest): NextResponse | null {
   const url = req.nextUrl.clone();
   const hostname = req.headers.get("host") ?? "";
@@ -55,7 +79,8 @@ function tryShopSubdomainRewrite(req: NextRequest): NextResponse | null {
   }
 
   url.pathname = `/shop/${subdomain}${pathname === "/" ? "" : pathname}`;
-  return NextResponse.rewrite(url);
+  const response = NextResponse.rewrite(url);
+  return applyShopEmbedHeaders(response, hostname);
 }
 
 export function middleware(req: NextRequest) {
@@ -111,7 +136,14 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  return NextResponse.next();
+  const hostname = req.headers.get("host") ?? "";
+  const response = NextResponse.next();
+
+  if (pathname.startsWith("/shop/")) {
+    return applyShopEmbedHeaders(response, hostname);
+  }
+
+  return applyShopEmbedHeaders(response, hostname);
 }
 
 export const config = {

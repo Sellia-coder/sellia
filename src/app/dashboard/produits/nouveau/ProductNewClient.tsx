@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CaretLeft } from "@phosphor-icons/react";
+import { CaretLeft, Eye, Plus } from "@phosphor-icons/react";
 import ProductEditorModal from "@/components/personnalisation/ProductEditorModal";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import type { ProductEditInput } from "@/lib/validations/personnalisation";
 import { createProductAction } from "@/app/actions/product";
 import "@/app/personnaliser-ma-boutique/personnalisation.css";
@@ -51,6 +52,9 @@ export default function ProductNewClient(props: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [successData, setSuccessData] = useState<{ slug: string } | null>(
+    null
+  );
 
   const handleSave = async (product: ProductEditInput) => {
     setSaving(true);
@@ -62,7 +66,8 @@ export default function ProductNewClient(props: Props) {
     });
 
     if (res.ok) {
-      router.push(`/dashboard/produits/${res.productId}?created=1`);
+      setSuccessData({ slug: res.slug });
+      setSaving(false);
     } else {
       setError(res.error);
       setSaving(false);
@@ -98,6 +103,28 @@ export default function ProductNewClient(props: Props) {
           onClose={handleClose}
         />
       </div>
+
+      {successData && (
+        <SuccessModal
+          title="Produit créé avec succès"
+          description="Votre nouveau produit est maintenant en ligne dans votre catalogue."
+          actions={[
+            {
+              label: "Voir mon produit",
+              href: `/shop/${props.shopSlug}/produit/${successData.slug}`,
+              variant: "secondary",
+              icon: <Eye size={14} weight="duotone" />,
+            },
+            {
+              label: "Créer encore",
+              href: "/dashboard/produits/nouveau",
+              variant: "primary",
+              icon: <Plus size={14} weight="bold" />,
+            },
+          ]}
+          onClose={() => router.push("/dashboard/produits")}
+        />
+      )}
     </div>
   );
 }
