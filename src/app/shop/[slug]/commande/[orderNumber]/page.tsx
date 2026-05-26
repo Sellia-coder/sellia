@@ -10,6 +10,7 @@ interface Props {
 
 function parseItems(items: unknown): Array<{
   id: string;
+  productId: string;
   productName: string;
   quantity: number;
   unitPrice: number;

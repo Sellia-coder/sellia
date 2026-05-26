@@ -1,6 +1,5 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { Plus } from "@phosphor-icons/react";
 import { PaymentMethodsGrid } from "@/components/icons/momo-operators";
 import styles from "./ShopFooter.module.css";
 
@@ -116,7 +115,21 @@ export default async function ShopFooter({ shop }: Props) {
               title="Et bien plus de moyens de paiement"
               aria-label="Voir tous les moyens de paiement"
             >
-              <Plus size={16} weight="bold" />
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden
+              >
+                <path
+                  d="M12 5v14M5 12h14"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
             </button>
           </div>
         </div>
