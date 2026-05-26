@@ -22,7 +22,7 @@ interface CouponRow {
   startsAt: string;
   endsAt: string | null;
   maxUses: number | null;
-  maxUsesPerCustomer: number;
+  maxUsesPerCustomer: number | null;
   firstOrderOnly: boolean;
 }
 
@@ -109,7 +109,7 @@ export default function CouponEditorModal({
 
     setSaving(false);
     if (res.ok) onSaved();
-    else setError(res.error);
+    else setError(res.error ?? null);
   };
 
   const recap =

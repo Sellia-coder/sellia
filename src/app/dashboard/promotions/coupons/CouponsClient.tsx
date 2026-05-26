@@ -33,7 +33,7 @@ interface CouponRow {
   startsAt: string;
   endsAt: string | null;
   maxUses: number | null;
-  maxUsesPerCustomer: number;
+  maxUsesPerCustomer: number | null;
   currentUses: number;
   isActive: boolean;
   firstOrderOnly: boolean;

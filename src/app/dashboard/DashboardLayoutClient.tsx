@@ -4,15 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/actions/auth";
-import ShopSidebarCard from "@/components/dashboard/ShopSidebarCard";
 import SidebarBadge from "@/components/dashboard/SidebarBadge";
 import type { SidebarCounts } from "@/lib/sidebar-counts";
 
 export type DashboardLayoutShop = {
   slug: string;
-  name: string;
-  primaryColor: string;
-  plan: string;
   customDomain?: string | null;
 };
 
@@ -67,19 +63,6 @@ export default function DashboardLayoutClient({
             </span>
           </Link>
         </div>
-
-        {shop && shopUrl ? (
-          <ShopSidebarCard
-            shopName={shop.name}
-            shopSlug={shop.slug}
-            planId={shop.plan}
-            shopDomain={shop.customDomain || `${shop.slug}.getsellia.com`}
-          />
-        ) : (
-          <div className="dash-sidebar-shop-placeholder">
-            Aucune boutique liée à ce compte pour le moment.
-          </div>
-        )}
 
         <div className="dash-nav-section">
           <div className="dash-nav-section-label">Vue d&apos;ensemble</div>

@@ -82,6 +82,12 @@ model Shop {
   heroImageGeneratedAt DateTime? @map("hero_image_generated_at")
   heroImageGenerations Int       @default(0) @map("hero_image_generations")
   heroImagePrompt      String?   @map("hero_image_prompt") @db.Text
+  headerStyle          String?   @default("centered") @map("header_style")
+  productGridCols      Int?      @default(3) @map("product_grid_cols")
+  footerStyle          String?   @default("classic") @map("footer_style")
+  heroStyle            String?   @default("image-text") @map("hero_style")
+  mobileLogoUrl        String?   @map("mobile_logo_url")
+  customDomainVerifiedAt DateTime? @map("custom_domain_verified_at")
 
   // SEO
   seoTitle       String?
@@ -137,6 +143,8 @@ model Shop {
   flashCampaigns      FlashCampaign[]
   loyaltyAccounts     LoyaltyAccount[]
   loyaltyConfig       LoyaltyConfig?
+  shopPages           ShopPage[]
+  shopFaqs            ShopFaq[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -823,4 +831,47 @@ model LoyaltyConfig {
   updatedAt                DateTime @updatedAt @map("updated_at")
 
   @@map("loyalty_configs")
+}
+
+model ShopPage {
+  id              String   @id @default(cuid())
+  shopId          String   @map("shop_id")
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  slug            String
+  title           String
+  content         String   @db.Text
+  metaDescription String?  @map("meta_description")
+
+  isPublished     Boolean  @default(true) @map("is_published")
+  showInHeader    Boolean  @default(false) @map("show_in_header")
+  showInFooter    Boolean  @default(true) @map("show_in_footer")
+
+  templateKey     String?  @map("template_key")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([shopId, slug])
+  @@index([shopId, isPublished])
+  @@map("shop_pages")
+}
+
+model ShopFaq {
+  id          String   @id @default(cuid())
+  shopId      String   @map("shop_id")
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  question    String   @db.Text
+  answer      String   @db.Text
+  category    String?
+
+  order       Int      @default(0)
+  isPublished Boolean  @default(true) @map("is_published")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([shopId, isPublished, order])
+  @@map("shop_faqs")
 }

@@ -25,10 +25,8 @@ export default async function DashboardLayout({
     select: {
       id: true,
       slug: true,
-      name: true,
-      primaryColor: true,
-      plan: true,
       customDomain: true,
+      plan: true,
     },
   });
 
@@ -51,9 +49,6 @@ export default async function DashboardLayout({
         shop
           ? {
               slug: shop.slug,
-              name: shop.name,
-              primaryColor: shop.primaryColor,
-              plan: shop.plan ?? "free",
               customDomain: shop.customDomain,
             }
           : null
