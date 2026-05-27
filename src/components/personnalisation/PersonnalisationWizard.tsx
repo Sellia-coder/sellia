@@ -171,6 +171,7 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
   const [step4, setStep4] = useState<Step4Input>({
     description: draft.description ?? "",
   });
+  const [codUnlocked, setCodUnlocked] = useState(false);
 
   const hasPhysicalProducts = step2.products.some(
     (p) => p.included && p.type === "physical"
@@ -294,6 +295,8 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
             onNext={handleNext}
             onBack={handleBack}
             countryCode={step3.country}
+            codUnlocked={codUnlocked}
+            onCodUnlocked={() => setCodUnlocked(true)}
           />
         )}
         {currentStep === 5 && (

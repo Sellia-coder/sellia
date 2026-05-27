@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation",
-  description: "Conditions générales d'utilisation du service Sellia, opéré par Rollo Technologies Inc.",
+  description: "Conditions générales d'utilisation du service Sellia, opéré par Fiable Technologies LLC",
   robots: { index: false, follow: false },
 };
 
@@ -89,7 +89,7 @@ export default function Conditions() {
                 Les présentes Conditions Générales d&apos;Utilisation (ci-après les « <strong>CGU</strong> ») constituent un contrat juridiquement contraignant entre :
               </p>
               <p>
-                <strong>Rollo Technologies Inc.</strong>, société de droit américain immatriculée dans l&apos;État du Delaware, dont le siège social est sis 1111B S Governors Ave, Suite 59264, Dover, DE 19904, États-Unis d&apos;Amérique (ci-après « <strong>Rollo</strong> » ou « <strong>nous</strong> »),
+                <strong>Fiable Technologies LLC</strong>, société de droit américain immatriculée dans l&apos;État du Delaware, dont le siège social est sis 1111B S Governors Ave, Suite 59264, Dover, DE 19904, États-Unis d&apos;Amérique (ci-après « <strong>Fiable</strong> » ou « <strong>nous</strong> »),
               </p>
               <p>
                 d&apos;une part, et
@@ -101,7 +101,7 @@ export default function Conditions() {
                 d&apos;autre part.
               </p>
               <p>
-                Les CGU régissent l&apos;ensemble des relations entre Rollo et l&apos;Utilisateur dans le cadre de l&apos;utilisation du service Sellia. L&apos;accès et l&apos;utilisation du Service impliquent l&apos;acceptation pleine, entière et sans réserve des présentes CGU.
+                Les CGU régissent l&apos;ensemble des relations entre Fiable et l&apos;Utilisateur dans le cadre de l&apos;utilisation du service Sellia. L&apos;accès et l&apos;utilisation du Service impliquent l&apos;acceptation pleine, entière et sans réserve des présentes CGU.
               </p>
               <p>
                 Si vous n&apos;acceptez pas les présentes CGU, vous devez vous abstenir d&apos;utiliser le Service.
@@ -120,7 +120,7 @@ export default function Conditions() {
                 <li><strong>« Contenu »</strong> : tout élément (texte, image, vidéo, son, code, donnée) publié, téléchargé ou créé via le Service.</li>
                 <li><strong>« Contenu Utilisateur »</strong> : Contenu créé ou téléchargé par l&apos;Utilisateur (notamment : descriptions de produits, photos, textes marketing).</li>
                 <li><strong>« Plan »</strong> : formule tarifaire à laquelle l&apos;Utilisateur souscrit (Free, Starter, Pro, Business).</li>
-                <li><strong>« Commission »</strong> : pourcentage prélevé par Rollo sur chaque vente effectuée via une Boutique, dont le taux dépend du Plan choisi.</li>
+                <li><strong>« Commission »</strong> : pourcentage prélevé par Fiable sur chaque vente effectuée via une Boutique, dont le taux dépend du Plan choisi.</li>
                 <li><strong>« KYC »</strong> : « Know Your Customer », procédure de vérification d&apos;identité obligatoire pour les Vendeurs.</li>
                 <li><strong>« Force Majeure »</strong> : tout événement extérieur, imprévisible et irrésistible empêchant l&apos;exécution normale des obligations contractuelles.</li>
               </ul>
@@ -132,7 +132,7 @@ export default function Conditions() {
               <h3>2.1 Objet</h3>
               <p>
                 Les présentes CGU ont pour objet de définir les conditions dans
-                lesquelles Rollo met le Service à disposition de l&apos;Utilisateur, ainsi
+                lesquelles Fiable met le Service à disposition de l&apos;Utilisateur, ainsi
                 que les droits et obligations réciproques des parties.
               </p>
 
@@ -198,14 +198,14 @@ export default function Conditions() {
                 via le Service ou par email.
               </p>
               <p>
-                Pendant la phase bêta, Rollo se réserve le droit d&apos;ajuster les
+                Pendant la phase bêta, Fiable se réserve le droit d&apos;ajuster les
                 fonctionnalités, les tarifs et les modalités du Service, dans le
                 respect des conditions de modification prévues à l&apos;Article 20.
               </p>
 
               <h3>3.4 Évolutivité</h3>
               <p>
-                Le Service est évolutif. Rollo peut ajouter, modifier ou supprimer des
+                Le Service est évolutif. Fiable peut ajouter, modifier ou supprimer des
                 fonctionnalités à tout moment, dans une logique d&apos;amélioration
                 continue. Les modifications majeures font l&apos;objet d&apos;une communication
                 préalable.
@@ -239,7 +239,7 @@ export default function Conditions() {
 
               <h3>4.3 Refus d&apos;inscription</h3>
               <p>
-                Rollo se réserve le droit de refuser ou suspendre toute inscription,
+                Fiable se réserve le droit de refuser ou suspendre toute inscription,
                 sans avoir à justifier sa décision, notamment si :
               </p>
               <ul>
@@ -269,20 +269,20 @@ export default function Conditions() {
                 <li>Ne jamais les partager avec un tiers</li>
                 <li>Utiliser des mots de passe robustes et uniques</li>
                 <li>Activer l&apos;authentification à deux facteurs lorsqu&apos;elle sera disponible</li>
-                <li>Notifier immédiatement Rollo en cas de soupçon d&apos;utilisation non autorisée du Compte</li>
+                <li>Notifier immédiatement Fiable en cas de soupçon d&apos;utilisation non autorisée du Compte</li>
               </ul>
 
               <h3>5.3 Responsabilité</h3>
               <p>
                 L&apos;Utilisateur est seul responsable de toutes les actions effectuées
-                depuis son Compte, qu&apos;elles soient de son fait ou non. Rollo ne saurait
+                depuis son Compte, qu&apos;elles soient de son fait ou non. Fiable ne saurait
                 être tenu responsable des conséquences résultant d&apos;une utilisation
                 frauduleuse du Compte par un tiers.
               </p>
 
               <h3>5.4 Comptes multiples</h3>
               <p>
-                Sauf accord exprès de Rollo, chaque Utilisateur ne peut créer qu&apos;un
+                Sauf accord exprès de Fiable, chaque Utilisateur ne peut créer qu&apos;un
                 seul Compte. La création de multiples comptes pour contourner les
                 limitations du Service ou les présentes CGU peut entraîner la
                 résiliation immédiate de tous les comptes concernés.
@@ -326,7 +326,7 @@ export default function Conditions() {
 
               <h3>6.4 Mise à jour</h3>
               <p>
-                L&apos;Utilisateur s&apos;engage à informer Rollo de tout changement substantiel
+                L&apos;Utilisateur s&apos;engage à informer Fiable de tout changement substantiel
                 de sa situation (changement de représentant légal, modification des
                 statuts, transfert de siège) et à fournir les justificatifs actualisés
                 sur demande.
@@ -342,7 +342,7 @@ export default function Conditions() {
                 <li>Respecter les droits des tiers (propriété intellectuelle, vie privée, droit à l&apos;image)</li>
                 <li>Ne pas porter atteinte au bon fonctionnement du Service</li>
                 <li>Ne pas tenter de contourner les mesures de sécurité ou les limitations techniques</li>
-                <li>Coopérer de bonne foi avec Rollo en cas de demande relative au Compte ou à l&apos;activité</li>
+                <li>Coopérer de bonne foi avec Fiable en cas de demande relative au Compte ou à l&apos;activité</li>
                 <li>S&apos;acquitter des sommes dues selon le Plan choisi</li>
                 <li>Maintenir à jour les informations de son Compte</li>
               </ul>
@@ -381,7 +381,7 @@ export default function Conditions() {
                 <li>Tenter de pirater, scraper massivement, ou effectuer du reverse engineering du Service</li>
                 <li>Envoyer du spam ou des communications non sollicitées en masse</li>
                 <li>Diffuser des virus, malwares ou code malveillant</li>
-                <li>Contourner les commissions ou utiliser le Service pour effectuer des transactions hors-plateforme dans le but de frauder Rollo</li>
+                <li>Contourner les commissions ou utiliser le Service pour effectuer des transactions hors-plateforme dans le but de frauder Fiable</li>
               </ul>
 
               <h3>8.4 Sanctions</h3>
@@ -392,7 +392,7 @@ export default function Conditions() {
                 <li>Le retrait immédiat du Contenu litigieux</li>
                 <li>La suspension ou la résiliation du Compte sans préavis</li>
                 <li>Le signalement aux autorités compétentes le cas échéant</li>
-                <li>Des poursuites judiciaires en cas de préjudice subi par Rollo ou des tiers</li>
+                <li>Des poursuites judiciaires en cas de préjudice subi par Fiable ou des tiers</li>
                 <li>La rétention des sommes dues, le cas échéant, pour couvrir les préjudices et frais engagés</li>
               </ul>
             </section>
@@ -405,7 +405,7 @@ export default function Conditions() {
                 Le Vendeur exerce son activité commerciale en qualité d&apos;entrepreneur
                 indépendant, en son nom et pour son propre compte. Il n&apos;existe aucun
                 lien de subordination, de mandat, de partenariat formel ou de société
-                entre Rollo et le Vendeur.
+                entre Fiable et le Vendeur.
               </p>
 
               <h3>9.2 Obligations du vendeur</h3>
@@ -424,7 +424,7 @@ export default function Conditions() {
               <h3>9.3 Responsabilité commerciale</h3>
               <p>
                 Le Vendeur est seul responsable de la relation commerciale avec ses
-                Acheteurs. Rollo n&apos;intervient pas dans les transactions et ne saurait
+                Acheteurs. Fiable n&apos;intervient pas dans les transactions et ne saurait
                 être considéré comme partie au contrat de vente conclu entre le Vendeur
                 et l&apos;Acheteur.
               </p>
@@ -436,7 +436,7 @@ export default function Conditions() {
               <h3>10.1 Statut</h3>
               <p>
                 L&apos;Acheteur conclut le contrat de vente directement avec le Vendeur.
-                Rollo agit uniquement en tant qu&apos;intermédiaire technique fournissant
+                Fiable agit uniquement en tant qu&apos;intermédiaire technique fournissant
                 la plateforme.
               </p>
 
@@ -452,7 +452,7 @@ export default function Conditions() {
               <h3>10.3 Litiges acheteur-vendeur</h3>
               <p>
                 En cas de litige avec un Vendeur, l&apos;Acheteur s&apos;engage à tenter une
-                résolution amiable directement avec lui. Rollo peut, à titre purement
+                résolution amiable directement avec lui. Fiable peut, à titre purement
                 facultatif, faciliter la médiation entre les parties, sans pour autant
                 que cela constitue une obligation contractuelle.
               </p>
@@ -499,7 +499,7 @@ export default function Conditions() {
 
               <h3>11.5 Défaut de paiement</h3>
               <p>
-                En cas de défaut de paiement, Rollo se réserve le droit de :
+                En cas de défaut de paiement, Fiable se réserve le droit de :
               </p>
               <ul>
                 <li>Suspendre l&apos;accès aux fonctionnalités payantes après notification</li>
@@ -514,7 +514,7 @@ export default function Conditions() {
 
               <h3>12.1 Principe</h3>
               <p>
-                Outre l&apos;abonnement éventuel au Plan, Rollo prélève une commission sur
+                Outre l&apos;abonnement éventuel au Plan, Fiable prélève une commission sur
                 chaque vente effectuée via une Boutique. Le taux de commission dépend
                 du Plan choisi :
               </p>
@@ -528,7 +528,7 @@ export default function Conditions() {
               <h3>12.2 Frais des partenaires de paiement</h3>
               <p>
                 Les frais des partenaires de paiement (Afribapay, CinetPay, Stripe)
-                sont distincts de la Commission de Rollo et viennent s&apos;ajouter à
+                sont distincts de la Commission de Fiable et viennent s&apos;ajouter à
                 celle-ci. Ces frais varient selon le moyen de paiement utilisé et la
                 devise. Ils sont communiqués au Vendeur lors de la configuration des
                 paiements.
@@ -571,7 +571,7 @@ export default function Conditions() {
 
               <h3>13.4 Rétention en cas de litige</h3>
               <p>
-                Rollo se réserve le droit de retenir tout ou partie des sommes en cas
+                Fiable se réserve le droit de retenir tout ou partie des sommes en cas
                 de :
               </p>
               <ul>
@@ -586,7 +586,7 @@ export default function Conditions() {
             <section id="article-14">
               <h2>Article 14 — Droit de rétractation et remboursements</h2>
 
-              <h3>14.1 Abonnement Sellia (relation Vendeur-Rollo)</h3>
+              <h3>14.1 Abonnement Sellia (relation Vendeur-Fiable)</h3>
               <p>
                 Pour les Vendeurs personnes physiques agissant à des fins
                 non-professionnelles et résidant dans l&apos;Union Européenne, un droit de
@@ -621,17 +621,17 @@ export default function Conditions() {
             <section id="article-15">
               <h2>Article 15 — Propriété intellectuelle</h2>
 
-              <h3>15.1 Droits de Rollo</h3>
+              <h3>15.1 Droits de Fiable</h3>
               <p>
                 Tous les éléments du Service (marque Sellia, logos, code source,
                 charte graphique, modèles, contenus éditoriaux) sont la propriété
-                exclusive de Rollo Technologies Inc., conformément à l&apos;Article 5 des <Link href="/mentions-legales" className="legal-link">Mentions Légales</Link>.
+                exclusive de Fiable Technologies LLC, conformément à l&apos;Article 5 des <Link href="/mentions-legales" className="legal-link">Mentions Légales</Link>.
               </p>
 
               <h3>15.2 Licence d&apos;utilisation accordée à l&apos;Utilisateur</h3>
               <p>
                 Sous réserve du respect des présentes CGU et du paiement des sommes
-                dues, Rollo accorde à l&apos;Utilisateur une licence personnelle, non
+                dues, Fiable accorde à l&apos;Utilisateur une licence personnelle, non
                 exclusive, non cessible et révocable, limitée à l&apos;usage du Service
                 pour les finalités prévues.
               </p>
@@ -639,7 +639,7 @@ export default function Conditions() {
               <h3>15.3 Contenus Utilisateur</h3>
               <p>
                 L&apos;Utilisateur conserve la propriété de ses Contenus Utilisateur. Il
-                concède à Rollo une licence non-exclusive, mondiale et gratuite, pour
+                concède à Fiable une licence non-exclusive, mondiale et gratuite, pour
                 la durée d&apos;utilisation du Service, aux seules fins de fournir le
                 Service (hébergement, affichage, sauvegarde, adaptation technique).
               </p>
@@ -648,7 +648,7 @@ export default function Conditions() {
               <p>
                 L&apos;Utilisateur garantit qu&apos;il dispose de tous les droits nécessaires
                 sur ses Contenus Utilisateur et qu&apos;ils ne portent atteinte à aucun
-                droit de tiers. Il s&apos;engage à indemniser Rollo de tout préjudice
+                droit de tiers. Il s&apos;engage à indemniser Fiable de tout préjudice
                 résultant d&apos;une violation de cette garantie.
               </p>
             </section>
@@ -665,13 +665,13 @@ export default function Conditions() {
 
               <h3>17.1 Engagement</h3>
               <p>
-                Rollo s&apos;efforce d&apos;assurer une disponibilité du Service de 99,5% sur
+                Fiable s&apos;efforce d&apos;assurer une disponibilité du Service de 99,5% sur
                 base mensuelle, hors interruptions programmées et cas de force majeure.
               </p>
 
               <h3>17.2 Maintenance</h3>
               <p>
-                Rollo peut être amené à interrompre temporairement l&apos;accès au Service
+                Fiable peut être amené à interrompre temporairement l&apos;accès au Service
                 pour des opérations de maintenance, mises à jour ou amélioration. Les
                 maintenances programmées sont annoncées au moins 48 heures à l&apos;avance,
                 sauf urgence de sécurité.
@@ -680,7 +680,7 @@ export default function Conditions() {
               <h3>17.3 Limitations</h3>
               <p>
                 Le fonctionnement du Service dépend de prestataires tiers (hébergeurs,
-                fournisseurs Internet, partenaires de paiement). Rollo ne peut garantir
+                fournisseurs Internet, partenaires de paiement). Fiable ne peut garantir
                 la disponibilité absolue de ces services tiers, mais s&apos;engage à choisir
                 des prestataires fiables et à mettre en place des solutions de secours
                 lorsque possible.
@@ -693,14 +693,14 @@ export default function Conditions() {
               <h3>18.1 Principe général</h3>
               <p>
                 Dans la mesure permise par la loi applicable, la responsabilité de
-                Rollo envers l&apos;Utilisateur, toutes causes confondues, est limitée au
+                Fiable envers l&apos;Utilisateur, toutes causes confondues, est limitée au
                 montant des sommes effectivement versées par l&apos;Utilisateur au titre du
                 Service durant les 12 mois précédant le fait générateur de
                 responsabilité.
               </p>
 
               <h3>18.2 Exclusions</h3>
-              <p>Rollo ne saurait être tenu responsable :</p>
+              <p>Fiable ne saurait être tenu responsable :</p>
               <ul>
                 <li>Des dommages indirects (perte de chiffre d&apos;affaires, perte de clientèle, atteinte à la réputation)</li>
                 <li>Des conséquences résultant de l&apos;usage frauduleux du Compte par un tiers</li>
@@ -714,7 +714,7 @@ export default function Conditions() {
               <h3>18.3 Cas non limités</h3>
               <p>
                 Les présentes limitations ne s&apos;appliquent pas en cas de faute lourde
-                ou intentionnelle de Rollo, ni dans les cas où la loi applicable
+                ou intentionnelle de Fiable, ni dans les cas où la loi applicable
                 interdit toute limitation de responsabilité (notamment en matière de
                 dommage corporel, garantie légale de conformité dans certaines
                 juridictions, etc.).
@@ -733,9 +733,9 @@ export default function Conditions() {
                 n&apos;est dû, sauf disposition légale impérative contraire.
               </p>
 
-              <h3>19.2 Résiliation par Rollo</h3>
+              <h3>19.2 Résiliation par Fiable</h3>
               <p>
-                Rollo peut suspendre ou résilier le Compte de l&apos;Utilisateur, avec ou
+                Fiable peut suspendre ou résilier le Compte de l&apos;Utilisateur, avec ou
                 sans préavis selon la gravité, en cas de :
               </p>
               <ul>
@@ -753,7 +753,7 @@ export default function Conditions() {
               <ul>
                 <li>L&apos;accès au Compte est désactivé</li>
                 <li>Les Données personnelles sont supprimées selon les durées indiquées dans la <Link href="/confidentialite" className="legal-link">Politique de Confidentialité</Link></li>
-                <li>Les sommes éventuellement dues à l&apos;Utilisateur lui sont versées sous 30 jours, après déduction des éventuelles sommes dues à Rollo</li>
+                <li>Les sommes éventuellement dues à l&apos;Utilisateur lui sont versées sous 30 jours, après déduction des éventuelles sommes dues à Fiable</li>
                 <li>L&apos;Utilisateur peut, avant la résiliation, exporter ses données via les fonctionnalités prévues à cet effet</li>
                 <li>Les obligations qui par nature survivent à la résiliation (propriété intellectuelle, confidentialité, responsabilité, droit applicable) restent en vigueur</li>
               </ul>
@@ -764,14 +764,14 @@ export default function Conditions() {
 
               <h3>20.1 Droit de modification</h3>
               <p>
-                Rollo se réserve le droit de modifier les présentes CGU à tout moment,
+                Fiable se réserve le droit de modifier les présentes CGU à tout moment,
                 notamment pour les adapter aux évolutions législatives, réglementaires,
                 techniques ou commerciales.
               </p>
 
               <h3>20.2 Information préalable</h3>
               <p>
-                En cas de modification substantielle, Rollo informera les Utilisateurs :
+                En cas de modification substantielle, Fiable informera les Utilisateurs :
               </p>
               <ul>
                 <li>Par email à l&apos;adresse renseignée dans le Compte, au moins 30 jours avant l&apos;entrée en vigueur des nouvelles CGU</li>
@@ -881,7 +881,7 @@ export default function Conditions() {
               <h3>23.4 Cession</h3>
               <p>
                 L&apos;Utilisateur ne peut céder ses droits et obligations au titre des
-                présentes sans l&apos;accord préalable écrit de Rollo. Rollo peut céder
+                présentes sans l&apos;accord préalable écrit de Fiable. Fiable peut céder
                 les présentes à tout tiers, notamment dans le cadre d&apos;une cession
                 d&apos;activité, d&apos;une fusion ou d&apos;une réorganisation.
               </p>
@@ -889,7 +889,7 @@ export default function Conditions() {
               <h3>23.5 Notifications</h3>
               <p>
                 Toute notification au titre des présentes doit être effectuée par
-                email aux adresses indiquées dans le Compte ou à l&apos;adresse <strong>legal@getsellia.com</strong> pour Rollo. Les notifications par courrier postal restent possibles aux adresses indiquées dans les Mentions Légales.
+                email aux adresses indiquées dans le Compte ou à l&apos;adresse <strong>legal@getsellia.com</strong> pour Fiable. Les notifications par courrier postal restent possibles aux adresses indiquées dans les Mentions Légales.
               </p>
 
               <h3>23.6 Langue</h3>
@@ -911,7 +911,7 @@ export default function Conditions() {
                 </p>
                 <p>
                   <strong>Adresse postale</strong> :<br />
-                  Rollo Technologies Inc.<br />
+                  Fiable Technologies LLC<br />
                   Attn: Legal Department<br />
                   1111B S Governors Ave, Suite 59264<br />
                   Dover, DE 19904<br />
@@ -924,7 +924,7 @@ export default function Conditions() {
               <p>
                 <strong>Document approuvé et publié par :</strong><br />
                 Dylan NONGA<br />
-                Responsable conformité, Rollo Technologies Inc.<br />
+                Responsable conformité, Fiable Technologies LLC<br />
                 Le 30 avril 2026
               </p>
             </div>
@@ -935,7 +935,7 @@ export default function Conditions() {
       <footer className="legal-footer">
         <div className="container">
           <div className="legal-footer-inner">
-            <span>© 2026 Rollo Technologies Inc. · Tous droits réservés · Sellia™ est une marque de Rollo Technologies Inc.</span>
+            <span>© 2026 Fiable Technologies LLC · Tous droits réservés · Sellia™ est une marque de Fiable Technologies LLC</span>
             <div className="legal-footer-links">
               <Link href="/conditions">Conditions</Link>
               <Link href="/confidentialite">Confidentialité</Link>

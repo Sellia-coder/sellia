@@ -3,6 +3,23 @@
 import type { CSSProperties } from "react";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import {
+  Storefront,
+  TShirt,
+  CookingPot,
+  PaintBrush,
+  Sparkle,
+  House,
+  Devices,
+  BookOpen,
+  Plant,
+  Heart,
+  Camera,
+  MusicNotes,
+  Basketball,
+  GameController,
+  type Icon,
+} from "@phosphor-icons/react";
 
 interface GeneratedProduct {
   name: string;
@@ -46,6 +63,46 @@ function resolveCategoryTemplate(category?: string): string {
   if (/\b(tech|digital|saas|logiciel)\b/.test(c)) return "tech";
   if (/\b(artisan|handmade|craft|creation)\b/.test(c)) return "artisanat";
   return "default";
+}
+
+function getShopCategoryIcon(category?: string): Icon {
+  if (!category) return Storefront;
+  const c = category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (/\b(mode|fashion|vetement|pret-a-porter)\b/.test(c)) return TShirt;
+  if (/\b(food|restaurant|cuisine|aliment|gastro|epicerie)\b/.test(c)) return CookingPot;
+  if (/\b(beaut|cosmet|skincare|soin|maquillage)\b/.test(c)) return PaintBrush;
+  if (/\b(jewelry|bijou|luxe|luxury)\b/.test(c)) return Sparkle;
+  if (/\b(home|decoration|deco|maison)\b/.test(c)) return House;
+  if (/\b(tech|electronique|digital|gsm|smartphone)\b/.test(c)) return Devices;
+  if (/\b(book|livre|papeterie)\b/.test(c)) return BookOpen;
+  if (/\b(bio|organic|naturel|plant)\b/.test(c)) return Plant;
+  if (/\b(wellness|sante|health|santé)\b/.test(c)) return Heart;
+  if (/\b(art|photo|camera)\b/.test(c)) return Camera;
+  if (/\b(music|musique)\b/.test(c)) return MusicNotes;
+  if (/\b(sport|fitness)\b/.test(c)) return Basketball;
+  if (/\b(game|gaming|loisir|jeux)\b/.test(c)) return GameController;
+  return Storefront;
+}
+
+function ShopCategoryIcon({ category, size = 28 }: { category?: string; size?: number }) {
+  const IconComponent = getShopCategoryIcon(category);
+  return (
+    <div
+      style={{
+        width: "48px",
+        height: "48px",
+        borderRadius: "12px",
+        background: "linear-gradient(135deg, rgba(232, 75, 31, 0.12), rgba(232, 75, 31, 0.04))",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "var(--apercu-ember, #E84B1F)",
+        flexShrink: 0,
+      }}
+    >
+      <IconComponent size={size} weight="duotone" />
+    </div>
+  );
 }
 
 function ApercuContent() {
@@ -249,9 +306,7 @@ function ApercuContent() {
       >
         <div className="apercu-pro-shop-header-inner">
           <div className="apercu-pro-shop-brand">
-            <div className="apercu-pro-shop-logo" aria-hidden="true">
-              <span>{(shop?.data?.name || shop?.shopName || "S").charAt(0)}</span>
-            </div>
+            <ShopCategoryIcon category={shop?.data?.category} />
             <div className="apercu-pro-shop-brand-text">
               <h1 className="apercu-pro-shop-name">
                 {shop?.data?.name || shop?.shopName || "Ma boutique"}
@@ -539,9 +594,7 @@ function ApercuContent() {
       <footer className="apercu-pro-footer">
         <div className="apercu-pro-footer-inner">
           <div className="apercu-pro-footer-brand">
-            <div className="apercu-pro-shop-logo apercu-pro-footer-logo">
-              <span>{(shop?.data?.name || shop?.shopName || "S").charAt(0)}</span>
-            </div>
+            <ShopCategoryIcon category={shop?.data?.category} size={24} />
             <div>
               <h5 className="apercu-pro-footer-name">{shop?.data?.name || shop?.shopName}</h5>
               <p className="apercu-pro-footer-desc">

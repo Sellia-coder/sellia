@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, Fragment } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -111,12 +111,18 @@ function VerifierEmailContent() {
     const result = await verifyOTPAction(formData);
 
     if (result.success) {
+      const fallbackRedirect = flow === "LOGIN"
+        ? "/dashboard"
+        : "/personnaliser-ma-boutique";
       const redirectTo =
         "redirectTo" in result && result.redirectTo
           ? result.redirectTo
-          : "/personnaliser-ma-boutique";
-      setTransitioning(true);
-      await new Promise((r) => setTimeout(r, 600));
+          : fallbackRedirect;
+
+      if (flow === "EMAIL_VERIFICATION") {
+        setTransitioning(true);
+        await new Promise((r) => setTimeout(r, 600));
+      }
       router.push(redirectTo);
     } else {
       setError(result.error || "Code invalide.");
@@ -165,6 +171,37 @@ function VerifierEmailContent() {
 
   const codeFilled = code.every(c => c !== "");
 
+  const stepsConfig = (() => {
+    if (flow === "LOGIN") {
+      return {
+        title: "Vérification de connexion",
+        steps: [
+          { title: "Identifiants validés", desc: "Email et mot de passe corrects", done: true },
+          { title: "Vérification de sécurité", desc: "Code envoyé à votre email", active: true },
+          { title: "Accès au dashboard", desc: "Reprenez là où vous êtes resté", done: false },
+        ],
+      };
+    }
+    if (flow === "PASSWORD_RESET") {
+      return {
+        title: "Réinitialisation sécurisée",
+        steps: [
+          { title: "Demande envoyée", desc: "Email de vérification reçu", done: true },
+          { title: "Vérification du code", desc: "Saisissez le code à 6 chiffres", active: true },
+          { title: "Nouveau mot de passe", desc: "Choisissez un mot de passe fort", done: false },
+        ],
+      };
+    }
+    return {
+      title: "Bienvenue sur Sellia",
+      steps: [
+        { title: "Compte créé", desc: "Vos identifiants sont enregistrés", done: true },
+        { title: "Vérification email", desc: "Saisissez le code reçu", active: true },
+        { title: "Création boutique", desc: "Décrivez ce que vous vendez", done: false },
+      ],
+    };
+  })();
+
   return (
     <div className="auth-page">
       <aside className="auth-editorial">
@@ -187,34 +224,29 @@ function VerifierEmailContent() {
             </p>
           </div>
           <div className="auth-steps">
-            <div className="auth-step auth-step-done">
-              <div className="auth-step-marker">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-              </div>
-              <div className="auth-step-content">
-                <span className="auth-step-title">Compte créé</span>
-                <span className="auth-step-desc">Vos identifiants sont enregistrés</span>
-              </div>
-            </div>
-            <div className="auth-step-line"></div>
-            <div className="auth-step auth-step-active">
-              <div className="auth-step-marker">
-                <span className="auth-step-pulse"></span>
-                2
-              </div>
-              <div className="auth-step-content">
-                <span className="auth-step-title">Vérification email</span>
-                <span className="auth-step-desc">Saisissez le code reçu</span>
-              </div>
-            </div>
-            <div className="auth-step-line"></div>
-            <div className="auth-step">
-              <div className="auth-step-marker">3</div>
-              <div className="auth-step-content">
-                <span className="auth-step-title">Création boutique</span>
-                <span className="auth-step-desc">Décrivez ce que vous vendez</span>
-              </div>
-            </div>
+            {stepsConfig.steps.map((step, i) => (
+              <Fragment key={i}>
+                <div className={`auth-step ${step.done ? "auth-step-done" : ""} ${step.active ? "auth-step-active" : ""}`}>
+                  <div className="auth-step-marker">
+                    {step.done ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                    ) : step.active ? (
+                      <>
+                        <span className="auth-step-pulse"></span>
+                        {i + 1}
+                      </>
+                    ) : (
+                      i + 1
+                    )}
+                  </div>
+                  <div className="auth-step-content">
+                    <span className="auth-step-title">{step.title}</span>
+                    <span className="auth-step-desc">{step.desc}</span>
+                  </div>
+                </div>
+                {i < stepsConfig.steps.length - 1 && <div className="auth-step-line"></div>}
+              </Fragment>
+            ))}
           </div>
         </div>
       </aside>

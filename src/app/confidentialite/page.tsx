@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Politique de Confidentialité",
-  description: "Politique de confidentialité du service Sellia, conforme RGPD, CCPA et lois OHADA. Opéré par Rollo Technologies Inc.",
+  description: "Politique de confidentialité du service Sellia, conforme RGPD, CCPA et lois OHADA. Opéré par Fiable Technologies LLC",
   robots: { index: false, follow: false },
 };
 
@@ -81,10 +81,10 @@ export default function Confidentialite() {
             <section className="legal-preamble">
               <h2>Préambule</h2>
               <p>
-                Rollo Technologies Inc. (ci-après « <strong>Rollo</strong> », « <strong>nous</strong> », « <strong>notre</strong> » ou « <strong>nos</strong> »), société de droit américain immatriculée dans l&apos;État du Delaware, exploite le service Sellia (ci-après « <strong>le Service</strong> ») accessible à l&apos;adresse <strong>https://getsellia.com</strong>.
+                Fiable Technologies LLC (ci-après « <strong>Fiable</strong> », « <strong>nous</strong> », « <strong>notre</strong> » ou « <strong>nos</strong> »), société de droit américain immatriculée dans l&apos;État du Delaware, exploite le service Sellia (ci-après « <strong>le Service</strong> ») accessible à l&apos;adresse <strong>https://getsellia.com</strong>.
               </p>
               <p>
-                La protection de vos données personnelles est une priorité pour Rollo. La
+                La protection de vos données personnelles est une priorité pour Fiable. La
                 présente Politique de Confidentialité (ci-après « <strong>la Politique</strong> ») a pour
                 objet de vous informer, de manière claire, complète et transparente, sur
                 la manière dont nous collectons, utilisons, conservons, partageons et
@@ -118,7 +118,7 @@ export default function Confidentialite() {
               <ul>
                 <li><strong>« Données personnelles »</strong> : toute information se rapportant à une personne physique identifiée ou identifiable, directement ou indirectement.</li>
                 <li><strong>« Traitement »</strong> : toute opération effectuée sur des Données personnelles (collecte, enregistrement, organisation, conservation, modification, extraction, consultation, utilisation, communication, mise à disposition, effacement, etc.).</li>
-                <li><strong>« Responsable du traitement »</strong> : la personne morale qui détermine les finalités et les moyens du Traitement. En l&apos;espèce : Rollo Technologies Inc.</li>
+                <li><strong>« Responsable du traitement »</strong> : la personne morale qui détermine les finalités et les moyens du Traitement. En l&apos;espèce : Fiable Technologies LLC</li>
                 <li><strong>« Sous-traitant »</strong> : la personne morale qui traite des Données personnelles pour le compte du Responsable du traitement.</li>
                 <li><strong>« Utilisateur »</strong> : toute personne physique utilisant le Service, qu&apos;elle soit Vendeur ou Acheteur.</li>
                 <li><strong>« Vendeur »</strong> : Utilisateur qui crée et exploite une boutique en ligne via le Service pour commercialiser ses produits ou services.</li>
@@ -137,7 +137,7 @@ export default function Confidentialite() {
               </p>
               <div className="legal-info-block">
                 <p>
-                  <strong>Rollo Technologies Inc.</strong><br />
+                  <strong>Fiable Technologies LLC</strong><br />
                   Société de droit américain (Delaware C-Corporation)<br />
                   1111B S Governors Ave, Suite 59264<br />
                   Dover, DE 19904<br />
@@ -150,14 +150,14 @@ export default function Confidentialite() {
                 </p>
               </div>
               <p>
-                En tant que Responsable du traitement, Rollo Technologies Inc. détermine
+                En tant que Responsable du traitement, Fiable Technologies LLC détermine
                 les finalités et les moyens des traitements de Données personnelles
                 effectués dans le cadre du Service.
               </p>
               <p>
                 Lorsqu&apos;un Vendeur utilise le Service pour exploiter sa boutique, ce
                 Vendeur est lui-même Responsable du traitement des Données personnelles
-                de ses propres Acheteurs. Rollo agit alors en tant que Sous-traitant pour
+                de ses propres Acheteurs. Fiable agit alors en tant que Sous-traitant pour
                 ce périmètre, dans le cadre d&apos;un accord de traitement de données (DPA)
                 disponible sur demande.
               </p>
@@ -166,7 +166,7 @@ export default function Confidentialite() {
             <section id="article-3">
               <h2>Article 3 — Délégué à la protection des données</h2>
               <p>
-                Bien que la désignation d&apos;un DPO ne soit pas obligatoire pour Rollo
+                Bien que la désignation d&apos;un DPO ne soit pas obligatoire pour Fiable
                 Technologies Inc. au regard du RGPD, nous avons fait le choix volontaire
                 de désigner un point de contact dédié aux questions de protection des
                 données.
@@ -392,9 +392,9 @@ export default function Confidentialite() {
               <h2>Article 8 — Destinataires des données</h2>
               <p>Vos Données personnelles peuvent être transmises aux destinataires suivants, dans les limites de ce qui est strictement nécessaire :</p>
 
-              <h3>8.1 Personnel de Rollo</h3>
+              <h3>8.1 Personnel de Fiable</h3>
               <p>
-                Les équipes internes de Rollo (développement, support, sécurité,
+                Les équipes internes de Fiable (développement, support, sécurité,
                 comptabilité, juridique), soumises à des obligations strictes de
                 confidentialité et accédant aux données selon le principe du moindre
                 privilège.
@@ -431,7 +431,7 @@ export default function Confidentialite() {
               </p>
 
               <p className="legal-note">
-                <strong>Vente de données : NON.</strong> Rollo ne vend, ne loue ni
+                <strong>Vente de données : NON.</strong> Fiable ne vend, ne loue ni
                 n&apos;échange vos Données personnelles à des tiers à des fins commerciales.
                 Cette interdiction est inscrite dans nos engagements contractuels et
                 applicable sans exception.
@@ -493,12 +493,12 @@ export default function Confidentialite() {
               <h2>Article 10 — Transferts internationaux de données</h2>
               <p>
                 Compte tenu de la nature internationale du Service et de l&apos;implantation
-                de Rollo Technologies Inc. aux États-Unis, vos Données personnelles
+                de Fiable Technologies LLC aux États-Unis, vos Données personnelles
                 peuvent être transférées en dehors de votre pays de résidence,
                 notamment :
               </p>
               <ul>
-                <li>Vers les <strong>États-Unis</strong> (siège de Rollo, Cloudflare, GitHub, Stripe, Anthropic, OpenAI)</li>
+                <li>Vers les <strong>États-Unis</strong> (siège de Fiable, Cloudflare, GitHub, Stripe, Anthropic, OpenAI)</li>
                 <li>Vers <strong>l&apos;Union Européenne</strong> (Hostinger en Chypre)</li>
                 <li>Vers <strong>l&apos;Afrique</strong> (Afribapay, CinetPay)</li>
               </ul>
@@ -710,7 +710,7 @@ export default function Confidentialite() {
               <h3>14.1 Modalités</h3>
               <ul>
                 <li><strong>Email</strong> : <strong>dpo@getsellia.com</strong> (méthode privilégiée)</li>
-                <li><strong>Courrier postal</strong> : Rollo Technologies Inc., Attn: Data Protection Officer, 1111B S Governors Ave, Suite 59264, Dover, DE 19904, États-Unis</li>
+                <li><strong>Courrier postal</strong> : Fiable Technologies LLC, Attn: Data Protection Officer, 1111B S Governors Ave, Suite 59264, Dover, DE 19904, États-Unis</li>
                 <li><strong>Depuis votre compte</strong> : section « Confidentialité » des paramètres (lorsque la fonctionnalité sera disponible)</li>
               </ul>
 
@@ -835,7 +835,7 @@ export default function Confidentialite() {
                 </p>
                 <p>
                   <strong>Adresse postale</strong> :<br />
-                  Rollo Technologies Inc.<br />
+                  Fiable Technologies LLC<br />
                   Attn: Data Protection Officer<br />
                   1111B S Governors Ave, Suite 59264<br />
                   Dover, DE 19904<br />
@@ -852,7 +852,7 @@ export default function Confidentialite() {
               <p>
                 <strong>Document approuvé et publié par :</strong><br />
                 Dylan NONGA<br />
-                Responsable conformité, Rollo Technologies Inc.<br />
+                Responsable conformité, Fiable Technologies LLC<br />
                 Le 30 avril 2026
               </p>
             </div>
@@ -863,7 +863,7 @@ export default function Confidentialite() {
       <footer className="legal-footer">
         <div className="container">
           <div className="legal-footer-inner">
-            <span>© 2026 Rollo Technologies Inc. · Tous droits réservés · Sellia™ est une marque de Rollo Technologies Inc.</span>
+            <span>© 2026 Fiable Technologies LLC · Tous droits réservés · Sellia™ est une marque de Fiable Technologies LLC</span>
             <div className="legal-footer-links">
               <Link href="/conditions">Conditions</Link>
               <Link href="/confidentialite">Confidentialité</Link>

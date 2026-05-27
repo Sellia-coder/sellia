@@ -121,14 +121,17 @@ export async function createOrderAction(input: CreateOrderInput) {
   ) {
     return { ok: false, error: "Paiement à la livraison non disponible" } as const;
   }
-  if (
-    effectivePaymentMethod === PAYMENT_METHOD.CASH_ON_DELIVERY &&
-    shop.plan !== "pro"
-  ) {
-    return {
-      ok: false,
-      error: "Paiement à la livraison réservé aux boutiques Pro",
-    } as const;
+  if (effectivePaymentMethod === PAYMENT_METHOD.CASH_ON_DELIVERY) {
+    const codUnlock = await db.shopFeatureUnlock.findUnique({
+      where: { shopId_feature: { shopId: shop.id, feature: "COD" } },
+      select: { id: true },
+    });
+    if (!codUnlock) {
+      return {
+        ok: false,
+        error: "Le paiement à la livraison n'est pas activé sur cette boutique",
+      } as const;
+    }
   }
   if (
     effectivePaymentMethod === PAYMENT_METHOD.ONLINE_MOBILE_MONEY &&

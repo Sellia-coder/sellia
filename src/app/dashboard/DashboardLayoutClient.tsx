@@ -252,13 +252,13 @@ export default function DashboardLayoutClient({
               </a>
             ) : null}
             <div className="dash-topbar-divider"></div>
-            <button className="dash-topbar-btn" aria-label="Aide">
+            <Link href="/dashboard/aide" className="dash-topbar-btn" aria-label="Aide & support">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-            </button>
+            </Link>
             <button className="dash-topbar-btn dash-topbar-btn-notif" aria-label="Notifications">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -270,7 +270,7 @@ export default function DashboardLayoutClient({
         <main className="dash-content">
           {children}
           <footer className="dash-footer">
-            <div className="dash-footer-copyright">© 2026 Sellia · Une marque de Rollo Technologies Inc.</div>
+            <div className="dash-footer-copyright">© 2026 Sellia · Une marque de Fiable Technologies LLC</div>
             <div className="dash-footer-links">
               <a href="/conditions">Conditions</a>
               <span>·</span>

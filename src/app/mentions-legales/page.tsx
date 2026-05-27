@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Mentions Légales",
-  description: "Mentions légales du service Sellia, opéré par Rollo Technologies Inc.",
+  description: "Mentions légales du service Sellia, opéré par Fiable Technologies LLC",
   robots: { index: false, follow: false },
 };
 
@@ -101,7 +101,7 @@ export default function MentionsLegales() {
                 Le service Sellia (ci-après « le Service ») est édité et exploité par :
               </p>
               <div className="legal-info-block">
-                <p><strong>Rollo Technologies Inc.</strong></p>
+                <p><strong>Fiable Technologies LLC</strong></p>
                 <p>
                   Société de droit américain (Corporation)<br />
                   Constituée selon les lois de l&apos;État du Delaware, États-Unis d&apos;Amérique
@@ -123,8 +123,8 @@ export default function MentionsLegales() {
                 </p>
               </div>
               <p>
-                Rollo Technologies Inc. exploite le Service Sellia en tant que marque
-                commerciale. Sellia constitue une activité opérée par Rollo Technologies
+                Fiable Technologies LLC exploite le Service Sellia en tant que marque
+                commerciale. Sellia constitue une activité opérée par Fiable Technologies
                 Inc. mais positionnée comme une offre distincte ciblant le marché du
                 commerce digital.
               </p>
@@ -139,7 +139,7 @@ export default function MentionsLegales() {
               <div className="legal-info-block">
                 <p>
                   <strong>Dylan NONGA</strong><br />
-                  Responsable conformité de Rollo Technologies Inc.<br />
+                  Responsable conformité de Fiable Technologies LLC<br />
                   Contact : <strong>legal@getsellia.com</strong>
                 </p>
               </div>
@@ -243,7 +243,7 @@ export default function MentionsLegales() {
             <section id="article-5">
               <h2>Article 5 — Propriété intellectuelle</h2>
 
-              <h3>5.1 Droits de Rollo Technologies Inc.</h3>
+              <h3>5.1 Droits de Fiable Technologies LLC</h3>
               <p>
                 L&apos;ensemble des éléments composant le Service Sellia, à savoir
                 notamment :
@@ -258,7 +258,7 @@ export default function MentionsLegales() {
                 <li>L&apos;ensemble des contenus éditoriaux (articles, FAQ, documentation)</li>
               </ul>
               <p>
-                sont la propriété exclusive de Rollo Technologies Inc. ou de ses
+                sont la propriété exclusive de Fiable Technologies LLC ou de ses
                 concédants de licence, et sont protégés par les lois en vigueur sur la
                 propriété intellectuelle, notamment le droit d&apos;auteur, le droit des
                 marques, le droit des dessins et modèles, ainsi que le droit des bases
@@ -271,7 +271,7 @@ export default function MentionsLegales() {
                 adaptation, traduction, distribution ou exploitation, totale ou
                 partielle, de tout ou partie des éléments susmentionnés, par quelque
                 procédé que ce soit et sur quelque support que ce soit, est strictement
-                interdite, sauf autorisation écrite préalable de Rollo Technologies
+                interdite, sauf autorisation écrite préalable de Fiable Technologies
                 Inc.
               </p>
               <p>
@@ -286,7 +286,7 @@ export default function MentionsLegales() {
                 Les contenus que les Utilisateurs téléchargent ou créent au moyen du
                 Service (notamment : descriptions de produits, photographies de
                 produits, contenus marketing, données de leur boutique) demeurent leur
-                propriété exclusive. L&apos;Utilisateur concède toutefois à Rollo
+                propriété exclusive. L&apos;Utilisateur concède toutefois à Fiable
                 Technologies Inc. une licence non-exclusive, mondiale et gratuite,
                 pour la durée d&apos;utilisation du Service, aux fins limitatives suivantes :
               </p>
@@ -341,7 +341,7 @@ export default function MentionsLegales() {
               </p>
               <ul>
                 <li>Le lien doit pointer vers une page publiquement accessible du Service</li>
-                <li>Le contexte du lien ne doit pas être préjudiciable à la réputation de Sellia ou de Rollo Technologies Inc.</li>
+                <li>Le contexte du lien ne doit pas être préjudiciable à la réputation de Sellia ou de Fiable Technologies LLC</li>
                 <li>Le lien ne doit pas induire en erreur sur l&apos;origine du contenu lié</li>
                 <li>Le lien ne doit pas s&apos;accompagner d&apos;une utilisation non autorisée des marques de Sellia</li>
               </ul>
@@ -349,7 +349,7 @@ export default function MentionsLegales() {
               <h3>7.2 Liens sortants</h3>
               <p>
                 Le Service peut contenir des liens hypertextes pointant vers des sites
-                tiers. Rollo Technologies Inc. n&apos;exerce aucun contrôle éditorial sur
+                tiers. Fiable Technologies LLC n&apos;exerce aucun contrôle éditorial sur
                 ces sites tiers et ne saurait être tenu responsable de leur contenu, de
                 leur disponibilité, de leur conformité légale, ou de toute conséquence
                 résultant de leur consultation.
@@ -402,10 +402,10 @@ export default function MentionsLegales() {
             <section id="article-11">
               <h2>Article 11 — Limitation de responsabilité</h2>
               <p>
-                Rollo Technologies Inc. met en œuvre tous les moyens raisonnables pour
+                Fiable Technologies LLC met en œuvre tous les moyens raisonnables pour
                 assurer le bon fonctionnement, la sécurité et la disponibilité du
                 Service. Toutefois, dans les limites autorisées par la loi applicable,
-                Rollo Technologies Inc. ne saurait être tenu responsable :
+                Fiable Technologies LLC ne saurait être tenu responsable :
               </p>
               <ul>
                 <li>Des interruptions de service liées à des opérations de maintenance, des évolutions techniques, ou des cas de force majeure</li>
@@ -469,7 +469,7 @@ export default function MentionsLegales() {
             <section id="article-13">
               <h2>Article 13 — Modification des mentions légales</h2>
               <p>
-                Rollo Technologies Inc. se réserve le droit de modifier les présentes
+                Fiable Technologies LLC se réserve le droit de modifier les présentes
                 mentions légales à tout moment, notamment pour les adapter aux
                 évolutions législatives, réglementaires ou techniques.
               </p>
@@ -492,7 +492,7 @@ export default function MentionsLegales() {
               <h2>Article 14 — Signalement de contenu illicite</h2>
               <p>
                 Conformément aux obligations applicables aux services de communication
-                au public en ligne, Rollo Technologies Inc. met en place une procédure
+                au public en ligne, Fiable Technologies LLC met en place une procédure
                 de signalement permettant à toute personne de notifier la présence sur
                 le Service d&apos;un contenu manifestement illicite.
               </p>
@@ -514,7 +514,7 @@ export default function MentionsLegales() {
 
               <h3>14.3 Traitement des signalements</h3>
               <p>
-                Rollo Technologies Inc. s&apos;engage à examiner chaque signalement avec
+                Fiable Technologies LLC s&apos;engage à examiner chaque signalement avec
                 diligence et à répondre dans un délai raisonnable. En cas de contenu
                 manifestement illicite avéré, le contenu sera retiré ou son accès rendu
                 impossible dans les meilleurs délais.
@@ -541,7 +541,7 @@ export default function MentionsLegales() {
                 </p>
                 <p>
                   <strong>Adresse postale</strong> :<br />
-                  Rollo Technologies Inc.<br />
+                  Fiable Technologies LLC<br />
                   Attn: Legal Department<br />
                   1111B S Governors Ave, Suite 59264<br />
                   Dover, DE 19904<br />
@@ -554,7 +554,7 @@ export default function MentionsLegales() {
               <p>
                 <strong>Document approuvé et publié par :</strong><br />
                 Dylan NONGA<br />
-                Responsable conformité, Rollo Technologies Inc.<br />
+                Responsable conformité, Fiable Technologies LLC<br />
                 Le 30 avril 2026
               </p>
             </div>
@@ -565,7 +565,7 @@ export default function MentionsLegales() {
       <footer className="legal-footer">
         <div className="container">
           <div className="legal-footer-inner">
-            <span>© 2026 Rollo Technologies Inc. · Tous droits réservés · Sellia™ est une marque de Rollo Technologies Inc.</span>
+            <span>© 2026 Fiable Technologies LLC · Tous droits réservés · Sellia™ est une marque de Fiable Technologies LLC</span>
             <div className="legal-footer-links">
               <Link href="/conditions">Conditions</Link>
               <Link href="/confidentialite">Confidentialité</Link>

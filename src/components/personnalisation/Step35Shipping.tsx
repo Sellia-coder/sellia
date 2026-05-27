@@ -26,7 +26,8 @@ interface Props {
   onNext: () => void;
   onBack: () => void;
   countryCode: string;
-  plan?: string;
+  codUnlocked?: boolean;
+  onCodUnlocked?: () => void;
 }
 
 const MAX_ZONES = 10;
@@ -37,7 +38,8 @@ export default function Step35Shipping({
   onNext,
   onBack,
   countryCode,
-  plan = "free",
+  codUnlocked = false,
+  onCodUnlocked,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [showProModal, setShowProModal] = useState(false);
@@ -219,7 +221,7 @@ export default function Step35Shipping({
         <div className="perso-payment-options">
           <div
             className={`perso-payment-option ${
-              plan === "free" ? "perso-payment-option-locked" : value.paymentCashOnDelivery ? "is-active" : ""
+              !codUnlocked ? "perso-payment-option-locked" : value.paymentCashOnDelivery ? "is-active" : ""
             }`}
           >
             <div className="perso-payment-option-icon">
@@ -230,27 +232,27 @@ export default function Step35Shipping({
                 <span className="perso-payment-option-title">
                   Paiement à la livraison
                 </span>
-                {plan === "free" && (
+                {!codUnlocked && (
                   <span className="perso-pro-badge">
                     <Crown size={10} strokeWidth={2.5} />
-                    PRO
+                    1 900 FCFA
                   </span>
                 )}
               </div>
               <p className="perso-payment-option-desc">
-                {plan === "free"
-                  ? "Permet au client de payer en espèces à la réception. Disponible avec le plan Pro."
+                {!codUnlocked
+                  ? "Permet au client de payer en espèces à la réception. Activation unique à 1 900 FCFA."
                   : "Le client paie en espèces ou Mobile Money directement à votre livreur quand il reçoit son colis."}
               </p>
             </div>
-            {plan === "free" ? (
+            {!codUnlocked ? (
               <button
                 type="button"
                 className="perso-upgrade-btn"
                 onClick={() => setShowProModal(true)}
               >
                 <Crown size={13} strokeWidth={2.4} />
-                Débloquer avec Pro
+                Débloquer · 1 900 FCFA
               </button>
             ) : (
               <span className="perso-payment-option-toggle">
@@ -353,7 +355,14 @@ export default function Step35Shipping({
       <StepNav onBack={onBack} onNext={handleSubmit} nextLabel="Continuer" />
 
       {showProModal && (
-        <ProUpgradeModal onClose={() => setShowProModal(false)} />
+        <ProUpgradeModal
+          open={showProModal}
+          onClose={() => setShowProModal(false)}
+          onUnlocked={() => {
+            onCodUnlocked?.();
+            setShowProModal(false);
+          }}
+        />
       )}
     </section>
   );

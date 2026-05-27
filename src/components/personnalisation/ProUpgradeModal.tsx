@@ -1,253 +1,317 @@
 "use client";
 
-import { useState } from "react";
-import { X, Crown, Check, ChevronDown, Loader2, ShieldCheck } from "lucide-react";
-import CountryFlag, { COUNTRY_NAMES } from "@/components/shared/CountryFlag";
-import PaymentLogos from "@/components/shop/PaymentLogos";
-import styles from "./ProUpgradeModal.module.css";
+import { useState, useTransition, useEffect } from "react";
+import {
+  X,
+  Truck,
+  CheckCircle,
+  Lock,
+  TrendUp,
+  ShieldCheck,
+  CurrencyCircleDollar,
+} from "@phosphor-icons/react";
+import { initiateCodUnlockAction, devUnlockCodAction } from "@/app/actions/feature-unlock";
 
 interface Props {
+  open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onUnlocked?: () => void;
 }
 
-const PRO_BENEFITS = [
-  {
-    title: "Paiement à la livraison débloqué",
-    desc: "Vos clients peuvent payer en espèces à la réception",
-    highlight: true,
-  },
-  {
-    title: "Commission réduite à 4%",
-    desc: "Au lieu de 6% sur le plan gratuit",
-  },
-  {
-    title: "Domaine personnalisé",
-    desc: "Utilisez votre propre nom de domaine (.com)",
-  },
-  {
-    title: "Statistiques détaillées",
-    desc: "Rapports IA et analytics avancés",
-  },
-  {
-    title: "Support prioritaire WhatsApp",
-    desc: "Réponse sous 4 heures",
-  },
+const UNLOCK_PRICE = 1900;
+
+const BENEFITS = [
+  { Icon: TrendUp, label: "Conversion x2", desc: "Vos clients hésitent moins quand ils peuvent payer à la réception" },
+  { Icon: ShieldCheck, label: "Confiance renforcée", desc: "Pratique standard des marchands africains" },
+  { Icon: Truck, label: "Livraison + paiement", desc: "Le client règle directement au livreur" },
+  { Icon: CheckCircle, label: "Gestion intégrée", desc: "Statut commande et paiement suivis dans le dashboard" },
 ];
 
-export default function ProUpgradeModal({ onClose, onSuccess }: Props) {
-  const [momoCountry, setMomoCountry] = useState("CM");
-  const [momoNumber, setMomoNumber] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [step, setStep] = useState<"benefits" | "payment" | "success">("benefits");
+export default function ProUpgradeModal({ open, onClose, onUnlocked }: Props) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-  const isValidNumber = momoNumber.length >= 8;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
-  const dialCodes: Record<string, string> = {
-    CM: "+237", CI: "+225", SN: "+221", BJ: "+229", TG: "+228",
-    BF: "+226", ML: "+223", NE: "+227", CG: "+242", GA: "+241",
-    GN: "+224", RW: "+250",
-  };
+  if (!open) return null;
 
-  const handleActivate = async () => {
-    if (!isValidNumber || isProcessing) return;
-    setIsProcessing(true);
-
-    setTimeout(() => {
-      setIsProcessing(false);
-      setStep("success");
-    }, 1500);
+  const handleUnlock = () => {
+    setError(null);
+    startTransition(async () => {
+      const res = await initiateCodUnlockAction();
+      if (res.ok && res.paymentUrl) {
+        const dev = await devUnlockCodAction();
+        if (dev.ok) {
+          onUnlocked?.();
+          onClose();
+        } else {
+          setError(dev.error || "Erreur");
+        }
+      } else {
+        setError(res.error || "Erreur");
+      }
+    });
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className={styles.closeBtn}
-          onClick={onClose}
-          aria-label="Fermer"
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(14, 17, 22, 0.55)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        zIndex: 9999,
+        backdropFilter: "blur(4px)",
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "white",
+          borderRadius: "20px",
+          width: "100%",
+          maxWidth: "560px",
+          maxHeight: "92vh",
+          overflowY: "auto",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.25)",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            padding: "32px 32px 24px",
+            background: "linear-gradient(135deg, #FAFAF7 0%, rgba(232, 75, 31, 0.04) 100%)",
+            borderRadius: "20px 20px 0 0",
+            position: "relative",
+          }}
         >
-          <X size={18} strokeWidth={2.2} />
-        </button>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              position: "absolute",
+              top: "16px",
+              right: "16px",
+              background: "white",
+              border: "1px solid var(--dash-border, #E5E5E0)",
+              borderRadius: "8px",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "#0E1116",
+            }}
+            aria-label="Fermer"
+          >
+            <X size={16} weight="bold" />
+          </button>
 
-        {step === "benefits" && (
-          <>
-            <div className={styles.header}>
-              <div className={styles.headerIcon}>
-                <Crown size={28} strokeWidth={2.2} fill="currentColor" />
-              </div>
-              <div className={styles.headerBadge}>PASSEZ AU PLAN PRO</div>
-              <h2 className={styles.headerTitle}>
-                Débloquez tout le potentiel de votre boutique
-              </h2>
-              <p className={styles.headerSubtitle}>
-                Activez le paiement à la livraison et bien plus pour seulement
-              </p>
-              <div className={styles.priceTag}>
-                <span className={styles.priceAmount}>4 900</span>
-                <span className={styles.priceCurrency}>FCFA</span>
-                <span className={styles.pricePeriod}>/ mois</span>
-              </div>
-              <span className={styles.priceNote}>Annulable à tout moment · Sans engagement</span>
-            </div>
+          <div
+            style={{
+              width: "56px",
+              height: "56px",
+              borderRadius: "16px",
+              background: "linear-gradient(135deg, #E84B1F, #ff6b3d)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              boxShadow: "0 8px 24px rgba(232, 75, 31, 0.3)",
+              marginBottom: "16px",
+            }}
+          >
+            <Truck size={28} weight="duotone" />
+          </div>
 
-            <div className={styles.benefits}>
-              <h3 className={styles.benefitsTitle}>Ce que vous débloquez</h3>
-              <ul className={styles.benefitsList}>
-                {PRO_BENEFITS.map((benefit, i) => (
-                  <li key={i} className={`${styles.benefit} ${benefit.highlight ? styles.benefitHighlight : ""}`}>
-                    <div className={styles.benefitIcon}>
-                      <Check size={14} strokeWidth={3} />
-                    </div>
-                    <div className={styles.benefitText}>
-                      <span className={styles.benefitTitleText}>
-                        {benefit.title}
-                        {benefit.highlight && <span className={styles.benefitStar}>★</span>}
-                      </span>
-                      <span className={styles.benefitDesc}>{benefit.desc}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div
+            style={{
+              fontSize: "11px",
+              textTransform: "uppercase",
+              letterSpacing: "0.6px",
+              color: "#E84B1F",
+              fontWeight: 700,
+              marginBottom: "6px",
+            }}
+          >
+            Fonctionnalité premium
+          </div>
 
-            <button
-              type="button"
-              className={styles.primaryCta}
-              onClick={() => setStep("payment")}
-            >
-              <Crown size={16} strokeWidth={2.4} fill="currentColor" />
-              Activer mon plan Pro
-            </button>
+          <h2
+            style={{
+              margin: "0 0 8px",
+              fontFamily: "'Fraunces', serif",
+              fontSize: "28px",
+              fontWeight: 500,
+              lineHeight: 1.15,
+              color: "#0E1116",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            Activez le paiement <em style={{ color: "#E84B1F" }}>à la livraison</em>
+          </h2>
 
-            <span className={styles.legal}>
-              <ShieldCheck size={12} strokeWidth={2.4} />
-              Paiement sécurisé · Données chiffrées
-            </span>
-          </>
-        )}
+          <p style={{ margin: 0, fontSize: "14px", color: "#4B5563", lineHeight: 1.5 }}>
+            Offrez à vos clients la possibilité de régler en espèces au moment de la livraison — le levier #1 pour booster vos conversions en Afrique.
+          </p>
+        </div>
 
-        {step === "payment" && (
-          <>
-            <div className={styles.headerSimple}>
-              <button
-                type="button"
-                className={styles.backBtn}
-                onClick={() => setStep("benefits")}
+        <div style={{ padding: "20px 32px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
+            {BENEFITS.map((b, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "12px",
+                  background: "var(--dash-bg-active, #FAFAF7)",
+                  border: "1px solid var(--dash-border, #E5E5E0)",
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                }}
               >
-                ←
-              </button>
-              <h2 className={styles.headerSimpleTitle}>Activer le plan Pro</h2>
-            </div>
-
-            <div className={styles.summary}>
-              <div className={styles.summaryRow}>
-                <span>Plan Pro mensuel</span>
-                <span>4 900 FCFA</span>
-              </div>
-              <div className={styles.summaryDivider} />
-              <div className={styles.summaryTotal}>
-                <span>Total aujourd&apos;hui</span>
-                <span className={styles.summaryTotalAmount}>4 900 FCFA</span>
-              </div>
-              <span className={styles.summaryNote}>
-                Renouvellement automatique le même jour chaque mois.
-              </span>
-            </div>
-
-            <div className={styles.paymentMethod}>
-              <span className={styles.paymentMethodLabel}>Mode de paiement</span>
-              <div className={styles.paymentMethodCard}>
-                <span className={styles.paymentMethodTitle}>Mobile Money</span>
-                <PaymentLogos
-                  methods={["mtn_momo", "wave", "orange_money", "moov_money", "free_money", "airtel_money"]}
-                  size="sm"
-                  variant="circle"
-                />
-              </div>
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.fieldLabel}>Numéro Mobile Money à débiter</label>
-              <div className={styles.fieldInner}>
-                <div className={styles.fieldCountry}>
-                  <select
-                    value={momoCountry}
-                    onChange={(e) => setMomoCountry(e.target.value)}
-                    className={styles.fieldCountrySelect}
-                  >
-                    {Object.keys(dialCodes).map((code) => (
-                      <option key={code} value={code}>
-                        {dialCodes[code]} {COUNTRY_NAMES[code as keyof typeof COUNTRY_NAMES]}
-                      </option>
-                    ))}
-                  </select>
-                  <div className={styles.fieldCountryDisplay}>
-                    <CountryFlag code={momoCountry as any} size="sm" />
-                    <span>{dialCodes[momoCountry]}</span>
-                    <ChevronDown size={12} strokeWidth={2.4} />
-                  </div>
+                <b.Icon size={20} weight="duotone" color="#E84B1F" style={{ flexShrink: 0, marginTop: "1px" }} />
+                <div>
+                  <div style={{ fontSize: "12.5px", fontWeight: 600, color: "#0E1116", marginBottom: "2px" }}>{b.label}</div>
+                  <div style={{ fontSize: "11px", color: "#6B7280", lineHeight: 1.4 }}>{b.desc}</div>
                 </div>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  className={styles.fieldInput}
-                  placeholder="6XX XXX XXX"
-                  value={momoNumber}
-                  onChange={(e) => setMomoNumber(e.target.value.replace(/[^0-9]/g, ""))}
-                  maxLength={10}
-                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ padding: "0 32px 24px" }}>
+          <div
+            style={{
+              padding: "20px",
+              background: "linear-gradient(135deg, rgba(232, 75, 31, 0.06), rgba(232, 75, 31, 0.02))",
+              border: "1.5px solid rgba(232, 75, 31, 0.2)",
+              borderRadius: "14px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "16px",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "#E84B1F",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.4px",
+                  fontWeight: 700,
+                  marginBottom: "4px",
+                }}
+              >
+                Activation unique
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                <span
+                  style={{
+                    fontFamily: "'Fraunces', serif",
+                    fontSize: "36px",
+                    fontWeight: 500,
+                    color: "#0E1116",
+                    letterSpacing: "-1px",
+                  }}
+                >
+                  {UNLOCK_PRICE.toLocaleString("fr-FR")}
+                </span>
+                <span style={{ fontSize: "14px", color: "#4B5563", fontWeight: 500 }}>FCFA</span>
+              </div>
+              <div style={{ fontSize: "11.5px", color: "#6B7280", marginTop: "4px" }}>
+                Sans engagement · Sans abonnement · Activé à vie
               </div>
             </div>
+            <Lock size={32} weight="duotone" color="#E84B1F" style={{ flexShrink: 0 }} />
+          </div>
 
-            <button
-              type="button"
-              className={styles.primaryCta}
-              onClick={handleActivate}
-              disabled={!isValidNumber || isProcessing}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 size={16} strokeWidth={2.4} className={styles.spin} />
-                  Activation en cours...
-                </>
-              ) : (
-                <>
-                  <Crown size={16} strokeWidth={2.4} fill="currentColor" />
-                  Confirmer et payer 4 900 FCFA
-                </>
-              )}
-            </button>
-
-            <span className={styles.legal}>
-              <ShieldCheck size={12} strokeWidth={2.4} />
-              Paiement sécurisé · Vous recevrez un SMS de confirmation
-            </span>
-          </>
-        )}
-
-        {step === "success" && (
-          <div className={styles.success}>
-            <div className={styles.successIcon}>
-              <Check size={32} strokeWidth={3} />
-            </div>
-            <h2 className={styles.successTitle}>Plan Pro activé !</h2>
-            <p className={styles.successDesc}>
-              Votre plan Pro est maintenant actif. Le paiement à la livraison est débloqué pour vos clients.
-            </p>
-            <button
-              type="button"
-              className={styles.primaryCta}
-              onClick={() => {
-                onSuccess?.();
-                onClose();
+          {error && (
+            <div
+              style={{
+                marginTop: "12px",
+                padding: "10px 14px",
+                background: "rgba(220, 38, 38, 0.06)",
+                border: "1px solid rgba(220, 38, 38, 0.2)",
+                borderRadius: "10px",
+                color: "#dc2626",
+                fontSize: "12.5px",
               }}
             >
-              Continuer la configuration
-            </button>
-          </div>
-        )}
+              {error}
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            padding: "16px 32px 24px",
+            borderTop: "1px solid var(--dash-border, #E5E5E0)",
+            display: "flex",
+            gap: "10px",
+            justifyContent: "flex-end",
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              padding: "10px 18px",
+              background: "white",
+              border: "1px solid var(--dash-border, #E5E5E0)",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontSize: "13px",
+              fontWeight: 500,
+              color: "#4B5563",
+            }}
+          >
+            Plus tard
+          </button>
+          <button
+            type="button"
+            onClick={handleUnlock}
+            disabled={isPending}
+            style={{
+              padding: "10px 22px",
+              background: "linear-gradient(135deg, #E84B1F, #ff6b3d)",
+              color: "white",
+              border: "none",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontSize: "13px",
+              fontWeight: 600,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 4px 12px rgba(232, 75, 31, 0.25)",
+              opacity: isPending ? 0.6 : 1,
+            }}
+          >
+            {isPending ? (
+              "Traitement..."
+            ) : (
+              <>
+                <CurrencyCircleDollar size={16} weight="duotone" />
+                Activer pour {UNLOCK_PRICE.toLocaleString("fr-FR")} FCFA
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

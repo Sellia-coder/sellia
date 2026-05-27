@@ -25,12 +25,19 @@ model User {
   avatarUrl        String?
   bio              String?
 
+  language         String    @default("fr")
+  timezone         String?
+  notificationPrefs Json?    @map("notification_prefs")
+  role             String?   @default("user")
+
   twoFactorEnabled Boolean   @default(false)
   onboardingCompleted Boolean @default(false)
 
   shops            Shop[]
   sessions         Session[]
   trustedDevices   TrustedDevice[]
+  supportTickets   SupportTicket[]  @relation("TicketOwner")
+  supportMessages  SupportMessage[] @relation("MessageSender")
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -145,6 +152,7 @@ model Shop {
   loyaltyConfig       LoyaltyConfig?
   shopPages           ShopPage[]
   shopFaqs            ShopFaq[]
+  featureUnlocks      ShopFeatureUnlock[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -874,4 +882,122 @@ model ShopFaq {
 
   @@index([shopId, isPublished, order])
   @@map("shop_faqs")
+}
+
+// ============================================
+// SUPPORT TICKETS (G3.0.B)
+// ============================================
+
+enum TicketStatus {
+  OPEN
+  WAITING_USER
+  WAITING_SUPPORT
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TicketCategory {
+  TECHNICAL
+  ORDER
+  PAYMENT
+  SHOP
+  SUGGESTION
+  OTHER
+}
+
+enum SenderType {
+  MERCHANT
+  SUPPORT
+  SYSTEM
+}
+
+model SupportTicket {
+  id              String          @id @default(cuid())
+
+  userId          String
+  user            User            @relation("TicketOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  shopId          String?
+  shopName        String?
+  shopSlug        String?
+
+  subject         String          @db.VarChar(200)
+  category        TicketCategory  @default(OTHER)
+  priority        TicketPriority  @default(NORMAL)
+  status          TicketStatus    @default(OPEN)
+
+  lastMessageAt   DateTime        @default(now())
+  lastMessageBy   SenderType      @default(MERCHANT)
+
+  unreadByUser    Int             @default(0)
+  unreadBySupport Int             @default(1)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+
+  messages        SupportMessage[]
+
+  @@index([userId, status])
+  @@index([status, lastMessageAt])
+  @@index([createdAt])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id              String          @id @default(cuid())
+
+  ticketId        String
+  ticket          SupportTicket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  senderId        String?
+  sender          User?           @relation("MessageSender", fields: [senderId], references: [id], onDelete: SetNull)
+  senderType      SenderType
+  senderName      String
+
+  content         String          @db.Text
+  attachments     String[]        @default([])
+
+  readAt          DateTime?
+  createdAt       DateTime        @default(now())
+
+  @@index([ticketId, createdAt])
+  @@index([senderId])
+  @@map("support_messages")
+}
+
+// ============================================
+// SHOP FEATURE UNLOCKS (G3.0.B.1)
+// ============================================
+
+enum FeatureCode {
+  COD
+}
+
+model ShopFeatureUnlock {
+  id              String         @id @default(cuid())
+
+  shopId          String
+  shop            Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  feature         FeatureCode
+
+  unlockedAt      DateTime       @default(now())
+  paidAmount      Int
+  paymentMethod   String?
+  paymentRef      String?
+
+  createdAt       DateTime       @default(now())
+
+  @@unique([shopId, feature])
+  @@index([shopId])
+  @@map("shop_feature_unlocks")
 }
