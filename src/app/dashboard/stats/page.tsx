@@ -10,6 +10,7 @@ import {
   getShopKpis,
   type DateRange,
 } from "@/lib/analytics";
+import { getShopBalances } from "@/lib/payouts";
 import StatsClient from "./StatsClient";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ export default async function StatsPage({
     paymentBreakdown,
     productTypeBreakdown,
     heatmap,
+    balances,
   ] = await Promise.all([
     getShopKpis(shop.id, range),
     getRevenueTimeSeries(shop.id, range),
@@ -51,6 +53,7 @@ export default async function StatsPage({
     getPaymentMethodBreakdown(shop.id, range),
     getProductTypeBreakdown(shop.id, range),
     getSalesHeatmap(shop.id, range),
+    getShopBalances(shop.id),
   ]);
 
   return (
@@ -63,6 +66,7 @@ export default async function StatsPage({
       paymentBreakdown={paymentBreakdown}
       productTypeBreakdown={productTypeBreakdown}
       heatmap={heatmap}
+      pendingEscrow={balances.pendingEscrow}
     />
   );
 }

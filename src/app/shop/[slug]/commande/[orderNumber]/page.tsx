@@ -94,6 +94,8 @@ export default async function OrderConfirmationPage({ params }: Props) {
         refundDeadline: order.refundDeadline?.toISOString() ?? null,
         items: parseItems(order.items),
         qrPngUrl: `${qrBase}?format=png`,
+        deliveryCode: order.deliveryCode,
+        deliveredAt: order.deliveredAt?.toISOString() ?? null,
       }}
       paymentPolling={
         showPaymentPolling

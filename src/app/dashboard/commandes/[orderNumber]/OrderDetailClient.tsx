@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   CaretLeft,
   Phone,
@@ -10,8 +9,8 @@ import {
   MapPin,
   Copy,
   WhatsappLogo,
-  ScanSmiley,
   CheckCircle,
+  ShieldCheck,
 } from "@phosphor-icons/react";
 import {
   computeDisplayStatus,
@@ -20,7 +19,6 @@ import {
   formatPrice,
   type OrderItem,
 } from "@/lib/order-status";
-import { markOrderAsDeliveredAction } from "@/app/actions/order-status";
 import styles from "./order-detail.module.css";
 
 interface OrderData {
@@ -62,11 +60,6 @@ export default function OrderDetailClient({
   currency,
   order,
 }: Props) {
-  const router = useRouter();
-  const [showQrScanner, setShowQrScanner] = useState(false);
-  const [scanCode, setScanCode] = useState("");
-  const [scanning, setScanning] = useState(false);
-  const [scanError, setScanError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const orderForStatus = {
@@ -81,11 +74,11 @@ export default function OrderDetailClient({
   const statusCfg = STATUS_CONFIG[displayStatus];
   const kind = getOrderTypeKind(order.items);
 
-  const canScanQr =
+  // G4.B — La livraison physique est confirmée par le client via son code 6 chiffres.
+  const awaitingDeliveryConfirmation =
     (displayStatus === "paid_pending_delivery" ||
       displayStatus === "in_delivery") &&
-    (kind === "physical" || kind === "mixed") &&
-    !!order.qrCode;
+    (kind === "physical" || kind === "mixed");
 
   const handleCopyOrderNumber = async () => {
     try {
@@ -95,24 +88,6 @@ export default function OrderDetailClient({
     } catch {
       /* ignore */
     }
-  };
-
-  const handleScanSubmit = async () => {
-    if (!scanCode.trim()) return;
-    setScanning(true);
-    setScanError(null);
-    const res = await markOrderAsDeliveredAction({
-      orderNumber,
-      qrCode: scanCode.trim(),
-    });
-    if (res.ok) {
-      router.refresh();
-      setShowQrScanner(false);
-      setScanCode("");
-    } else {
-      setScanError(res.error || "Code invalide");
-    }
-    setScanning(false);
   };
 
   const formatDateLong = (iso: string) =>
@@ -136,17 +111,6 @@ export default function OrderDetailClient({
         <Link href="/dashboard/commandes" className={styles.backLink}>
           <CaretLeft size={15} weight="bold" /> Toutes les commandes
         </Link>
-        <div className={styles.topbarActions}>
-          {canScanQr && (
-            <button
-              type="button"
-              className={styles.btnPrimary}
-              onClick={() => setShowQrScanner(true)}
-            >
-              <ScanSmiley size={15} weight="regular" /> Marquer comme livré (scan QR)
-            </button>
-          )}
-        </div>
       </div>
 
       <div className={styles.header}>
@@ -327,6 +291,51 @@ export default function OrderDetailClient({
                   </div>
                 )}
               </div>
+
+              {awaitingDeliveryConfirmation && (
+                <div
+                  style={{
+                    marginTop: 16,
+                    padding: "14px 16px",
+                    background: "rgba(29, 78, 216, 0.05)",
+                    border: "1px solid rgba(29, 78, 216, 0.18)",
+                    borderRadius: 12,
+                    display: "flex",
+                    gap: 12,
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <ShieldCheck
+                    size={20}
+                    weight="duotone"
+                    style={{ color: "#1D4ED8", flexShrink: 0, marginTop: 1 }}
+                  />
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: 600,
+                        color: "var(--sellia-ink)",
+                        marginBottom: 2,
+                      }}
+                    >
+                      Confirmation par le client
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        color: "var(--sellia-muted)",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      La livraison est confirmée par le client via son code à 6
+                      chiffres lors de la réception. Les fonds sont
+                      automatiquement libérés à ce moment — aucune action
+                      manuelle de votre part n&apos;est requise.
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
           )}
         </div>
@@ -384,54 +393,6 @@ export default function OrderDetailClient({
         </aside>
       </div>
 
-      {showQrScanner && (
-        <div
-          className={styles.modalBackdrop}
-          onClick={() => setShowQrScanner(false)}
-        >
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>Marquer comme livré</h3>
-            <p className={styles.modalDesc}>
-              Demandez au client de vous montrer son QR code. Scannez-le ou
-              saisissez le code manuellement pour libérer le paiement.
-            </p>
-            <div className={styles.qrInputWrap}>
-              <ScanSmiley size={16} weight="regular" />
-              <input
-                type="text"
-                placeholder="Code QR"
-                value={scanCode}
-                onChange={(e) => setScanCode(e.target.value)}
-                className={styles.qrInput}
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleScanSubmit();
-                }}
-              />
-            </div>
-            {scanError && (
-              <div className={styles.scanError}>⚠️ {scanError}</div>
-            )}
-            <div className={styles.modalActions}>
-              <button
-                type="button"
-                onClick={() => setShowQrScanner(false)}
-                className={styles.btnSecondary}
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                onClick={handleScanSubmit}
-                disabled={!scanCode.trim() || scanning}
-                className={styles.btnPrimary}
-              >
-                {scanning ? "Vérification..." : "Valider la livraison"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

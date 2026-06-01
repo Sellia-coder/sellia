@@ -12,6 +12,7 @@ import {
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
 import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
+import { settlePaidOrderPayout } from "@/lib/payouts";
 import {
   computeNextRetryAt,
   WEBHOOK_ERROR_STATUS,
@@ -97,6 +98,12 @@ export async function GET(request: NextRequest) {
         });
         if (tx.orderId) {
           await trySendOrderConfirmationEmail(tx.orderId);
+          // G4.B — payout dès la confirmation (escrow physique / instant digital+service).
+          await settlePaidOrderPayout(tx.orderId).catch((err) => {
+            stats.errors.push(
+              `settle ${tx.orderId}: ${err instanceof Error ? err.message : String(err)}`
+            );
+          });
         }
       } else if (
         verified.status === "FAILED" ||
@@ -233,6 +240,12 @@ export async function GET(request: NextRequest) {
         stats.successCount++;
         if (localTx.orderId) {
           await trySendOrderConfirmationEmail(localTx.orderId);
+          // G4.B — payout dès la confirmation (escrow physique / instant digital+service).
+          await settlePaidOrderPayout(localTx.orderId).catch((err) => {
+            stats.errors.push(
+              `settle ${localTx.orderId}: ${err instanceof Error ? err.message : String(err)}`
+            );
+          });
         }
       } else if (
         verified.status === "FAILED" ||

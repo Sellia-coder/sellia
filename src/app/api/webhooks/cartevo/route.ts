@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
+import { settlePaidOrderPayout } from "@/lib/payouts";
 import { db } from "@/lib/db";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/security/rate-limit";
 import {
@@ -274,6 +275,13 @@ export async function POST(request: NextRequest) {
 
     if (verified.status === "SUCCESS" && cartevoTx.orderId) {
       await trySendOrderConfirmationEmail(cartevoTx.orderId);
+      // G4.B — Crée le payout dès la confirmation (escrow physique / instant digital+service).
+      await settlePaidOrderPayout(cartevoTx.orderId).catch((err) => {
+        safeLogger.error("settlePaidOrderPayout failed (webhook)", {
+          orderId: cartevoTx.orderId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      });
     }
 
     return NextResponse.json({ ok: true });

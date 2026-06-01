@@ -28,6 +28,7 @@ import {
 import { safeLogger } from "@/lib/security/redact";
 import { syncCustomerFromOrder } from "@/lib/customers";
 import { validateCouponForCheckout } from "@/lib/coupons";
+import { getOrderTypeKind } from "@/lib/order-status";
 import type { Prisma } from "@prisma/client";
 
 const orderItemSchema = z.object({
@@ -250,7 +251,24 @@ export async function createOrderAction(input: CreateOrderInput) {
   const orderFeeMode = (firstProduct?.feeMode ??
     "merchant_absorbs") as FeeMode;
 
-  const qrCode = randomBytes(8).toString("hex").toUpperCase();
+  // G4.B : QR + code de livraison uniquement pour les commandes physiques.
+  const orderKind = getOrderTypeKind(
+    itemsSnapshot.map((i) => ({
+      type: i.type || "physical",
+      name: i.name,
+      price: i.price,
+      quantity: i.quantity,
+    }))
+  );
+  const needsPhysicalDelivery =
+    orderKind === "physical" || orderKind === "mixed";
+
+  const qrCode = needsPhysicalDelivery
+    ? randomBytes(8).toString("hex").toUpperCase()
+    : null;
+  const deliveryCode = needsPhysicalDelivery
+    ? String(Math.floor(100000 + Math.random() * 900000))
+    : null;
 
   const initialPaymentStatus = PAYMENT_STATUS.PENDING;
   const initialOrderStatus = ORDER_STATUS.PENDING;
@@ -266,7 +284,7 @@ export async function createOrderAction(input: CreateOrderInput) {
         customerCity: data.customerCity?.trim() || null,
         customerAddress: data.customerAddress?.trim() || null,
         customerNotes: data.customerNotes?.trim() || null,
-        items: itemsSnapshot.map(({ type: _t, ...row }) => row) as Prisma.InputJsonValue,
+        items: itemsSnapshot as unknown as Prisma.InputJsonValue,
         subtotal,
         shippingPrice,
         shippingZone: shippingZoneName,
@@ -287,6 +305,7 @@ export async function createOrderAction(input: CreateOrderInput) {
         paymentStatus: initialPaymentStatus,
         status: initialOrderStatus,
         qrCode,
+        deliveryCode,
       },
     });
 

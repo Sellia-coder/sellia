@@ -16,6 +16,7 @@ import {
   Coins,
   ChartLineUp,
   Sparkle,
+  Clock,
 } from "@phosphor-icons/react";
 import {
   ResponsiveContainer,
@@ -27,6 +28,7 @@ import {
   AreaChart,
 } from "recharts";
 import styles from "./dashboard-home.module.css";
+import AiAdviceCard from "./AiAdviceCard";
 
 interface Kpi {
   current: number;
@@ -239,31 +241,43 @@ export default function DashboardHomeClient(props: Props) {
         />
       </div>
 
-      <Link href="/dashboard/paiements" className={styles.balanceBanner}>
-        <div className={styles.balanceLeft}>
-          <div className={styles.balanceIconBox}>
-            <Wallet size={22} weight="duotone" />
+      <div className={styles.balanceRow}>
+        <Link href="/dashboard/paiements" className={styles.balanceBanner}>
+          <div className={styles.balanceLeft}>
+            <div className={styles.balanceIconBox}>
+              <Wallet size={22} weight="duotone" />
+            </div>
+            <div>
+              <div className={styles.balanceLabel}>Solde disponible</div>
+              <div className={styles.balanceValue}>
+                {formatPrice(balances.available)}{" "}
+                <span className={styles.balanceCurrency}>{currencyLabel}</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.balanceRight}>
+            <span className={styles.balanceCta}>
+              Gérer mes paiements <ArrowRight size={14} weight="bold" />
+            </span>
+          </div>
+        </Link>
+
+        <div className={styles.pendingCard}>
+          <div className={styles.pendingIconBox}>
+            <Clock size={22} weight="duotone" />
           </div>
           <div>
-            <div className={styles.balanceLabel}>Solde disponible</div>
-            <div className={styles.balanceValue}>
-              {formatPrice(balances.available)}{" "}
-              <span className={styles.balanceCurrency}>{currencyLabel}</span>
+            <div className={styles.pendingLabel}>Fonds en attente de versement</div>
+            <div className={styles.pendingValue}>
+              {formatPrice(balances.pendingEscrow)}{" "}
+              <span className={styles.pendingCurrency}>{currencyLabel}</span>
             </div>
-            {balances.pendingEscrow > 0 && (
-              <div className={styles.balanceMeta}>
-                + {formatPrice(balances.pendingEscrow)} {currencyLabel} en
-                attente
-              </div>
-            )}
+            <div className={styles.pendingHint}>
+              Libérés après confirmation de livraison
+            </div>
           </div>
         </div>
-        <div className={styles.balanceRight}>
-          <span className={styles.balanceCta}>
-            Gérer mes paiements <ArrowRight size={14} weight="bold" />
-          </span>
-        </div>
-      </Link>
+      </div>
 
       {hasOrders && (
         <div className={styles.chartSection}>
@@ -339,6 +353,10 @@ export default function DashboardHomeClient(props: Props) {
           </div>
         </div>
       )}
+
+      <div style={{ marginBottom: "28px" }}>
+        <AiAdviceCard />
+      </div>
 
       <div className={styles.bento}>
         <div className={styles.bentoCard}>

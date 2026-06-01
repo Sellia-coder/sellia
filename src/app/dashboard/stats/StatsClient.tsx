@@ -23,6 +23,7 @@ import {
   Users,
   Receipt,
   ChartLineUp,
+  Clock,
 } from "@phosphor-icons/react";
 import type { DateRange } from "@/lib/analytics";
 import styles from "./stats.module.css";
@@ -53,6 +54,7 @@ interface Props {
     label: string;
   }>;
   heatmap: number[][];
+  pendingEscrow: number;
 }
 
 const formatPrice = (n: number) => n.toLocaleString("fr-FR");
@@ -95,6 +97,7 @@ export default function StatsClient({
   paymentBreakdown,
   productTypeBreakdown,
   heatmap,
+  pendingEscrow,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -159,6 +162,13 @@ export default function StatsClient({
           unit={currencyLabel}
           delta={kpis.avgBasket.delta}
           icon={<Receipt size={16} weight="duotone" />}
+        />
+        <StatsKpi
+          label="FONDS EN ATTENTE"
+          value={formatPrice(pendingEscrow)}
+          unit={currencyLabel}
+          hint="Libérés après livraison"
+          icon={<Clock size={16} weight="duotone" />}
         />
       </div>
 
@@ -472,15 +482,17 @@ function StatsKpi({
   value,
   unit,
   delta,
+  hint,
   icon,
 }: {
   label: string;
   value: string;
   unit?: string;
-  delta: number;
+  delta?: number;
+  hint?: string;
   icon: React.ReactNode;
 }) {
-  const isPositive = delta >= 0;
+  const isPositive = (delta ?? 0) >= 0;
   return (
     <div className={styles.statsKpiCard}>
       <div className={styles.statsKpiHeader}>
@@ -492,17 +504,23 @@ function StatsKpi({
         {unit && <span className={styles.statsKpiUnit}>{unit}</span>}
       </div>
       <div className={styles.statsKpiDelta}>
-        <span
-          className={`${styles.statsKpiDeltaPill} ${isPositive ? styles.up : styles.down}`}
-        >
-          {isPositive ? (
-            <TrendUp size={11} weight="bold" />
-          ) : (
-            <TrendDown size={11} weight="bold" />
-          )}
-          {Math.abs(delta)}%
-        </span>
-        <span className={styles.statsKpiPeriod}>vs période précédente</span>
+        {hint !== undefined ? (
+          <span className={styles.statsKpiPeriod}>{hint}</span>
+        ) : (
+          <>
+            <span
+              className={`${styles.statsKpiDeltaPill} ${isPositive ? styles.up : styles.down}`}
+            >
+              {isPositive ? (
+                <TrendUp size={11} weight="bold" />
+              ) : (
+                <TrendDown size={11} weight="bold" />
+              )}
+              {Math.abs(delta ?? 0)}%
+            </span>
+            <span className={styles.statsKpiPeriod}>vs période précédente</span>
+          </>
+        )}
       </div>
     </div>
   );

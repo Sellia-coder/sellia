@@ -50,6 +50,8 @@ interface ProductItem {
   type: string;
   isActive: boolean;
   variantsCount: number;
+  salesCount: number;
+  salesRevenue?: number;
   createdAt: string;
 }
 
@@ -464,8 +466,16 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                       )}
                     </td>
                     <td>
-                      <span style={{ color: "var(--sellia-muted)", fontWeight: 500 }}>
-                        0
+                      <span
+                        style={{
+                          color:
+                            p.salesCount > 0
+                              ? "var(--sellia-ink)"
+                              : "var(--sellia-muted)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {p.salesCount}
                       </span>
                     </td>
                     <td>

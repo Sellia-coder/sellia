@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getProductSalesMap } from "@/lib/analytics";
 import ProductsListClient from "./ProductsListClient";
 
 export default async function ProductsListPage() {
@@ -36,6 +37,8 @@ export default async function ProductsListPage() {
       },
     },
   });
+
+  const salesMap = await getProductSalesMap(shop.id);
 
   const stats = {
     total: products.length,
@@ -79,6 +82,8 @@ export default async function ProductsListPage() {
         type: p.type,
         isActive: p.status === "active",
         variantsCount: p.variants.length,
+        salesCount: salesMap[p.id]?.quantity ?? 0,
+        salesRevenue: salesMap[p.id]?.revenue ?? 0,
         createdAt: p.createdAt.toISOString(),
       }))}
       stats={stats}

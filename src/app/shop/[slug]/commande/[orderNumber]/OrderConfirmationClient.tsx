@@ -41,6 +41,8 @@ export interface OrderConfirmationProps {
   refundDeadline?: string | null;
   items: OrderConfirmationItem[];
   qrPngUrl: string;
+  deliveryCode?: string | null;
+  deliveredAt?: string | null;
 }
 
 interface PaymentPollingProps {
@@ -67,6 +69,10 @@ export default function OrderConfirmationClient({
     order.paymentStatus === "delivered";
   const isCashOnDelivery = order.paymentMethod === "cash_on_delivery";
   const showConfirmation = isPaid || isCashOnDelivery;
+  const showDeliveryCode =
+    !!order.deliveryCode &&
+    order.paymentStatus === "paid_escrow" &&
+    !order.deliveredAt;
 
   const [copied, setCopied] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -265,6 +271,53 @@ export default function OrderConfirmationClient({
                 <strong>uniquement</strong> lorsque vous êtes satisfait de votre
                 commande.
               </p>
+
+              {showDeliveryCode && (
+                <div
+                  style={{
+                    marginTop: "16px",
+                    padding: "16px",
+                    background: "#FFFFFF",
+                    border: `2px dashed ${primary}`,
+                    borderRadius: "12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#8B8E94",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Code de confirmation de livraison
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: 700,
+                      letterSpacing: "6px",
+                      color: primary,
+                    }}
+                  >
+                    {order.deliveryCode}
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "11.5px",
+                      color: "#6B7280",
+                      lineHeight: 1.5,
+                      margin: "8px 0 0",
+                    }}
+                  >
+                    Communiquez ce code au livreur{" "}
+                    <strong>uniquement à la réception</strong> de votre colis.
+                    Il libère le paiement au marchand.
+                  </p>
+                </div>
+              )}
               <div className={styles.qrActions}>
                 <button
                   type="button"

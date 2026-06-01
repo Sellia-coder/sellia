@@ -381,6 +381,9 @@ model Order {
   qrCode            String?   @unique
   qrScannedAt       DateTime?
 
+  deliveryCode        String?   @map("delivery_code")
+  deliveryConfirmedAt DateTime? @map("delivery_confirmed_at")
+
   status            String    @default("pending")
 
   whatsappContacted Boolean   @default(false)

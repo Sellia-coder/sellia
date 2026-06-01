@@ -52,12 +52,16 @@ async function processRelease(): Promise<NextResponse> {
       try {
         const items = order.items as unknown as OrderItem[];
         const kind = getOrderTypeKind(items);
-        if (kind !== "digital") continue;
+        // G4.B — Filet de sécurité : digital/service sont normalement libérés
+        // INSTANTANÉMENT au paiement (settlePaidOrderPayout). Ce cron ne traite
+        // que les anciennes commandes ou les cas où la libération au paiement
+        // aurait échoué. Le physique n'est JAMAIS auto-libéré (code client requis).
+        if (kind !== "digital" && kind !== "service") continue;
 
         await db.order.update({
           where: { id: order.id },
           data: {
-            paymentStatus: "delivered",
+            paymentStatus: "paid_released",
             status: ORDER_STATUS.DELIVERED,
             deliveredAt: new Date(),
           },
@@ -65,7 +69,10 @@ async function processRelease(): Promise<NextResponse> {
 
         await createPayoutFromOrder({
           orderId: order.id,
-          payoutType: PayoutType.ORDER_DIGITAL,
+          payoutType:
+            kind === "service"
+              ? PayoutType.ORDER_SERVICE
+              : PayoutType.ORDER_DIGITAL,
           releaseImmediately: true,
         });
 

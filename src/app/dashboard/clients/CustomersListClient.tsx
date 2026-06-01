@@ -1,14 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import {
-  MagnifyingGlass,
-  Phone,
-  Envelope,
-  WhatsappLogo,
-  Trophy,
-} from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import EmptyCustomers from "@/app/dashboard/empty-states/EmptyCustomers";
 import { formatPrice } from "@/lib/order-status";
 import styles from "./customers-list.module.css";
@@ -45,6 +39,7 @@ export default function CustomersListClient({
   customers,
   stats,
 }: Props) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("recent");
 
@@ -182,77 +177,54 @@ export default function CustomersListClient({
           <p>Les clients apparaîtront ici dès leur première commande.</p>
         </div>
       ) : (
-        <div className={styles.grid}>
-          {filtered.map((c, idx) => {
-            const isTopCustomer = idx < 3 && sortBy !== "recent";
-            return (
-              <div key={c.id} className={styles.card}>
-                <Link
-                  href={`/dashboard/clients/${c.id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Téléphone</th>
+                <th>Ville</th>
+                <th>Commandes</th>
+                <th>Total dépensé</th>
+                <th>Panier moyen</th>
+                <th>Dernière commande</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c) => (
+                <tr
+                  key={c.id}
+                  onClick={() => router.push(`/dashboard/clients/${c.id}`)}
                 >
-                {isTopCustomer && (
-                  <div className={styles.topBadge}>
-                    <Trophy size={11} weight="duotone" /> Top {idx + 1}
-                  </div>
-                )}
-                <div className={styles.cardHeader}>
-                  <div className={styles.avatar}>{getInitials(c.fullName)}</div>
-                  <div className={styles.cardHeaderInfo}>
-                    <div className={styles.cardName}>{c.fullName}</div>
-                    <div className={styles.cardCity}>{c.city || "—"}</div>
-                  </div>
-                </div>
-
-                <div className={styles.cardStats}>
-                  <div>
-                    <div className={styles.cardStatValue}>{c.totalOrders}</div>
-                    <div className={styles.cardStatLabel}>Commandes</div>
-                  </div>
-                  <div>
-                    <div className={styles.cardStatValue}>
-                      {formatPrice(c.totalSpent)}
+                  <td>
+                    <div className={styles.rowClient}>
+                      <div className={styles.rowAvatar}>
+                        {getInitials(c.fullName)}
+                      </div>
+                      <div>
+                        <div className={styles.rowName}>{c.fullName}</div>
+                        {c.email && (
+                          <div className={styles.rowEmail}>{c.email}</div>
+                        )}
+                      </div>
                     </div>
-                    <div className={styles.cardStatLabel}>
-                      Dépenses {currency}
-                    </div>
-                  </div>
-                  <div>
-                    <div className={styles.cardStatValue}>
-                      {formatPrice(c.averageOrder)}
-                    </div>
-                    <div className={styles.cardStatLabel}>Panier moyen</div>
-                  </div>
-                </div>
-
-                <div className={styles.cardContacts}>
-                  <span className={styles.cardContact}>
-                    <Phone size={12} weight="duotone" /> {c.phone}
-                  </span>
-                  {c.email && (
-                    <span className={styles.cardContact}>
-                      <Envelope size={12} weight="duotone" /> {c.email}
-                    </span>
-                  )}
-                </div>
-
-                </Link>
-                <div className={styles.cardFooter}>
-                  <span className={styles.cardDate}>
-                    Dernière : {formatDate(c.lastOrderAt)}
-                  </span>
-                  <a
-                    href={`https://wa.me/${c.phone.replace(/[^0-9]/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.whatsappLink}
-                  >
-                    <WhatsappLogo size={12} weight="duotone" /> WhatsApp
-                  </a>
-                </div>
-              </div>
-            );
-          })}
+                  </td>
+                  <td className={styles.cellPhone}>{c.phone}</td>
+                  <td className={styles.cellMuted}>{c.city || "—"}</td>
+                  <td className={styles.cellNum}>{c.totalOrders}</td>
+                  <td className={styles.cellAmount}>
+                    {formatPrice(c.totalSpent)} {currency}
+                  </td>
+                  <td className={styles.cellMuted}>
+                    {formatPrice(c.averageOrder)} {currency}
+                  </td>
+                  <td className={styles.cellDate}>
+                    {formatDate(c.lastOrderAt)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

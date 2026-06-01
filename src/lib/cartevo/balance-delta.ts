@@ -11,6 +11,7 @@ import { cartevoGetWalletBalance } from "./client";
 import { computeRefundDeadline } from "./order-status";
 import { safeLogger } from "@/lib/security/redact";
 import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
+import { settlePaidOrderPayout } from "@/lib/payouts";
 
 const BALANCE_TOLERANCE_PERCENT = 7;
 const MAX_MATCH_AGE_MS = 24 * 60 * 60 * 1000;
@@ -179,6 +180,13 @@ export async function tryMatchPendingByBalance(params: {
     if (tx.orderId) {
       trySendOrderConfirmationEmail(tx.orderId).catch((err) => {
         safeLogger.error("Email send failed after balance match", {
+          orderId: tx.orderId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      });
+      // G4.B — Crée le payout dès la confirmation (escrow physique / instant digital+service).
+      await settlePaidOrderPayout(tx.orderId).catch((err) => {
+        safeLogger.error("settlePaidOrderPayout failed (balance match)", {
           orderId: tx.orderId,
           error: err instanceof Error ? err.message : String(err),
         });

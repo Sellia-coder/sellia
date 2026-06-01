@@ -378,8 +378,9 @@ export default function PaiementsClient({
         <div className={styles.escrowExplainerText}>
           <strong>Comment fonctionnent vos paiements</strong>
           <span>
-            Produits digitaux : versement automatique 3h après paiement.
-            Produits physiques : versement au scan du QR code client.
+            Produits digitaux et services : versement immédiat dès le paiement.
+            Produits physiques : fonds en attente, libérés quand le client
+            confirme la réception avec son code à 6 chiffres.
           </span>
         </div>
       </div>

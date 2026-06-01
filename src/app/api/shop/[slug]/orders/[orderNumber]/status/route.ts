@@ -12,6 +12,7 @@ import {
   computeRefundDeadline,
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
+import { settlePaidOrderPayout } from "@/lib/payouts";
 
 export async function GET(
   request: NextRequest,
@@ -130,6 +131,15 @@ export async function GET(
 
       safeLogger.info("Order marked PAID_ESCROW via status polling", {
         orderNumber: order.orderNumber,
+      });
+
+      // G4.B — Crée le payout (escrow physique / libération instantanée digital+service).
+      // Idempotent : sûr même si le webhook l'a déjà réglé.
+      await settlePaidOrderPayout(order.id).catch((err) => {
+        safeLogger.error("settlePaidOrderPayout failed (status polling)", {
+          orderNumber: order.orderNumber,
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
 
       return NextResponse.json({

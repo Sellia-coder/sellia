@@ -301,7 +301,7 @@ function ProfilTab({ user: initialUser }: { user: ReglagesUser }) {
         <div className="dash-form-row-split">
           <div className="dash-form-row">
             <label className="dash-form-label">Prénom</label>
-            <input type="text" className="dash-form-input" value={user.firstName} onChange={(e) => setUser({ ...user, firstName: e.target.value })} placeholder="Christian" />
+            <input type="text" className="dash-form-input" value={user.firstName} onChange={(e) => setUser({ ...user, firstName: e.target.value })} placeholder="Jean" />
           </div>
           <div className="dash-form-row">
             <label className="dash-form-label">Nom</label>

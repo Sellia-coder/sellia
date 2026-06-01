@@ -196,6 +196,40 @@ export async function getTopProducts(
     .slice(0, limit);
 }
 
+/**
+ * Retourne une map { productId: { quantity, revenue } } des ventes par produit
+ * sur les commandes effectivement payées (paid_escrow, delivered, paid_released, paid_offline).
+ */
+export async function getProductSalesMap(
+  shopId: string
+): Promise<Record<string, { quantity: number; revenue: number }>> {
+  const orders = await db.order.findMany({
+    where: {
+      shopId,
+      paymentStatus: { in: PAID_ORDER_STATUSES },
+      refundedAt: null,
+    },
+    select: { items: true },
+  });
+
+  const map: Record<string, { quantity: number; revenue: number }> = {};
+
+  for (const order of orders) {
+    const items = parseOrderItems(order.items);
+    for (const item of items) {
+      const productId = item.productId;
+      if (!productId) continue;
+      const qty = item.quantity || 1;
+      const price = item.price || 0;
+      if (!map[productId]) map[productId] = { quantity: 0, revenue: 0 };
+      map[productId].quantity += qty;
+      map[productId].revenue += qty * price;
+    }
+  }
+
+  return map;
+}
+
 export async function getTopCustomers(shopId: string, limit = 5) {
   return db.customer.findMany({
     where: { shopId },

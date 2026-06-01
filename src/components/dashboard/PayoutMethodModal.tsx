@@ -11,6 +11,7 @@ import {
   Phone,
 } from "@phosphor-icons/react";
 import { savePayoutMethodAction, type PayoutOperatorKey } from "@/app/actions/payout-method";
+import { getSupportedCountries } from "@/lib/cartevo/pricing";
 import styles from "./payout-method-modal.module.css";
 
 interface Props {
@@ -54,20 +55,25 @@ const OPERATORS = [
 const COUNTRIES: Record<string, { label: string; flag: string; dialCode: string }> =
   {
     CM: { label: "Cameroun", flag: "🇨🇲", dialCode: "+237" },
+    GA: { label: "Gabon", flag: "🇬🇦", dialCode: "+241" },
+    TD: { label: "Tchad", flag: "🇹🇩", dialCode: "+235" },
+    CG: { label: "Congo", flag: "🇨🇬", dialCode: "+242" },
     CI: { label: "Côte d'Ivoire", flag: "🇨🇮", dialCode: "+225" },
     SN: { label: "Sénégal", flag: "🇸🇳", dialCode: "+221" },
-    ML: { label: "Mali", flag: "🇲🇱", dialCode: "+223" },
     BF: { label: "Burkina Faso", flag: "🇧🇫", dialCode: "+226" },
-    MG: { label: "Madagascar", flag: "🇲🇬", dialCode: "+261" },
+    ML: { label: "Mali", flag: "🇲🇱", dialCode: "+223" },
+    NE: { label: "Niger", flag: "🇳🇪", dialCode: "+227" },
+    TG: { label: "Togo", flag: "🇹🇬", dialCode: "+228" },
     BJ: { label: "Bénin", flag: "🇧🇯", dialCode: "+229" },
+    GN: { label: "Guinée", flag: "🇬🇳", dialCode: "+224" },
+    CD: { label: "RD Congo", flag: "🇨🇩", dialCode: "+243" },
+    MG: { label: "Madagascar", flag: "🇲🇬", dialCode: "+261" },
     GH: { label: "Ghana", flag: "🇬🇭", dialCode: "+233" },
     UG: { label: "Ouganda", flag: "🇺🇬", dialCode: "+256" },
     RW: { label: "Rwanda", flag: "🇷🇼", dialCode: "+250" },
-    TG: { label: "Togo", flag: "🇹🇬", dialCode: "+228" },
-    NE: { label: "Niger", flag: "🇳🇪", dialCode: "+227" },
   };
 
-const COUNTRY_CODES = ["CM", "CI", "SN", "ML", "BF", "MG"] as const;
+const COUNTRY_CODES = getSupportedCountries();
 
 export default function PayoutMethodModal({
   initialMethod,
@@ -261,7 +267,7 @@ export default function PayoutMethodModal({
                   type="text"
                   value={holderName}
                   onChange={(e) => setHolderName(e.target.value)}
-                  placeholder="Ex: KONO Christian"
+                  placeholder="Ex: Jean Dupont"
                   className={styles.textInput}
                   maxLength={80}
                 />

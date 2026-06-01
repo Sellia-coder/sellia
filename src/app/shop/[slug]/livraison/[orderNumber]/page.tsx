@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { verifyOrderDeliverySignature } from "@/lib/qr/qr-signature";
+import LivraisonClient from "./LivraisonClient";
 import styles from "./livraison.module.css";
 
 export const dynamic = "force-dynamic";
@@ -99,10 +100,12 @@ export default async function LivraisonScanPage({ params, searchParams }: Props)
             Cette commande a déjà été marquée comme livrée.
           </div>
         ) : (
-          <div className={styles.alertInfo}>
-            <strong>Fonds protégés</strong> — Le paiement est sécurisé chez Sellia.
-            Validez uniquement si le client a reçu sa commande.
-          </div>
+          <LivraisonClient
+            orderNumber={order.orderNumber}
+            shopSlug={slug}
+            signature={sig}
+            primaryColor={primaryColor}
+          />
         )}
 
         {order.cartevoTransaction && isPaid && (

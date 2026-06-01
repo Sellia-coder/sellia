@@ -64,9 +64,9 @@ export const currentShop: Shop = {
 
 export const currentUser: User = {
   id: "user_1",
-  name: "KONO Christian",
-  email: "kono@example.com",
-  initial: "K",
+  name: "Awa Diallo",
+  email: "client@example.com",
+  initial: "A",
   plan: "Pro",
 };
 

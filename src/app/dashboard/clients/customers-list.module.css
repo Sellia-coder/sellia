@@ -292,6 +292,111 @@
   background: #1fb957;
 }
 
+.tableWrap {
+  background: #ffffff;
+  border: 1px solid var(--sellia-border);
+  border-radius: 16px;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.table th {
+  text-align: left;
+  padding: 16px 20px;
+  background: var(--sellia-ivory);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--sellia-subtle);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--sellia-border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f5f2ec;
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.table tbody tr:hover {
+  background: var(--sellia-ivory);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.rowClient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rowAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e84b1f, #c2410c);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.rowName {
+  font-weight: 600;
+  color: var(--sellia-ink);
+}
+
+.rowEmail {
+  font-size: 11.5px;
+  color: var(--sellia-subtle);
+}
+
+.cellPhone {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--sellia-muted);
+  white-space: nowrap;
+}
+
+.cellMuted {
+  color: var(--sellia-muted);
+}
+
+.cellNum {
+  font-weight: 600;
+  color: var(--sellia-ink);
+}
+
+.cellAmount {
+  font-weight: 700;
+  color: var(--sellia-ink);
+  white-space: nowrap;
+}
+
+.cellDate {
+  font-size: 12.5px;
+  color: var(--sellia-muted);
+  white-space: nowrap;
+}
+
 .emptyState {
   background: #ffffff;
   border: 1px dashed var(--sellia-border);

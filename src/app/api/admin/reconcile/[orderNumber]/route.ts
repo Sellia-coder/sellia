@@ -12,6 +12,7 @@ import {
 } from "@/lib/cartevo/order-status";
 import { safeLogger } from "@/lib/security/redact";
 import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
+import { settlePaidOrderPayout } from "@/lib/payouts";
 
 export async function POST(
   _request: NextRequest,
@@ -105,6 +106,13 @@ export async function POST(
       });
 
       await trySendOrderConfirmationEmail(order.id);
+      // G4.B — Crée le payout dès la confirmation (escrow physique / instant digital+service).
+      await settlePaidOrderPayout(order.id).catch((err) => {
+        safeLogger.error("settlePaidOrderPayout failed (manual reconcile)", {
+          orderNumber: decoded,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      });
 
       return NextResponse.json({
         ok: true,
