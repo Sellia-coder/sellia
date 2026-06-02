@@ -183,6 +183,7 @@ export default function ProductEditorModal({
 }: Props) {
   const [draft, setDraft] = useState<ProductEditInput>(product);
   const [error, setError] = useState<string | null>(null);
+  const [digitalFieldError, setDigitalFieldError] = useState(false);
   const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
@@ -224,6 +225,17 @@ export default function ProductEditorModal({
       setError("Veuillez sélectionner une catégorie pour ce produit.");
       return;
     }
+    if (draft.type === "digital") {
+      const url = (draft.digitalFileUrl ?? "").trim();
+      if (!url || !/^https?:\/\/.+/.test(url)) {
+        setDigitalFieldError(true);
+        setError(
+          "Un lien de téléchargement valide est obligatoire pour un produit digital"
+        );
+        return;
+      }
+    }
+    setDigitalFieldError(false);
     const parsed = productEditSchema.safeParse(draft);
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Vérifie les champs");
@@ -581,18 +593,35 @@ export default function ProductEditorModal({
                 <label className="perso-form-label perso-form-label-with-icon">
                   <Link2 size={14} strokeWidth={2} />
                   Lien du fichier à livrer{" "}
-                  <span className="perso-form-label-optional">(optionnel)</span>
+                  <span style={{ color: "#dc2626" }}>*</span>
                 </label>
                 <input
                   type="url"
                   value={draft.digitalFileUrl ?? ""}
-                  onChange={(e) => update("digitalFileUrl", e.target.value)}
+                  onChange={(e) => {
+                    update("digitalFileUrl", e.target.value);
+                    if (digitalFieldError) setDigitalFieldError(false);
+                    if (error) setError(null);
+                  }}
                   placeholder="https://drive.google.com/..."
                   className="perso-input"
+                  style={
+                    digitalFieldError
+                      ? { borderColor: "#dc2626" }
+                      : undefined
+                  }
                 />
-                <p className="perso-form-help">
-                  Le client recevra ce lien après paiement. (Upload direct disponible bientôt.)
-                </p>
+                {digitalFieldError ? (
+                  <p className="perso-form-help" style={{ color: "#dc2626" }}>
+                    Un lien de téléchargement valide est obligatoire (Google Drive,
+                    Dropbox, ou hébergement direct).
+                  </p>
+                ) : (
+                  <p className="perso-form-help">
+                    Obligatoire — lien Google Drive, Dropbox, ou hébergement direct
+                    (PDF, ZIP, etc.). Le client le recevra après paiement.
+                  </p>
+                )}
               </div>
 
               <div className="perso-form-row">

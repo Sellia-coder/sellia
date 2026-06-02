@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { checkAuthStatusAction } from "@/app/actions/auth-status";
 
 const RESULT_TEMPLATES: Record<string, string[]> = {
   bijoux: [
@@ -55,12 +56,18 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Nav scroll effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // CTA conditionnel : marchand déjà connecté → "Accéder à mon compte"
+  useEffect(() => {
+    checkAuthStatusAction().then((r) => setIsLoggedIn(r.loggedIn));
   }, []);
 
   // Demo IA simulation
@@ -94,8 +101,14 @@ export default function Home() {
       <a href="#pour-qui" onClick={() => setMobileMenuOpen(false)}>Pour qui</a>
       <a href="#tarifs" onClick={() => setMobileMenuOpen(false)}>Tarifs</a>
       <a href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
-      <a href="/connexion" className="nav-login">Connexion</a>
-      <a href="#hero-form" className="nav-cta" onClick={() => setMobileMenuOpen(false)}>Créer ma boutique</a>
+      {isLoggedIn ? (
+        <a href="/dashboard" className="nav-cta" onClick={() => setMobileMenuOpen(false)}>Accéder à mon compte</a>
+      ) : (
+        <>
+          <a href="/connexion" className="nav-login">Connexion</a>
+          <a href="#hero-form" className="nav-cta" onClick={() => setMobileMenuOpen(false)}>Créer ma boutique</a>
+        </>
+      )}
     </div>
     <button
       className="nav-mobile-toggle"
@@ -829,8 +842,8 @@ export default function Home() {
           <span className="pricing-v2-commission-label">de commission par vente</span>
         </div>
 
-        <a href="#hero-form" className="pricing-v2-cta pricing-v2-cta-ghost">
-          <span>Commencer gratuitement</span>
+        <a href={isLoggedIn ? "/dashboard" : "#hero-form"} className="pricing-v2-cta pricing-v2-cta-ghost">
+          <span>{isLoggedIn ? "Accéder à mon compte" : "Commencer gratuitement"}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />
@@ -921,9 +934,9 @@ export default function Home() {
           <span className="pricing-v2-commission-label">de commission par vente</span>
         </div>
 
-        <a href="#hero-form" className="pricing-v2-cta pricing-v2-cta-primary">
+        <a href={isLoggedIn ? "/dashboard" : "#hero-form"} className="pricing-v2-cta pricing-v2-cta-primary">
           <span className="pricing-v2-cta-content">
-            <span>Passer Pro maintenant</span>
+            <span>{isLoggedIn ? "Accéder à mon compte" : "Passer Pro maintenant"}</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
@@ -1223,8 +1236,8 @@ export default function Home() {
       <h2>Décrivez ce que vous vendez.<br /><em>Commencez à gagner aujourd&apos;hui.</em></h2>
       <p>Créez votre boutique en moins d&apos;une minute. Aucune carte bancaire requise. Vous gardez 100% de vos ventes en plan Free.</p>
       <div className="cta-final-buttons">
-        <a href="#hero-form" className="btn-primary">
-          <span>Créer ma boutique</span>
+        <a href={isLoggedIn ? "/dashboard" : "#hero-form"} className="btn-primary">
+          <span>{isLoggedIn ? "Accéder à mon compte" : "Créer ma boutique"}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
         <a href="#tarifs" className="btn-secondary">Voir les tarifs</a>

@@ -205,7 +205,19 @@ export const productEditSchema = z
   .refine((p) => !p.hasVariants || p.type === "physical", {
     message: "Les variantes sont uniquement disponibles pour les produits physiques",
     path: ["hasVariants"],
-  });
+  })
+  .refine(
+    (p) => {
+      if (p.type !== "digital") return true;
+      const url = typeof p.digitalFileUrl === "string" ? p.digitalFileUrl.trim() : "";
+      return url.length > 0 && /^https?:\/\/.+/.test(url);
+    },
+    {
+      message:
+        "Un lien de téléchargement valide est obligatoire pour un produit digital",
+      path: ["digitalFileUrl"],
+    }
+  );
 
 export const step2Schema = z.object({
   products: z

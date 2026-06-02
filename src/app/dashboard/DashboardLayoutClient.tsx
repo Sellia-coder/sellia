@@ -6,6 +6,10 @@ import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/actions/auth";
 import SidebarBadge from "@/components/dashboard/SidebarBadge";
 import type { SidebarCounts } from "@/lib/sidebar-counts";
+import {
+  getNotificationsAction,
+  type SelliaNotification,
+} from "@/app/actions/notifications";
 
 export type DashboardLayoutShop = {
   slug: string;
@@ -34,9 +38,23 @@ export default function DashboardLayoutClient({
   const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifs, setNotifs] = useState<SelliaNotification[]>([]);
+  const [notifLoaded, setNotifLoaded] = useState(false);
+
+  const toggleNotif = async () => {
+    const next = !notifOpen;
+    setNotifOpen(next);
+    if (next && !notifLoaded) {
+      const res = await getNotificationsAction();
+      if (res.ok) setNotifs(res.notifications);
+      setNotifLoaded(true);
+    }
+  };
 
   useEffect(() => {
     setMobileSidebarOpen(false);
+    setNotifOpen(false);
   }, [pathname]);
 
   const isActive = (path: string) => pathname === path;
@@ -265,11 +283,118 @@ export default function DashboardLayoutClient({
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
             </Link>
-            <button className="dash-topbar-btn dash-topbar-btn-notif" aria-label="Notifications">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
-            </button>
+            <div style={{ position: "relative" }}>
+              <button
+                className="dash-topbar-btn dash-topbar-btn-notif"
+                aria-label="Notifications"
+                onClick={toggleNotif}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                {notifs.length > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "6px",
+                      right: "6px",
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      background: "#E84B1F",
+                      border: "2px solid white",
+                    }}
+                  />
+                )}
+              </button>
+              {notifOpen && (
+                <>
+                  <div
+                    style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                    onClick={() => setNotifOpen(false)}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      width: "340px",
+                      background: "white",
+                      border: "1px solid var(--dash-border)",
+                      borderRadius: "14px",
+                      boxShadow: "0 16px 48px rgba(0,0,0,0.14)",
+                      zIndex: 50,
+                      overflow: "hidden",
+                      maxHeight: "440px",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderBottom: "1px solid var(--dash-border)",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        color: "var(--dash-text-primary)",
+                      }}
+                    >
+                      Notifications
+                    </div>
+                    <div style={{ overflowY: "auto", flex: 1 }}>
+                      {notifs.length === 0 ? (
+                        <div
+                          style={{
+                            padding: "32px 16px",
+                            textAlign: "center",
+                            color: "var(--dash-text-secondary)",
+                            fontSize: "13px",
+                          }}
+                        >
+                          {notifLoaded
+                            ? "Aucune notification pour le moment"
+                            : "Chargement..."}
+                        </div>
+                      ) : (
+                        notifs.map((n) => (
+                          <Link
+                            key={n.id}
+                            href={n.href}
+                            onClick={() => setNotifOpen(false)}
+                            style={{
+                              display: "block",
+                              padding: "12px 16px",
+                              borderBottom: "1px solid var(--dash-border)",
+                              textDecoration: "none",
+                              color: "var(--dash-text-primary)",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: "13px",
+                                fontWeight: 600,
+                                marginBottom: "2px",
+                              }}
+                            >
+                              {n.title}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                color: "var(--dash-text-secondary)",
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {n.message}
+                            </div>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 

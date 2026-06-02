@@ -41,6 +41,7 @@ export default async function OrderDetailPage({
         shippingZone: order.shippingZone,
         shippingEta: order.shippingEta,
         total: order.total,
+        operatorFee: order.operatorFee ?? 0,
         paymentMethod: order.paymentMethod,
         paymentSubMethod: order.paymentSubMethod,
         paymentProvider: order.paymentProvider,

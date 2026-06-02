@@ -175,6 +175,25 @@ export default function ProductCard({
 
         <h3 className={styles.name}>{product.name}</h3>
 
+        {product.productType && (
+          <span
+            style={{
+              fontSize: "11px",
+              color: "var(--shop-text-muted, #9CA3AF)",
+              fontWeight: 500,
+              letterSpacing: "0.2px",
+              display: "inline-block",
+              marginTop: "2px",
+            }}
+          >
+            {product.productType === "digital"
+              ? "Produit numérique"
+              : product.productType === "service"
+                ? "Service"
+                : "Produit physique"}
+          </span>
+        )}
+
         {product.description && (
           <p className={styles.description}>{product.description}</p>
         )}

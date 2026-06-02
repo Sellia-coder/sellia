@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   ShieldCheck,
   Download,
+  DownloadCloud,
   Mail,
   Copy,
   Check,
@@ -36,6 +37,7 @@ export interface OrderConfirmationProps {
   subTotal: number;
   shipping?: number;
   feesAdded?: number;
+  operatorFee?: number;
   currency: string;
   paidAt?: string | null;
   refundDeadline?: string | null;
@@ -43,6 +45,8 @@ export interface OrderConfirmationProps {
   qrPngUrl: string;
   deliveryCode?: string | null;
   deliveredAt?: string | null;
+  digitalDownloads?: { name: string; url: string }[];
+  isPurelyDigital?: boolean;
 }
 
 interface PaymentPollingProps {
@@ -73,6 +77,10 @@ export default function OrderConfirmationClient({
     !!order.deliveryCode &&
     order.paymentStatus === "paid_escrow" &&
     !order.deliveredAt;
+  const digitalDownloads = order.digitalDownloads ?? [];
+  const hasDigitalDownloads = digitalDownloads.length > 0;
+  // Le digital pur n'a pas de QR de livraison physique.
+  const showQrCard = !isCashOnDelivery && !order.isPurelyDigital;
 
   const [copied, setCopied] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -250,10 +258,94 @@ export default function OrderConfirmationClient({
           </div>
         </div>
 
+        {hasDigitalDownloads && (
+          <div
+            style={{
+              background:
+                "linear-gradient(135deg, #FAFAF7, rgba(232,75,31,0.04))",
+              border: "1px solid rgba(232,75,31,0.15)",
+              borderRadius: "16px",
+              padding: "24px",
+              marginBottom: "20px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "8px",
+              }}
+            >
+              <DownloadCloud size={24} color="#E84B1F" />
+              <h3
+                style={{
+                  margin: 0,
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: "20px",
+                  color: "#0E1116",
+                }}
+              >
+                Merci pour votre achat
+              </h3>
+            </div>
+            <p
+              style={{
+                fontSize: "13.5px",
+                color: "#4B5563",
+                margin: "0 0 16px",
+                lineHeight: 1.5,
+              }}
+            >
+              Votre paiement est confirmé. Vos fichiers sont prêts à être
+              téléchargés. Un lien vous a également été envoyé par email.
+            </p>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            >
+              {digitalDownloads.map((d, i) => (
+                <a
+                  key={i}
+                  href={d.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "14px 16px",
+                    background: "white",
+                    border: "1px solid var(--dash-border, #E5E5E0)",
+                    borderRadius: "12px",
+                    textDecoration: "none",
+                    color: "#0E1116",
+                  }}
+                >
+                  <span style={{ fontSize: "14px", fontWeight: 600 }}>
+                    {d.name}
+                  </span>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      color: "#E84B1F",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Download size={16} /> Télécharger
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div
-          className={`${styles.mainGrid} ${isCashOnDelivery ? styles.mainGridCodOnly : ""}`}
+          className={`${styles.mainGrid} ${!showQrCard ? styles.mainGridCodOnly : ""}`}
         >
-          {!isCashOnDelivery && (
+          {showQrCard && (
             <div className={styles.qrCard}>
               <div className={styles.qrLabel}>
                 <ShieldCheck size={14} />
@@ -416,18 +508,19 @@ export default function OrderConfirmationClient({
                   </span>
                 </div>
               )}
-              {order.feesAdded != null && order.feesAdded > 0 && (
+              {order.operatorFee != null && order.operatorFee > 0 && (
                 <div className={styles.recapLine}>
                   <span>Frais opérateur</span>
                   <span>
-                    +{formatPrice(order.feesAdded)} {order.currency}
+                    +{formatPrice(order.operatorFee)} {order.currency}
                   </span>
                 </div>
               )}
               <div className={styles.recapTotal}>
                 <span>{isCashOnDelivery ? "Total" : "Total payé"}</span>
                 <strong style={{ color: primary }}>
-                  {formatPrice(order.total)} {order.currency}
+                  {formatPrice(order.total + (order.operatorFee ?? 0))}{" "}
+                  {order.currency}
                 </strong>
               </div>
             </div>

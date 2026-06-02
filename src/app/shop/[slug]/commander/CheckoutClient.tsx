@@ -42,6 +42,7 @@ import {
 import type { CartevoOperator, CartevoCountry } from "@/lib/cartevo/types";
 import {
   computeCollectFees,
+  getCartevoPayinRate,
   type FeeMode,
   type SelliaPlan,
 } from "@/lib/cartevo/pricing";
@@ -235,7 +236,21 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
         })()
       : null;
 
-  const total = collectFeesPreview?.customerPays ?? baseTotal;
+  // G5.B — Frais opérateur additif (aperçu client), Mobile Money uniquement.
+  const operatorFeePreview =
+    formData.paymentMethod === "online_escrow" && momoCountry && momoOperator
+      ? (() => {
+          try {
+            const rate = getCartevoPayinRate(momoCountry, momoOperator);
+            return Math.round(baseTotal * (rate / 100));
+          } catch {
+            return 0;
+          }
+        })()
+      : 0;
+
+  const total =
+    (collectFeesPreview?.customerPays ?? baseTotal) + operatorFeePreview;
   const paymentChoiceBoth = escrowAvail && codAvailableForCart;
 
   const deliveryValid =
@@ -905,6 +920,14 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                 </span>
               </div>
             )}
+            {operatorFeePreview > 0 && (
+              <div className={styles.summaryFees}>
+                <span>Frais opérateur</span>
+                <span>
+                  +{operatorFeePreview.toLocaleString("fr-FR")} {cur}
+                </span>
+              </div>
+            )}
             <div className={styles.summaryTotal}>
               <span>Total à payer</span>
               <strong>
@@ -912,6 +935,7 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
               </strong>
             </div>
             {collectFeesPreview?.totalFeesAdded === 0 &&
+              operatorFeePreview === 0 &&
               formData.paymentMethod === "online_escrow" && (
                 <div className={styles.summaryNote}>
                   ✓ Aucun frais pour vous, pris en charge par le marchand.

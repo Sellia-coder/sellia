@@ -20,6 +20,8 @@ export interface InitOrderCollectInput {
   orderId: string;
   shopId: string;
   baseAmount: number;
+  /** G5.B — Frais opérateur additif (FCFA), ajouté au montant débité au client. */
+  additionalCustomerFee?: number;
   currency: CartevoCurrency;
   country: CartevoCountry;
   operator: CartevoOperator;
@@ -44,6 +46,7 @@ export async function initOrderCollect(
     orderId,
     shopId,
     baseAmount,
+    additionalCustomerFee,
     currency,
     country,
     operator,
@@ -60,11 +63,19 @@ export async function initOrderCollect(
     feeMode,
   });
 
+  // G5.B — Frais opérateur additif : s'ajoute au montant débité au client,
+  // SANS passer par computeCollectFees (qui reste inchangé) et SANS impacter
+  // order.total (donc le payout marchand reste basé sur baseAmount).
+  const additionalFee = Math.round(additionalCustomerFee ?? 0);
+  const customerPaysFinal = Math.round(fees.customerPays) + additionalFee;
+
   safeLogger.info("Initiating Cartevo collect", {
     orderId,
     shopId,
     baseAmount,
     customerPays: fees.customerPays,
+    additionalFee,
+    customerPaysFinal,
     currency,
     operator,
     country,
@@ -84,7 +95,7 @@ export async function initOrderCollect(
       operator,
       country,
       phone_number: phoneNumber,
-      amount: fees.customerPays,
+      amount: customerPaysFinal,
       currency,
       notify_url: process.env.CARTEVO_NOTIFY_URL,
     });
@@ -114,7 +125,7 @@ export async function initOrderCollect(
         cartevoExternalId: data.external_id,
         type: "COLLECT",
         status: "INITIATED",
-        amount: fees.customerPays,
+        amount: customerPaysFinal,
         currency,
         feeCartevo: fees.cartevoFee,
         feeSellia: fees.selliaFee,
@@ -134,8 +145,9 @@ export async function initOrderCollect(
           operator,
           country,
           phone_number: phoneNumber,
-          amount: fees.customerPays,
+          amount: customerPaysFinal,
           baseAmount,
+          additionalFee,
           currency,
           feeMode,
         } as Prisma.InputJsonValue,
@@ -157,7 +169,7 @@ export async function initOrderCollect(
       orderId,
       cartevoTxId: data.transaction_id,
       status: data.status,
-      customerPays: fees.customerPays,
+      customerPays: customerPaysFinal,
     });
 
     return {
@@ -165,7 +177,7 @@ export async function initOrderCollect(
       cartevoTransactionId: cartevoTx.id,
       cartevoExternalId: data.external_id,
       status: data.status,
-      customerPays: fees.customerPays,
+      customerPays: customerPaysFinal,
     };
   } catch (err) {
     safeLogger.error("Failed to persist CartevoTransaction", {

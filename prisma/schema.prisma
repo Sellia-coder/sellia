@@ -378,6 +378,8 @@ model Order {
   paymentProvider   String?
   paymentStatus     String    @default("pending")
 
+  operatorFee       Int       @default(0) @map("operator_fee")
+
   qrCode            String?   @unique
   qrScannedAt       DateTime?
 

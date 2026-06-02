@@ -34,6 +34,7 @@ interface OrderData {
   shippingZone: string | null;
   shippingEta: string | null;
   total: number;
+  operatorFee: number;
   paymentMethod: string;
   paymentSubMethod: string | null;
   paymentProvider: string | null;
@@ -200,10 +201,18 @@ export default function OrderDetailClient({
                   </span>
                 </div>
               )}
+              {order.operatorFee > 0 && (
+                <div className={styles.totalLine}>
+                  <span>Frais opérateur</span>
+                  <span>
+                    {formatPrice(order.operatorFee)} {currency}
+                  </span>
+                </div>
+              )}
               <div className={styles.totalLineFinal}>
                 <span>Total payé</span>
                 <strong>
-                  {formatPrice(order.total)} {currency}
+                  {formatPrice(order.total + order.operatorFee)} {currency}
                 </strong>
               </div>
             </div>

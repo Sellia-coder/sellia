@@ -57,6 +57,41 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
   if (!order) notFound();
 
+  // Téléchargements digitaux : uniquement si le paiement est confirmé.
+  const paymentConfirmed = [
+    "paid_escrow",
+    "paid_released",
+    "delivered",
+  ].includes(order.paymentStatus);
+
+  const allItems = Array.isArray(order.items)
+    ? (order.items as Array<{ productId?: string; type?: string }>)
+    : [];
+  const isPurelyDigital =
+    allItems.length > 0 &&
+    allItems.every((i) => (i.type || "physical") === "digital");
+
+  let digitalDownloads: { name: string; url: string }[] = [];
+  if (paymentConfirmed) {
+    const digitalItemProductIds = allItems
+      .filter((i) => (i.type || "physical") === "digital")
+      .map((i) => i.productId)
+      .filter((id): id is string => Boolean(id));
+
+    if (digitalItemProductIds.length > 0) {
+      const products = await db.product.findMany({
+        where: {
+          id: { in: digitalItemProductIds },
+          digitalFileUrl: { not: null },
+        },
+        select: { id: true, name: true, digitalFileUrl: true },
+      });
+      digitalDownloads = products
+        .filter((p) => p.digitalFileUrl)
+        .map((p) => ({ name: p.name, url: p.digitalFileUrl as string }));
+    }
+  }
+
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getsellia.com";
   const qrBase = `${baseUrl}/api/shop/${slug}/orders/${encodeURIComponent(decoded)}/qr`;
 
@@ -89,6 +124,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
         subTotal: order.subtotal,
         shipping: order.shippingPrice,
         feesAdded,
+        operatorFee: order.operatorFee ?? 0,
         currency,
         paidAt: order.paidAt?.toISOString() ?? null,
         refundDeadline: order.refundDeadline?.toISOString() ?? null,
@@ -96,6 +132,8 @@ export default async function OrderConfirmationPage({ params }: Props) {
         qrPngUrl: `${qrBase}?format=png`,
         deliveryCode: order.deliveryCode,
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
+        digitalDownloads,
+        isPurelyDigital,
       }}
       paymentPolling={
         showPaymentPolling

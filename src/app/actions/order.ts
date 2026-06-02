@@ -20,6 +20,7 @@ import {
 } from "@/lib/cartevo/operators-catalog";
 import { initOrderCollect } from "@/lib/cartevo/order-collect";
 import type { FeeMode, SelliaPlan } from "@/lib/cartevo/pricing";
+import { getCartevoPayinRate } from "@/lib/cartevo/pricing";
 import {
   PAYMENT_STATUS,
   ORDER_STATUS,
@@ -245,6 +246,25 @@ export async function createOrderAction(input: CreateOrderInput) {
 
   const baseTotal = Math.max(0, subtotal + shippingPrice - couponDiscount);
 
+  // G5.B : frais opérateur additif (UNIQUEMENT Mobile Money en ligne / Cartevo).
+  // Calculé au vrai taux payin du pays/opérateur. N'altère PAS baseTotal ni le payout.
+  let operatorFee = 0;
+  if (
+    effectivePaymentMethod === PAYMENT_METHOD.ONLINE_MOBILE_MONEY &&
+    data.moMo?.country &&
+    data.moMo?.operator
+  ) {
+    try {
+      const payinRate = getCartevoPayinRate(
+        data.moMo.country,
+        data.moMo.operator
+      );
+      operatorFee = Math.round(baseTotal * (payinRate / 100));
+    } catch {
+      operatorFee = 0; // pays/opérateur non supporté → pas de frais (sécurité)
+    }
+  }
+
   const firstProduct = shop.products.find(
     (p) => p.id === itemsSnapshot[0]?.productId
   );
@@ -290,6 +310,7 @@ export async function createOrderAction(input: CreateOrderInput) {
         shippingZone: shippingZoneName,
         shippingEta,
         total: baseTotal,
+        operatorFee,
         couponCode: appliedCouponCode,
         couponDiscount: couponDiscount > 0 ? couponDiscount : null,
         feeMode: orderFeeMode,
@@ -377,6 +398,7 @@ export async function createOrderAction(input: CreateOrderInput) {
         orderId: order.id,
         shopId: shop.id,
         baseAmount: baseTotal,
+        additionalCustomerFee: operatorFee,
         currency: countryInfo.currency,
         country: data.moMo.country,
         operator: data.moMo.operator,
