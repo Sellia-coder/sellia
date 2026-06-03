@@ -2,7 +2,7 @@
  * Module central de tarification Sellia + Cartevo.
  *
  * - Grille Cartevo : fidèle au dashboard Cartevo (XAF + XOF + autres)
- * - Plans Sellia : Free 3% / Pro 1.5% / Business 1%
+ * - Plans Sellia : Découverte 6% / Pro 4% / Business 4%
  * - 3 modes de répercussion des frais : merchant_absorbs / customer_pays / split_50_50
  *
  * ⚠️ NE JAMAIS exposer le nom "Cartevo" côté UI client.
@@ -81,7 +81,7 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
   free: {
     id: "free",
     name: "Découverte",
-    commissionRate: 3.0,
+    commissionRate: 6.0,
     monthlyFee: 0,
     yearlyDiscount: 0,
     features: [
@@ -98,13 +98,13 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
   pro: {
     id: "pro",
     name: "Pro",
-    commissionRate: 1.5,
+    commissionRate: 4.0,
     monthlyFee: 4900,
     yearlyDiscount: 15,
     highlighted: true,
     features: [
       "Tout Découverte",
-      "Commission réduite à 1.5% (-50%)",
+      "Commission réduite à 4% (-33%)",
       "Multi-boutiques (jusqu'à 5)",
       "Branding personnalisé (logo, couleurs)",
       "Domaine personnalisé (.com)",
@@ -116,12 +116,12 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
   business: {
     id: "business",
     name: "Business",
-    commissionRate: 1.0,
+    commissionRate: 4.0,
     monthlyFee: 14900,
     yearlyDiscount: 20,
     features: [
       "Tout Pro",
-      "Commission ultra-réduite à 1.0%",
+      "Commission réduite à 4%",
       "Multi-boutiques illimitées",
       "API complète (intégration sur-mesure)",
       "Compte gestionnaire dédié",

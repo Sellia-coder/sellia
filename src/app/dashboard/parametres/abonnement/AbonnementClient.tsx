@@ -69,7 +69,7 @@ const PLANS = [
       { label: "Multi-boutiques (jusqu'à 5)", included: true },
       { label: "API publique + webhooks", included: true },
       { label: "Manager dédié", included: true },
-      { label: "Commission Sellia", value: "2% par vente" },
+      { label: "Commission Sellia", value: "4% par vente" },
     ],
   },
 ];

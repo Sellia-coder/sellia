@@ -153,6 +153,7 @@ model Shop {
   shopPages           ShopPage[]
   shopFaqs            ShopFaq[]
   featureUnlocks      ShopFeatureUnlock[]
+  productReports      ProductReport[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -223,6 +224,7 @@ model Product {
   updatedAt   DateTime @updatedAt
 
   reviews     Review[]
+  reports     ProductReport[]
 
   @@unique([shopId, slug])
   @@index([shopId])
@@ -1005,4 +1007,50 @@ model ShopFeatureUnlock {
   @@unique([shopId, feature])
   @@index([shopId])
   @@map("shop_feature_unlocks")
+}
+
+// ============================================================================
+// G6 — SIGNALEMENTS PRODUITS
+// ============================================================================
+
+enum ReportReason {
+  COUNTERFEIT      // Contrefaçon
+  INAPPROPRIATE    // Contenu inapproprié
+  MISLEADING       // Description trompeuse
+  SCAM             // Arnaque / fraude
+  PROHIBITED       // Produit interdit
+  OTHER            // Autre
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+model ProductReport {
+  id            String        @id @default(cuid())
+
+  shopId        String
+  shop          Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  productId     String
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  reason        ReportReason
+  description   String        @db.Text
+
+  reporterName  String?
+  reporterEmail String?
+
+  status        ReportStatus  @default(PENDING)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([shopId])
+  @@index([productId])
+  @@index([status])
+  @@map("product_reports")
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,6 +13,8 @@ import {
   MessageCircle,
   Check,
 } from "lucide-react";
+import { Flag, X } from "@phosphor-icons/react";
+import { createReportAction } from "@/app/actions/report";
 import { addToCart } from "@/lib/cart";
 import { usePixelTracking } from "@/lib/use-pixel-tracking";
 import { useCartContext } from "./CartProvider";
@@ -44,6 +46,15 @@ function formatPrice(price: number): string {
 function currencyLabel(currency: string): string {
   return currency === "XAF" ? "FCFA" : currency;
 }
+
+const REPORT_REASONS = [
+  { value: "COUNTERFEIT", label: "Contrefaçon" },
+  { value: "INAPPROPRIATE", label: "Contenu inapproprié" },
+  { value: "MISLEADING", label: "Description trompeuse" },
+  { value: "SCAM", label: "Arnaque / fraude" },
+  { value: "PROHIBITED", label: "Produit interdit" },
+  { value: "OTHER", label: "Autre" },
+];
 
 interface ReviewVM {
   id: string;
@@ -157,6 +168,51 @@ export default function ProductDetail({
   const [activeTab, setActiveTab] = useState<"description" | "reviews">(
     "description"
   );
+
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
+  const [reporterName, setReporterName] = useState("");
+  const [reporterEmail, setReporterEmail] = useState("");
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [isReporting, startReport] = useTransition();
+
+  const closeReport = () => {
+    setReportOpen(false);
+    setReportError(null);
+    setReportSuccess(false);
+    setReportReason("");
+    setReportDescription("");
+    setReporterName("");
+    setReporterEmail("");
+  };
+
+  const handleSubmitReport = () => {
+    setReportError(null);
+    if (!reportReason) {
+      setReportError("Veuillez sélectionner un motif");
+      return;
+    }
+    if (reportDescription.trim().length < 10) {
+      setReportError("Veuillez détailler votre signalement (10 caractères min)");
+      return;
+    }
+    startReport(async () => {
+      const res = await createReportAction({
+        productId: product.id,
+        reason: reportReason,
+        description: reportDescription,
+        reporterName: reporterName || undefined,
+        reporterEmail: reporterEmail || undefined,
+      });
+      if (res.ok) {
+        setReportSuccess(true);
+      } else {
+        setReportError(res.error || "Une erreur est survenue");
+      }
+    });
+  };
 
   useEffect(() => {
     trackViewContent({
@@ -556,6 +612,24 @@ export default function ProductDetail({
                   </div>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => setReportOpen(true)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#9CA3AF",
+                  fontSize: "12.5px",
+                  padding: "8px 0",
+                }}
+              >
+                <Flag size={14} weight="regular" /> Signaler ce produit
+              </button>
             </div>
           </div>
 
@@ -724,6 +798,306 @@ export default function ProductDetail({
             >
               Acheter maintenant
             </button>
+          </div>
+        </div>
+      )}
+
+      {reportOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={closeReport}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(14,17,22,0.55)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#FFFFFF",
+              borderRadius: "16px",
+              padding: "28px",
+              width: "100%",
+              maxWidth: "460px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 12px 48px rgba(14,17,22,0.22)",
+              position: "relative",
+            }}
+          >
+            <button
+              type="button"
+              onClick={closeReport}
+              aria-label="Fermer"
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#9CA3AF",
+                padding: "4px",
+                lineHeight: 0,
+              }}
+            >
+              <X size={20} weight="bold" />
+            </button>
+
+            {reportSuccess ? (
+              <div style={{ textAlign: "center", padding: "12px 0" }}>
+                <div
+                  style={{
+                    width: "52px",
+                    height: "52px",
+                    borderRadius: "50%",
+                    background: "#DCFCE7",
+                    color: "#16A34A",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 16px",
+                  }}
+                >
+                  <Check size={26} strokeWidth={3} />
+                </div>
+                <h3
+                  style={{
+                    fontSize: "17px",
+                    fontWeight: 700,
+                    color: "#0E1116",
+                    margin: "0 0 8px",
+                  }}
+                >
+                  Merci, votre signalement a été transmis
+                </h3>
+                <p
+                  style={{
+                    fontSize: "13.5px",
+                    color: "#6B7280",
+                    margin: "0 0 20px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Notre équipe va examiner ce produit dans les plus brefs délais.
+                </p>
+                <button
+                  type="button"
+                  onClick={closeReport}
+                  style={{
+                    background: primaryColor,
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "11px 24px",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Fermer
+                </button>
+              </div>
+            ) : (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "6px",
+                  }}
+                >
+                  <Flag size={18} weight="fill" color={primaryColor} />
+                  <h3
+                    style={{
+                      fontSize: "17px",
+                      fontWeight: 700,
+                      color: "#0E1116",
+                      margin: 0,
+                    }}
+                  >
+                    Signaler ce produit
+                  </h3>
+                </div>
+                <p
+                  style={{
+                    fontSize: "12.5px",
+                    color: "#6B7280",
+                    margin: "0 0 18px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Aidez-nous à garder la plateforme sûre. Décrivez le problème
+                  rencontré avec ce produit.
+                </p>
+
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    color: "#374151",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Motif <span style={{ color: "#DC2626" }}>*</span>
+                </label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: "10px",
+                    border: "1px solid #E5E5E0",
+                    fontSize: "14px",
+                    color: "#0E1116",
+                    marginBottom: "14px",
+                    background: "#FFFFFF",
+                  }}
+                >
+                  <option value="">Sélectionnez un motif…</option>
+                  {REPORT_REASONS.map((r) => (
+                    <option key={r.value} value={r.value}>
+                      {r.label}
+                    </option>
+                  ))}
+                </select>
+
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    color: "#374151",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Description <span style={{ color: "#DC2626" }}>*</span>
+                </label>
+                <textarea
+                  value={reportDescription}
+                  onChange={(e) => setReportDescription(e.target.value)}
+                  rows={4}
+                  placeholder="Décrivez le problème (10 caractères min)…"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: "10px",
+                    border: "1px solid #E5E5E0",
+                    fontSize: "14px",
+                    color: "#0E1116",
+                    marginBottom: "14px",
+                    resize: "vertical",
+                    fontFamily: "inherit",
+                  }}
+                />
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "10px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <div>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "12.5px",
+                        fontWeight: 600,
+                        color: "#374151",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      Votre nom
+                    </label>
+                    <input
+                      type="text"
+                      value={reporterName}
+                      onChange={(e) => setReporterName(e.target.value)}
+                      placeholder="Optionnel"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "10px",
+                        border: "1px solid #E5E5E0",
+                        fontSize: "14px",
+                        color: "#0E1116",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "12.5px",
+                        fontWeight: 600,
+                        color: "#374151",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      Votre email
+                    </label>
+                    <input
+                      type="email"
+                      value={reporterEmail}
+                      onChange={(e) => setReporterEmail(e.target.value)}
+                      placeholder="Optionnel"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "10px",
+                        border: "1px solid #E5E5E0",
+                        fontSize: "14px",
+                        color: "#0E1116",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {reportError && (
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#DC2626",
+                      margin: "0 0 12px",
+                    }}
+                  >
+                    {reportError}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleSubmitReport}
+                  disabled={isReporting}
+                  style={{
+                    width: "100%",
+                    background: primaryColor,
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: isReporting ? "wait" : "pointer",
+                    opacity: isReporting ? 0.7 : 1,
+                  }}
+                >
+                  {isReporting ? "Envoi…" : "Envoyer le signalement"}
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

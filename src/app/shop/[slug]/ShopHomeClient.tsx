@@ -24,6 +24,7 @@ export interface ShopHomeProduct {
   comparePrice: number | null;
   imageUrl: string | null;
   emoji: string;
+  type?: string;
   isNew?: boolean;
 }
 
@@ -203,6 +204,24 @@ export default function ShopHomeClient(props: Props) {
                 </div>
                 <div className={styles.productInfo}>
                   <div className={styles.productName}>{product.name}</div>
+                  {product.type && (
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#9CA3AF",
+                        fontWeight: 500,
+                        letterSpacing: "0.2px",
+                        display: "inline-block",
+                        marginTop: "2px",
+                      }}
+                    >
+                      {product.type === "digital"
+                        ? "Produit numérique"
+                        : product.type === "service"
+                          ? "Service"
+                          : "Produit physique"}
+                    </span>
+                  )}
                   {reviewsCount > 0 && (
                     <div className={styles.productRating}>
                       {Array.from({ length: 5 }).map((_, i) => (

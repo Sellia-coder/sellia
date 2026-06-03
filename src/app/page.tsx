@@ -838,7 +838,7 @@ export default function Home() {
         </div>
 
         <div className="pricing-v2-commission">
-          <span className="pricing-v2-commission-num">3%</span>
+          <span className="pricing-v2-commission-num">6%</span>
           <span className="pricing-v2-commission-label">de commission par vente</span>
         </div>
 
@@ -930,7 +930,7 @@ export default function Home() {
         )}
 
         <div className="pricing-v2-commission pricing-v2-commission-pro">
-          <span className="pricing-v2-commission-num">1.5%</span>
+          <span className="pricing-v2-commission-num">4%</span>
           <span className="pricing-v2-commission-label">de commission par vente</span>
         </div>
 
@@ -962,7 +962,7 @@ export default function Home() {
           </li>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-            <span><strong>Commission réduite à 1.5%</strong> par vente</span>
+            <span><strong>Commission réduite à 4%</strong> par vente</span>
           </li>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
@@ -1025,7 +1025,7 @@ export default function Home() {
         )}
 
         <div className="pricing-v2-commission">
-          <span className="pricing-v2-commission-num">1%</span>
+          <span className="pricing-v2-commission-num">4%</span>
           <span className="pricing-v2-commission-label">de commission par vente</span>
         </div>
 
@@ -1043,7 +1043,7 @@ export default function Home() {
         <ul className="pricing-v2-features">
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-            <span><strong>Commission à 1%</strong> par vente</span>
+            <span><strong>Commission à 4%</strong> par vente</span>
           </li>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
@@ -1177,7 +1177,7 @@ export default function Home() {
           <div className="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         </div>
         <div className="faq-answer">
-          <div className="faq-answer-inner">Le plan Découverte est entièrement gratuit, sans carte bancaire requise. Vous payez uniquement 3% de commission sur vos ventes en plan gratuit, plus les frais opérateur Mobile Money selon votre pays. Le plan Pro est à 4 900 FCFA/mois (3 920 FCFA en annuel) avec une commission réduite à 1.5%, et débloque le paiement à la livraison, multi-boutiques et branding personnalisé. Le plan Business à 14 900 FCFA/mois descend la commission à 1% avec API complète et compte gestionnaire dédié. Vous pouvez changer de plan ou résilier à tout moment.</div>
+          <div className="faq-answer-inner">Le plan Découverte est entièrement gratuit, sans carte bancaire requise. Vous payez uniquement 6% de commission sur vos ventes en plan gratuit, plus les frais opérateur Mobile Money selon votre pays. Le plan Pro est à 4 900 FCFA/mois (3 920 FCFA en annuel) avec une commission réduite à 4%, et débloque le paiement à la livraison, multi-boutiques et branding personnalisé. Le plan Business à 14 900 FCFA/mois conserve une commission à 4% avec API complète et compte gestionnaire dédié. Vous pouvez changer de plan ou résilier à tout moment.</div>
         </div>
       </div>
       <div className={`faq-item ${openFaq === 1 ? "open" : ""}`}>

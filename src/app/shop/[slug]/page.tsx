@@ -73,6 +73,7 @@ export default async function ShopHomePage({ params }: Props) {
     comparePrice: p.comparePrice,
     imageUrl: p.imageUrl,
     emoji: p.emoji || "📦",
+    type: p.type,
     isNew: new Date(p.createdAt).getTime() > twoWeeksAgo,
   }));
 
