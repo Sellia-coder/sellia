@@ -100,7 +100,7 @@ export default function PlanCard({
 
       <div style={{ fontSize: 14, color: "#6B6E76", marginBottom: 18 }}>
         + <strong style={{ color: "#0A0E13" }}>{plan.commissionRate}%</strong> de
-        commission par vente
+        frais partenaires &amp; opérateurs
       </div>
 
       <ul

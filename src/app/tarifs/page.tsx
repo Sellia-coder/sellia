@@ -134,7 +134,7 @@ export default function PricingPage() {
                   </span>
                 </div>
                 <div style={{ fontSize: 14, color: "#6B6E76", marginBottom: 24 }}>
-                  + <strong>{plan.commissionRate}%</strong> de commission par vente
+                  + <strong>{plan.commissionRate}%</strong> de frais partenaires &amp; opérateurs
                 </div>
                 <ul
                   style={{

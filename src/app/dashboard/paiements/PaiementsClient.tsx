@@ -16,6 +16,10 @@ import {
 } from "@phosphor-icons/react";
 import PayoutMethodModal from "@/components/dashboard/PayoutMethodModal";
 import EmptyTransactions from "@/app/dashboard/empty-states/EmptyTransactions";
+import {
+  getMerchantWithdrawalFeeRate,
+  getPayoutOperators,
+} from "@/lib/cartevo/pricing";
 import styles from "./paiements.module.css";
 
 interface Balances {
@@ -95,23 +99,30 @@ const TYPE_LABELS: Record<string, string> = {
 function WithdrawModal({
   available,
   currency,
+  country,
   onClose,
 }: {
   available: number;
   currency: string;
+  country: string;
   onClose: () => void;
 }) {
   const [amount, setAmount] = useState(available);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const feeRate = 0.02;
-  const fee = Math.round(amount * feeRate);
+  const feeRate = getMerchantWithdrawalFeeRate(country); // 0 ou 2 (%)
+  const isFree = feeRate === 0;
+  const fee = Math.round((amount * feeRate) / 100);
   const netReceived = amount - fee;
   const formatPrice = (n: number) => n.toLocaleString("fr-FR");
+  // Cartevo ne propose pas de retrait Mobile Money dans certains pays (ex Tchad).
+  const payoutUnavailable = getPayoutOperators(country).length === 0;
 
   const handleSubmit = async () => {
+    if (payoutUnavailable) return;
     if (amount <= 0 || amount > available) {
       setError("Montant invalide");
       return;
@@ -129,8 +140,9 @@ function WithdrawModal({
         setError(data.error || "Erreur lors de la demande");
         return;
       }
+      setSuccessMessage(typeof data.message === "string" ? data.message : null);
       setSuccess(true);
-      setTimeout(() => window.location.reload(), 2000);
+      setTimeout(() => window.location.reload(), 2500);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Problème réseau");
     } finally {
@@ -150,8 +162,8 @@ function WithdrawModal({
             />
             <h3>Demande envoyée</h3>
             <p>
-              Vous recevrez {formatPrice(netReceived)} {currency} sur votre
-              Mobile Money sous peu.
+              {successMessage ??
+                `Vous recevrez ${formatPrice(netReceived)} ${currency} sur votre Mobile Money sous peu.`}
             </p>
           </div>
         ) : (
@@ -160,6 +172,23 @@ function WithdrawModal({
             <p className={styles.modalDesc}>
               Recevez votre argent directement sur votre Mobile Money.
             </p>
+            {payoutUnavailable && (
+              <div
+                style={{
+                  background: "#FEF3C7",
+                  border: "1px solid #FDE68A",
+                  borderRadius: "12px",
+                  padding: "14px 16px",
+                  marginBottom: "12px",
+                  fontSize: "13px",
+                  color: "#92400E",
+                  lineHeight: 1.45,
+                }}
+              >
+                Le retrait Mobile Money n&apos;est pas disponible dans votre pays
+                pour le moment.
+              </div>
+            )}
             <div className={styles.modalField}>
               <label>Montant ({currency})</label>
               <input
@@ -176,27 +205,77 @@ function WithdrawModal({
                   {formatPrice(available)} {currency}
                 </strong>
               </div>
-            </div>
-            <div className={styles.modalBreakdown}>
-              <div className={styles.modalBreakdownLine}>
-                <span>Montant retiré</span>
-                <span>
-                  {formatPrice(amount)} {currency}
-                </span>
-              </div>
-              <div className={styles.modalBreakdownLine}>
-                <span>Frais Mobile Money (~2%)</span>
-                <span style={{ color: "var(--sellia-warning)" }}>
-                  -{formatPrice(fee)} {currency}
-                </span>
-              </div>
-              <div className={styles.modalBreakdownLineFinal}>
-                <span>Vous recevrez</span>
-                <strong>
-                  {formatPrice(netReceived)} {currency}
-                </strong>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#6B6E76",
+                  marginTop: "8px",
+                  lineHeight: 1.45,
+                }}
+              >
+                Retraits jusqu&apos;à 50 000 {currency} : instantanés. Au-delà :
+                validation manuelle sous 15 minutes maximum, pour votre
+                sécurité.
               </div>
             </div>
+
+            {isFree ? (
+              <div
+                style={{
+                  background: "#DCFCE7",
+                  border: "1px solid #BBF7D0",
+                  borderRadius: "12px",
+                  padding: "14px 16px",
+                  marginBottom: "4px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "#15803D",
+                    marginBottom: "6px",
+                  }}
+                >
+                  💚 Chez Sellia, votre argent vous appartient — les retraits
+                  sont gratuits.
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "14px",
+                    color: "#0E1116",
+                  }}
+                >
+                  <span>Vous recevez</span>
+                  <strong>
+                    {formatPrice(amount)} {currency}
+                  </strong>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.modalBreakdown}>
+                <div className={styles.modalBreakdownLine}>
+                  <span>Montant retiré</span>
+                  <span>
+                    {formatPrice(amount)} {currency}
+                  </span>
+                </div>
+                <div className={styles.modalBreakdownLine}>
+                  <span>Frais de retrait ({feeRate}%)</span>
+                  <span style={{ color: "var(--sellia-warning)" }}>
+                    -{formatPrice(fee)} {currency}
+                  </span>
+                </div>
+                <div className={styles.modalBreakdownLineFinal}>
+                  <span>Vous recevrez</span>
+                  <strong>
+                    {formatPrice(netReceived)} {currency}
+                  </strong>
+                </div>
+              </div>
+            )}
             {error && <div className={styles.modalError}>⚠️ {error}</div>}
             <div className={styles.modalActions}>
               <button type="button" onClick={onClose} className={styles.btnSecondary}>
@@ -205,7 +284,12 @@ function WithdrawModal({
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={submitting || amount <= 0 || amount > available}
+                disabled={
+                  submitting ||
+                  payoutUnavailable ||
+                  amount <= 0 ||
+                  amount > available
+                }
                 className={styles.btnPrimary}
               >
                 {submitting ? "Envoi..." : "Confirmer le retrait"}
@@ -606,6 +690,7 @@ export default function PaiementsClient({
         <WithdrawModal
           available={balances.available}
           currency={currency}
+          country={payoutMethod?.country || "CM"}
           onClose={() => setShowWithdrawModal(false)}
         />
       )}

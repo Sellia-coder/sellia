@@ -256,11 +256,11 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
   const deliveryValid =
     formData.fullName.trim().length > 1 &&
     /^\+?[0-9\s]{8,20}$/.test(formData.phone) &&
-    formData.address.trim().length > 2 &&
-    formData.city.trim().length > 1 &&
+    // Adresse + ville + zone uniquement si le panier contient du physique.
     (!hasPhysicalLines ||
-      zones.length === 0 ||
-      Boolean(formData.shippingZoneId));
+      (formData.address.trim().length > 2 &&
+        formData.city.trim().length > 1 &&
+        (zones.length === 0 || Boolean(formData.shippingZoneId))));
 
   const canProceedToPayment =
     formData.paymentMethod === "cash_on_delivery" ||
@@ -455,7 +455,10 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                 </div>
                 {deliveryDone && expandedSection !== "delivery" && (
                   <div className={styles.sectionSummary}>
-                    {formData.fullName} · {formData.phone} · {formData.city}
+                    {formData.fullName} · {formData.phone}
+                    {hasPhysicalLines && formData.city
+                      ? ` · ${formData.city}`
+                      : ""}
                   </div>
                 )}
               </div>
@@ -533,28 +536,47 @@ export default function CheckoutClient({ shop, initialMethod }: Props) {
                     </select>
                   </div>
                 )}
-                <div className={styles.field}>
-                  <label>Adresse de livraison</label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
-                    placeholder="Quartier, rue, points de repère"
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Ville</label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) =>
-                      setFormData({ ...formData, city: e.target.value })
-                    }
-                    placeholder="Douala, Yaoundé..."
-                  />
-                </div>
+                {hasPhysicalLines ? (
+                  <>
+                    <div className={styles.field}>
+                      <label>Adresse de livraison</label>
+                      <input
+                        type="text"
+                        value={formData.address}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
+                        placeholder="Quartier, rue, points de repère"
+                      />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Ville</label>
+                      <input
+                        type="text"
+                        value={formData.city}
+                        onChange={(e) =>
+                          setFormData({ ...formData, city: e.target.value })
+                        }
+                        placeholder="Douala, Yaoundé..."
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      background: "rgba(232,75,31,0.05)",
+                      border: "1px solid rgba(232,75,31,0.15)",
+                      borderRadius: "12px",
+                      padding: "14px 16px",
+                      fontSize: "13px",
+                      color: "#4B5563",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Produit numérique — livraison instantanée par
+                    email/téléchargement après paiement. Aucune adresse requise.
+                  </div>
+                )}
                 <button
                   type="button"
                   className={styles.sectionNextBtn}

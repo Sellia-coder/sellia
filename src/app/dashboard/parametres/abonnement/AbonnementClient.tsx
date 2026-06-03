@@ -33,7 +33,7 @@ const PLANS = [
       { label: "Lien personnalisé getsellia.com", included: true },
       { label: "Domaine personnalisé", included: false },
       { label: "Pixels marketing (FB, GA4, TikTok)", included: false },
-      { label: "Commission Sellia", value: "6% par vente" },
+      { label: "Frais partenaires & opérateurs", value: "6% par vente" },
     ],
   },
   {
@@ -52,7 +52,7 @@ const PLANS = [
       { label: "Coupons & cartes cadeaux", included: true },
       { label: "Campagnes flash + fidélité", included: true },
       { label: "Pages personnalisées illimitées", included: true },
-      { label: "Commission Sellia", value: "4% par vente" },
+      { label: "Frais partenaires & opérateurs", value: "4% par vente" },
     ],
   },
   {
@@ -69,15 +69,15 @@ const PLANS = [
       { label: "Multi-boutiques (jusqu'à 5)", included: true },
       { label: "API publique + webhooks", included: true },
       { label: "Manager dédié", included: true },
-      { label: "Commission Sellia", value: "4% par vente" },
+      { label: "Frais partenaires & opérateurs", value: "4% par vente" },
     ],
   },
 ];
 
 const FAQ = [
   {
-    q: "Comment fonctionne la commission Sellia ?",
-    a: "La commission est prélevée automatiquement sur chaque vente. Plus votre plan est élevé, plus la commission est basse.",
+    q: "Comment fonctionnent les frais partenaires & opérateurs ?",
+    a: "Ces frais sont prélevés automatiquement sur chaque vente. Plus votre plan est élevé, plus ils sont bas. Les retraits de vos gains, eux, sont gratuits.",
   },
   {
     q: "Puis-je changer de plan à tout moment ?",

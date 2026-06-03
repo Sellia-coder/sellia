@@ -71,7 +71,9 @@ export default async function OrderConfirmationPage({ params }: Props) {
     allItems.length > 0 &&
     allItems.every((i) => (i.type || "physical") === "digital");
 
-  let digitalDownloads: { name: string; url: string }[] = [];
+  // url peut être null si le marchand n'a pas (encore) renseigné digitalFileUrl :
+  // on affiche quand même le produit côté client avec un état "bientôt".
+  let digitalDownloads: { name: string; url: string | null }[] = [];
   if (paymentConfirmed) {
     const digitalItemProductIds = allItems
       .filter((i) => (i.type || "physical") === "digital")
@@ -80,15 +82,13 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
     if (digitalItemProductIds.length > 0) {
       const products = await db.product.findMany({
-        where: {
-          id: { in: digitalItemProductIds },
-          digitalFileUrl: { not: null },
-        },
+        where: { id: { in: digitalItemProductIds } },
         select: { id: true, name: true, digitalFileUrl: true },
       });
-      digitalDownloads = products
-        .filter((p) => p.digitalFileUrl)
-        .map((p) => ({ name: p.name, url: p.digitalFileUrl as string }));
+      digitalDownloads = products.map((p) => ({
+        name: p.name,
+        url: p.digitalFileUrl || null,
+      }));
     }
   }
 

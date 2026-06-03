@@ -65,6 +65,47 @@ export const CARTEVO_FEES: Record<CartevoCountryCode, CountryFees> = {
   CD: { currency: "CDF", defaultPayin: 5.0, defaultPayout: 4.0 },
 };
 
+/**
+ * Opérateurs Mobile Money disponibles pour le RETRAIT (payout) par pays.
+ * Tchad (TD) : aucun opérateur de retrait MoMo chez Cartevo.
+ *
+ * ⚠️ PROPOSITION à VALIDER par KONO avec la liste EXACTE des opérateurs supportés
+ * par Cartevo : certains codes peuvent différer (ex "tmoney" vs "togocom",
+ * "free" vs "expresso", "africell" n'est peut-être pas un code Cartevo valide).
+ */
+export const PAYOUT_OPERATORS_BY_COUNTRY: Record<string, string[]> = {
+  CM: ["mtn", "orange"],
+  GA: ["airtel", "moov"],
+  TD: [], // ⚠️ pas de retrait MoMo au Tchad
+  CG: ["mtn", "airtel"],
+  CI: ["mtn", "orange", "moov", "wave"],
+  SN: ["orange", "free", "wave"],
+  BF: ["orange", "moov"],
+  ML: ["orange", "moov"],
+  NE: ["airtel", "moov", "orange"],
+  TG: ["tmoney", "moov"],
+  BJ: ["mtn", "moov"],
+  GN: ["orange", "mtn"],
+  CD: ["orange", "airtel", "mpesa", "africell"],
+};
+
+/** Libellés lisibles des opérateurs de retrait. */
+export const PAYOUT_OPERATOR_LABELS: Record<string, string> = {
+  mtn: "MTN",
+  orange: "Orange",
+  moov: "Moov",
+  wave: "Wave",
+  airtel: "Airtel",
+  mpesa: "M-Pesa",
+  tmoney: "T-Money",
+  free: "Free",
+  africell: "Africell",
+};
+
+export function getPayoutOperators(country: string): string[] {
+  return PAYOUT_OPERATORS_BY_COUNTRY[(country || "").toUpperCase()] ?? [];
+}
+
 export type SelliaPlan = "free" | "pro" | "business";
 
 export interface SelliaPlanConfig {
@@ -104,7 +145,7 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
     highlighted: true,
     features: [
       "Tout Découverte",
-      "Commission réduite à 4% (-33%)",
+      "Frais partenaires & opérateurs réduits à 4% (-33%)",
       "Multi-boutiques (jusqu'à 5)",
       "Branding personnalisé (logo, couleurs)",
       "Domaine personnalisé (.com)",
@@ -121,7 +162,7 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
     yearlyDiscount: 20,
     features: [
       "Tout Pro",
-      "Commission réduite à 4%",
+      "Frais partenaires & opérateurs réduits à 4%",
       "Multi-boutiques illimitées",
       "API complète (intégration sur-mesure)",
       "Compte gestionnaire dédié",
@@ -175,6 +216,17 @@ export function getCartevoPayinRate(country: string, operator: string): number {
   }
   const opOverride = c.perOperator?.[operator.toLowerCase()];
   return opOverride?.payin ?? c.defaultPayin;
+}
+
+/**
+ * Frais de retrait facturé au marchand (revenu Sellia), distinct du coût Cartevo.
+ * RDC (CD) et Tchad (TD) = 2% (payout Cartevo élevé là-bas).
+ * Tous les autres pays = 0% (retrait gratuit, Sellia absorbe le coût Cartevo).
+ */
+export function getMerchantWithdrawalFeeRate(country: string): number {
+  const c = (country || "").toUpperCase();
+  if (c === "TD" || c === "CD" || c === "RDC") return 2;
+  return 0;
 }
 
 export function getCartevoPayoutRate(country: string, operator: string): number {

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { Prisma, PayoutStatus, PayoutType } from "@prisma/client";
-import { getOrderTypeKind, type OrderItem } from "@/lib/order-status";
+import { type OrderItem } from "@/lib/order-status";
 import { PAYMENT_STATUS, ORDER_STATUS } from "@/lib/cartevo/order-status";
 import { sendDeliveryCodeEmail } from "@/lib/email/delivery-code";
 
@@ -10,9 +10,107 @@ interface CreatePayoutInput {
   releaseImmediately?: boolean;
 }
 
+type PayoutKind = "physical" | "digital" | "service";
+
 function selliaCommissionRate(plan: string): number {
   if (plan === "pro" || plan === "business") return 4;
   return 6;
+}
+
+function normalizePayoutKind(t?: string | null): PayoutKind {
+  return t === "digital" || t === "service" ? t : "physical";
+}
+
+function payoutTypeToKind(payoutType: PayoutType): PayoutKind {
+  if (payoutType === PayoutType.ORDER_DIGITAL) return "digital";
+  if (payoutType === PayoutType.ORDER_SERVICE) return "service";
+  return "physical";
+}
+
+interface PayoutPortion {
+  gross: number;
+  commission: number;
+  shipping: number;
+  amount: number;
+}
+
+/**
+ * Splitte le payout d'une commande PAR TYPE en préservant strictement l'invariant
+ * money : la SOMME des portions == le payout unique d'avant.
+ *
+ * Formule unique (auditée) :
+ *   G = order.total − shippingPrice            (gross hors livraison, remise déduite)
+ *   C = round(G × rate/100)                    (commission Sellia)
+ *   M = G − C + shippingPrice                  (montant marchand total)
+ *
+ * Répartition :
+ *   - G est alloué proportionnellement au sous-total brut de chaque type
+ *     (gère correctement une éventuelle remise coupon : on répartit G, pas le brut).
+ *   - Le shipping va entièrement au type PHYSIQUE (sinon au dernier type présent).
+ *   - Le type "absorbeur" (physique si présent, sinon dernier) prend le RESTE exact
+ *     (gross + commission) pour garantir somme(portions) == M au FCFA près.
+ */
+function computePayoutSplit(opts: {
+  items: OrderItem[];
+  total: number;
+  shippingPrice: number;
+  commissionRate: number;
+}): Record<PayoutKind, PayoutPortion> {
+  const { items, total, shippingPrice, commissionRate } = opts;
+
+  const rawByKind: Record<PayoutKind, number> = {
+    physical: 0,
+    digital: 0,
+    service: 0,
+  };
+  for (const it of items) {
+    const k = normalizePayoutKind(it.type as string | undefined);
+    rawByKind[k] += Number(it.price) * Number(it.quantity ?? 1);
+  }
+  const S = rawByKind.physical + rawByKind.digital + rawByKind.service;
+
+  const G = total - shippingPrice;
+  const C = Math.round((G * commissionRate) / 100);
+
+  const order: PayoutKind[] = ["digital", "service", "physical"];
+  const present = order.filter((k) => rawByKind[k] > 0);
+
+  const result: Record<PayoutKind, PayoutPortion> = {
+    physical: { gross: 0, commission: 0, shipping: 0, amount: 0 },
+    digital: { gross: 0, commission: 0, shipping: 0, amount: 0 },
+    service: { gross: 0, commission: 0, shipping: 0, amount: 0 },
+  };
+
+  if (present.length === 0) return result;
+
+  // Absorbeur : physique si présent, sinon le dernier type présent.
+  const absorber: PayoutKind = present.includes("physical")
+    ? "physical"
+    : present[present.length - 1];
+
+  let allocatedGross = 0;
+  let allocatedCommission = 0;
+
+  for (const k of present) {
+    if (k === absorber) continue;
+    const gross = S > 0 ? Math.round((G * rawByKind[k]) / S) : 0;
+    const commission = Math.round((gross * commissionRate) / 100);
+    result[k] = { gross, commission, shipping: 0, amount: gross - commission };
+    allocatedGross += gross;
+    allocatedCommission += commission;
+  }
+
+  // L'absorbeur prend le reste exact (+ tout le shipping).
+  const gross = G - allocatedGross;
+  const commission = C - allocatedCommission;
+  result[absorber] = {
+    gross,
+    commission,
+    shipping: shippingPrice,
+    amount: gross - commission + shippingPrice,
+  };
+
+  return result;
 }
 
 function resolvePayoutDestination(shop: {
@@ -30,7 +128,11 @@ function resolvePayoutDestination(shop: {
 }
 
 /**
- * Crée un Payout à partir d'une commande livrée. Idempotent par orderId.
+ * Crée un Payout pour UN type donné d'une commande, avec le montant de la PORTION
+ * correspondante (split par type). Idempotent par (orderId, payoutType).
+ *
+ * La somme des portions de tous les types présents == le payout unique d'avant
+ * (cf. computePayoutSplit, invariant money strict).
  */
 export async function createPayoutFromOrder(input: CreatePayoutInput) {
   const order = await db.order.findUnique({
@@ -53,19 +155,33 @@ export async function createPayoutFromOrder(input: CreatePayoutInput) {
 
   if (!order) return null;
 
+  // Idempotence stricte sur (orderId, payoutType).
   const existing = await db.payout.findUnique({
-    where: { orderId: input.orderId },
+    where: {
+      orderId_payoutType: {
+        orderId: input.orderId,
+        payoutType: input.payoutType,
+      },
+    },
   });
   if (existing) return existing;
 
   const plan = order.shop.plan || "free";
   const commissionRate = selliaCommissionRate(plan);
-  const grossAmount = order.total - order.shippingPrice;
-  const commissionAmount = Math.round(
-    (grossAmount * commissionRate) / 100
-  );
-  const merchantAmount =
-    grossAmount - commissionAmount + order.shippingPrice;
+
+  const split = computePayoutSplit({
+    items: order.items as unknown as OrderItem[],
+    total: order.total,
+    shippingPrice: order.shippingPrice,
+    commissionRate,
+  });
+
+  const targetKind = payoutTypeToKind(input.payoutType);
+  const portion = split[targetKind];
+
+  const merchantAmount = portion.amount;
+  const grossAmount = portion.gross;
+  const commissionAmount = portion.commission;
 
   const initialStatus = input.releaseImmediately
     ? PayoutStatus.AVAILABLE
@@ -91,7 +207,7 @@ export async function createPayoutFromOrder(input: CreatePayoutInput) {
       phoneNumber: dest.phoneNumber,
       status: initialStatus,
       releasedAt,
-      description: `Vente commande ${order.orderNumber}`,
+      description: `Vente commande ${order.orderNumber} (${targetKind})`,
     },
   });
 
@@ -124,30 +240,45 @@ export async function settlePaidOrderPayout(orderId: string) {
   // Ne régler que les commandes confirmées en escrow (garde anti-rejeu).
   if (order.paymentStatus !== PAYMENT_STATUS.PAID_ESCROW) return;
 
-  const kind = getOrderTypeKind(order.items as unknown as OrderItem[]);
-  const instantRelease = kind === "digital" || kind === "service";
-  const payoutType =
-    kind === "digital"
-      ? PayoutType.ORDER_DIGITAL
-      : kind === "service"
-        ? PayoutType.ORDER_SERVICE
-        : PayoutType.ORDER_PHYSICAL;
+  const items = order.items as unknown as OrderItem[];
 
-  const existingPayout = await db.payout.findUnique({
-    where: { orderId },
-    select: { id: true },
-  });
+  // Types DISTINCTS présents dans le panier.
+  const kinds = new Set(items.map((it) => normalizePayoutKind(it.type as string | undefined)));
+  const hasPhysical = kinds.has("physical");
 
-  if (!existingPayout) {
-    await createPayoutFromOrder({
-      orderId,
-      payoutType,
-      releaseImmediately: instantRelease,
-    });
+  const typeMap: { kind: PayoutKind; payoutType: PayoutType; instant: boolean }[] = [
+    { kind: "digital", payoutType: PayoutType.ORDER_DIGITAL, instant: true },
+    { kind: "service", payoutType: PayoutType.ORDER_SERVICE, instant: true },
+    { kind: "physical", payoutType: PayoutType.ORDER_PHYSICAL, instant: false },
+  ];
+
+  // Pour chaque type présent : créer le payout correspondant (idempotent par (orderId, type)).
+  // - digital / service : libérés INSTANTANÉMENT (AVAILABLE).
+  // - physique : escrow (PENDING_ESCROW), libéré à la confirmation de livraison.
+  let physicalCreated = false;
+
+  for (const t of typeMap) {
+    if (!kinds.has(t.kind)) continue;
+    const existing = await db.payout
+      .findUnique({
+        where: {
+          orderId_payoutType: { orderId, payoutType: t.payoutType },
+        },
+        select: { id: true },
+      })
+      .catch(() => null);
+    if (!existing) {
+      await createPayoutFromOrder({
+        orderId,
+        payoutType: t.payoutType,
+        releaseImmediately: t.instant,
+      });
+      if (t.kind === "physical") physicalCreated = true;
+    }
   }
 
-  if (instantRelease) {
-    // Digital / Service : la commande passe immédiatement à "libéré".
+  if (!hasPhysical) {
+    // 100% digital/service → tout est libéré, la commande passe à "libéré".
     await db.order.update({
       where: { id: orderId },
       data: {
@@ -156,8 +287,10 @@ export async function settlePaidOrderPayout(orderId: string) {
         deliveredAt: order.deliveredAt ?? new Date(),
       },
     });
-  } else if (!existingPayout) {
-    // Physique : fonds en escrow, on envoie le code de livraison au client (une seule fois).
+  } else if (physicalCreated) {
+    // Présence de physique → la commande RESTE paid_escrow (le digital/service est
+    // déjà AVAILABLE via son propre payout). On envoie le code de livraison pour la
+    // partie physique, une seule fois (garde : payout physique fraîchement créé).
     await sendDeliveryCodeEmail(orderId);
   }
 }

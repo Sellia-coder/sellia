@@ -45,7 +45,7 @@ export interface OrderConfirmationProps {
   qrPngUrl: string;
   deliveryCode?: string | null;
   deliveredAt?: string | null;
-  digitalDownloads?: { name: string; url: string }[];
+  digitalDownloads?: { name: string; url: string | null }[];
   isPurelyDigital?: boolean;
 }
 
@@ -303,41 +303,72 @@ export default function OrderConfirmationClient({
             <div
               style={{ display: "flex", flexDirection: "column", gap: "10px" }}
             >
-              {digitalDownloads.map((d, i) => (
-                <a
-                  key={i}
-                  href={d.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "14px 16px",
-                    background: "white",
-                    border: "1px solid var(--dash-border, #E5E5E0)",
-                    borderRadius: "12px",
-                    textDecoration: "none",
-                    color: "#0E1116",
-                  }}
-                >
-                  <span style={{ fontSize: "14px", fontWeight: 600 }}>
-                    {d.name}
-                  </span>
-                  <span
+              {digitalDownloads.map((d, i) =>
+                d.url ? (
+                  <a
+                    key={i}
+                    href={d.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
-                      display: "inline-flex",
+                      display: "flex",
                       alignItems: "center",
-                      gap: "6px",
-                      color: "#E84B1F",
-                      fontSize: "13px",
-                      fontWeight: 600,
+                      justifyContent: "space-between",
+                      padding: "14px 16px",
+                      background: "white",
+                      border: "1px solid var(--dash-border, #E5E5E0)",
+                      borderRadius: "12px",
+                      textDecoration: "none",
+                      color: "#0E1116",
                     }}
                   >
-                    <Download size={16} /> Télécharger
-                  </span>
-                </a>
-              ))}
+                    <span style={{ fontSize: "14px", fontWeight: 600 }}>
+                      {d.name}
+                    </span>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        color: "#E84B1F",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      <Download size={16} /> Télécharger
+                    </span>
+                  </a>
+                ) : (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "12px",
+                      padding: "14px 16px",
+                      background: "white",
+                      border: "1px dashed var(--dash-border, #E5E5E0)",
+                      borderRadius: "12px",
+                      color: "#0E1116",
+                    }}
+                  >
+                    <span style={{ fontSize: "14px", fontWeight: 600 }}>
+                      {d.name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "12.5px",
+                        color: "#6B7280",
+                        textAlign: "right",
+                      }}
+                    >
+                      Votre fichier sera disponible très bientôt — contactez le
+                      vendeur si besoin.
+                    </span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         )}

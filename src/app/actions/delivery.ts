@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { PayoutType } from "@prisma/client";
 import { db } from "@/lib/db";
 import { releasePayout } from "@/lib/payouts";
 import { verifyOrderDeliverySignature } from "@/lib/qr/qr-signature";
@@ -60,9 +61,15 @@ export async function confirmDeliveryAction(input: {
       return { ok: false, error: "Code de confirmation incorrect" };
     }
 
-    // 6. Marquer livré (transaction)
-    const payout = await db.payout.findUnique({
-      where: { orderId: order.id },
+    // 6. Marquer livré (transaction). On ne libère QUE le payout PHYSIQUE :
+    // la part digital/service a déjà été libérée instantanément au paiement.
+    const physicalPayout = await db.payout.findUnique({
+      where: {
+        orderId_payoutType: {
+          orderId: order.id,
+          payoutType: PayoutType.ORDER_PHYSICAL,
+        },
+      },
       select: { id: true },
     });
 
@@ -79,9 +86,10 @@ export async function confirmDeliveryAction(input: {
       });
     });
 
-    // 7. Libérer le payout escrow → AVAILABLE (idempotent)
-    if (payout) {
-      await releasePayout(payout.id);
+    // 7. Libérer UNIQUEMENT le payout physique escrow → AVAILABLE (idempotent :
+    // releasePayout ne touche que les payouts en PENDING_ESCROW).
+    if (physicalPayout) {
+      await releasePayout(physicalPayout.id);
     }
 
     revalidatePath(`/shop/${input.shopSlug}/livraison/${input.orderNumber}`);

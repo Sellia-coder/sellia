@@ -415,7 +415,7 @@ model Order {
   cancelledAt       DateTime?
 
   cartevoTransaction CartevoTransaction? @relation("OrderCartevoTx")
-  payout             Payout?
+  payouts            Payout[]
 
   @@index([shopId])
   @@index([orderNumber])
@@ -518,7 +518,7 @@ model Payout {
   shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   payoutType      PayoutType @default(MERCHANT_REQUESTED) @map("payout_type")
-  orderId         String?  @unique @map("order_id")
+  orderId         String?  @map("order_id")
   order           Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   amount          Decimal  @db.Decimal(14, 2)
@@ -550,6 +550,7 @@ model Payout {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  @@unique([orderId, payoutType])
   @@index([shopId, status])
   @@index([shopId, releasedAt])
   @@index([createdAt])

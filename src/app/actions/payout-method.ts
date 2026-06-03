@@ -3,12 +3,14 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";
+import {
+  getPayoutOperators,
+  PAYOUT_OPERATOR_LABELS,
+} from "@/lib/cartevo/pricing";
 
-export type PayoutOperatorKey =
-  | "orange_money"
-  | "mtn_mobile_money"
-  | "moov_money"
-  | "wave";
+// Codes opérateurs simples (Cartevo). On garde l'alias large pour la
+// rétro-compatibilité avec d'anciens appelants.
+export type PayoutOperatorKey = string;
 
 interface SavePayoutMethodInput {
   operator: PayoutOperatorKey;
@@ -17,27 +19,18 @@ interface SavePayoutMethodInput {
   holderName: string;
 }
 
-const OPERATOR_CONFIG: Record<
-  PayoutOperatorKey,
-  { label: string; countries: string[] }
-> = {
-  orange_money: {
-    label: "Orange Money",
-    countries: ["CM", "CI", "SN", "ML", "BF", "MG"],
-  },
-  mtn_mobile_money: {
-    label: "MTN Mobile Money",
-    countries: ["CM", "CI", "BJ", "GH", "UG", "RW"],
-  },
-  moov_money: {
-    label: "Moov Money",
-    countries: ["CI", "BJ", "BF", "TG", "ML", "NE"],
-  },
-  wave: {
-    label: "Wave",
-    countries: ["CI", "SN", "UG"],
-  },
-};
+// Normalise les anciens codes (orange_money, mtn_mobile_money…) vers les codes
+// simples Cartevo, afin que la validation et le stockage soient cohérents.
+function normalizeOperatorCode(op: string): string {
+  const o = (op || "").toLowerCase();
+  const legacy: Record<string, string> = {
+    orange_money: "orange",
+    mtn_mobile_money: "mtn",
+    moov_money: "moov",
+    wave: "wave",
+  };
+  return legacy[o] ?? o;
+}
 
 export async function savePayoutMethodAction(
   input: SavePayoutMethodInput
@@ -53,12 +46,20 @@ export async function savePayoutMethodAction(
 
     if (!shop) return { ok: false, error: "Aucune boutique trouvée" };
 
-    const opCfg = OPERATOR_CONFIG[input.operator];
-    if (!opCfg) return { ok: false, error: "Opérateur invalide" };
-    if (!opCfg.countries.includes(input.country)) {
+    const operatorCode = normalizeOperatorCode(input.operator);
+    const allowed = getPayoutOperators(input.country);
+    if (!operatorCode) return { ok: false, error: "Opérateur invalide" };
+    if (allowed.length === 0) {
       return {
         ok: false,
-        error: `${opCfg.label} non disponible dans ce pays`,
+        error: "Le retrait Mobile Money n'est pas disponible dans ce pays.",
+      };
+    }
+    if (!allowed.includes(operatorCode)) {
+      const label = PAYOUT_OPERATOR_LABELS[operatorCode] ?? operatorCode;
+      return {
+        ok: false,
+        error: `${label} non disponible dans ce pays`,
       };
     }
 
@@ -74,7 +75,7 @@ export async function savePayoutMethodAction(
     await db.shop.update({
       where: { id: shop.id },
       data: {
-        payoutOperator: input.operator,
+        payoutOperator: operatorCode,
         payoutCountry: input.country,
         payoutPhone: cleanPhone,
         payoutHolderName: input.holderName.trim(),

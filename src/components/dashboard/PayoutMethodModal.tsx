@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   X,
   CheckCircle,
@@ -11,7 +11,11 @@ import {
   Phone,
 } from "@phosphor-icons/react";
 import { savePayoutMethodAction, type PayoutOperatorKey } from "@/app/actions/payout-method";
-import { getSupportedCountries } from "@/lib/cartevo/pricing";
+import {
+  getSupportedCountries,
+  getPayoutOperators,
+  PAYOUT_OPERATOR_LABELS,
+} from "@/lib/cartevo/pricing";
 import styles from "./payout-method-modal.module.css";
 
 interface Props {
@@ -25,32 +29,38 @@ interface Props {
   onSaved?: () => void;
 }
 
-const OPERATORS = [
-  {
-    key: "orange_money",
-    label: "Orange Money",
-    color: "#FF7900",
-    countries: ["CM", "CI", "SN", "ML", "BF", "MG"],
-  },
-  {
-    key: "mtn_mobile_money",
-    label: "MTN Mobile Money",
-    color: "#FFCC00",
-    countries: ["CM", "CI", "BJ", "GH", "UG", "RW"],
-  },
-  {
-    key: "moov_money",
-    label: "Moov Money",
-    color: "#0072CE",
-    countries: ["CI", "BJ", "BF", "TG", "ML", "NE"],
-  },
-  {
-    key: "wave",
-    label: "Wave",
-    color: "#1DC8FF",
-    countries: ["CI", "SN", "UG"],
-  },
-] as const;
+// Couleurs de marque par code opérateur (codes simples Cartevo).
+const OPERATOR_COLORS: Record<string, string> = {
+  mtn: "#FFCC00",
+  orange: "#FF7900",
+  moov: "#0072CE",
+  wave: "#1DC8FF",
+  airtel: "#E40000",
+  mpesa: "#00A859",
+  tmoney: "#0033A0",
+  free: "#CD1F2D",
+  africell: "#6A1B9A",
+};
+
+// Normalise les anciens codes (orange_money, mtn_mobile_money…) vers les codes
+// simples Cartevo, pour la rétro-compatibilité d'un opérateur déjà enregistré.
+function normalizeOperatorCode(op: string): string {
+  const o = (op || "").toLowerCase();
+  const legacy: Record<string, string> = {
+    orange_money: "orange",
+    mtn_mobile_money: "mtn",
+    moov_money: "moov",
+    wave: "wave",
+  };
+  return legacy[o] ?? o;
+}
+
+function operatorLabel(code: string): string {
+  return (
+    PAYOUT_OPERATOR_LABELS[code] ??
+    code.charAt(0).toUpperCase() + code.slice(1)
+  );
+}
 
 const COUNTRIES: Record<string, { label: string; flag: string; dialCode: string }> =
   {
@@ -80,7 +90,9 @@ export default function PayoutMethodModal({
   onClose,
   onSaved,
 }: Props) {
-  const [operator, setOperator] = useState(initialMethod?.operator || "");
+  const [operator, setOperator] = useState(
+    normalizeOperatorCode(initialMethod?.operator || "")
+  );
   const [country, setCountry] = useState(initialMethod?.country || "CM");
   const [phoneNumber, setPhoneNumber] = useState(
     initialMethod?.phoneNumber || ""
@@ -90,9 +102,25 @@ export default function PayoutMethodModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const availableOperators = OPERATORS.filter((op) =>
-    (op.countries as readonly string[]).includes(country)
-  );
+  // Opérateurs de retrait disponibles pour ce pays (source unique : pricing.ts).
+  const availableOperators = useMemo(() => {
+    const codes = [...getPayoutOperators(country)];
+    // Rétro-compatibilité : conserver un opérateur déjà enregistré même s'il
+    // n'est plus dans la liste (évite de casser une config existante).
+    const saved = normalizeOperatorCode(initialMethod?.operator || "");
+    if (
+      saved &&
+      initialMethod?.country === country &&
+      !codes.includes(saved)
+    ) {
+      codes.unshift(saved);
+    }
+    return codes.map((code) => ({
+      key: code,
+      label: operatorLabel(code),
+      color: OPERATOR_COLORS[code] || "#6B7280",
+    }));
+  }, [country, initialMethod?.operator, initialMethod?.country]);
 
   useEffect(() => {
     if (operator && !availableOperators.find((op) => op.key === operator)) {
@@ -100,7 +128,7 @@ export default function PayoutMethodModal({
     }
   }, [country, operator, availableOperators]);
 
-  const selectedOp = OPERATORS.find((op) => op.key === operator);
+  const selectedOp = availableOperators.find((op) => op.key === operator);
   const selectedCountry = COUNTRIES[country];
 
   const handleSubmit = async () => {
@@ -193,8 +221,10 @@ export default function PayoutMethodModal({
                 </label>
                 {availableOperators.length === 0 ? (
                   <div className={styles.noOperators}>
-                    <Warning size={14} weight="duotone" /> Aucun opérateur
-                    disponible dans ce pays
+                    <Warning size={14} weight="duotone" />{" "}
+                    {country === "TD"
+                      ? "Le retrait Mobile Money n'est pas disponible au Tchad pour le moment."
+                      : "Aucun opérateur de retrait disponible dans ce pays pour le moment."}
                   </div>
                 ) : (
                   <div className={styles.operatorGrid}>

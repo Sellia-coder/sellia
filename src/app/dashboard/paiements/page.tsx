@@ -23,6 +23,7 @@ export default async function PaiementsPage() {
       payoutOperator: true,
       payoutCountry: true,
       payoutHolderName: true,
+      country: true,
     },
   });
 
@@ -82,7 +83,7 @@ export default async function PaiementsPage() {
       payoutMethodConfigured={!!(shop.payoutPhone || shop.phone)}
       payoutMethod={{
         operator: shop.payoutOperator,
-        country: shop.payoutCountry,
+        country: shop.payoutCountry || shop.country,
         phoneNumber: shop.payoutPhone,
         holderName: shop.payoutHolderName,
       }}
