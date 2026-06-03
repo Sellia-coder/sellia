@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
@@ -330,6 +331,14 @@ export async function publishShopAction(input: PublishShopInput) {
 
     revalidatePath("/dashboard");
     revalidatePath("/personnaliser-ma-boutique");
+
+    // COUCHE 2 bis : nettoyer le cookie de secours après publication réussie
+    try {
+      const cookieStore = await cookies();
+      cookieStore.delete("sellia_pending_draft");
+    } catch {
+      // ignore
+    }
 
     return {
       ok: true,

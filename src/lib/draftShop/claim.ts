@@ -21,18 +21,26 @@ export async function claimDraftShop(
       return { success: false, error: "Brouillon introuvable" };
     }
 
-    if (draft.userId) {
-      return { success: false, error: "Brouillon déjà associé à un compte" };
+    // Idempotent : déjà rattaché à ce user → OK
+    if (draft.userId === userId) {
+      return { success: true };
+    }
+
+    // Rattaché à un AUTRE user → refus
+    if (draft.userId && draft.userId !== userId) {
+      return { success: false, error: "Brouillon déjà associé à un autre compte" };
     }
 
     if (draft.expiresAt < new Date()) {
       return { success: false, error: "Brouillon expiré" };
     }
 
-    if (draft.status !== "ready") {
-      return { success: false, error: "Brouillon pas prêt" };
+    // La génération échouée est inutilisable
+    if (draft.status === "failed") {
+      return { success: false, error: "Génération échouée" };
     }
 
+    // ✅ On rattache même si "pending" (génération async en cours) — bulletproof.
     await db.draftShop.update({
       where: { id: draftShopId },
       data: {
@@ -56,7 +64,7 @@ export async function getActiveDraftShopForUser(userId: string) {
   return db.draftShop.findFirst({
     where: {
       userId,
-      status: "ready",
+      status: { notIn: ["failed", "consumed"] },
     },
     orderBy: {
       claimedAt: "desc",

@@ -149,6 +149,13 @@ function ApercuContent() {
           };
 
           setShop(shopFromApi);
+
+          // COUCHE 3 : persister le draftShopId pour le rattachement ultérieur (résilience)
+          try {
+            document.cookie = `sellia_pending_draft=${apiData.id}; path=/; max-age=86400; SameSite=Lax`;
+          } catch {
+            // ignore
+          }
         } catch (err) {
           console.error("[apercu] Fetch error:", err);
           setFetchError("Erreur réseau. Vérifiez votre connexion.");
