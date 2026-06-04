@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isAdminRole } from "@/lib/auth/admin";
 import { getActiveDraftShopForUser } from "@/lib/draftShop/claim";
 import {
   getShopKpis,
@@ -18,23 +19,52 @@ export default async function DashboardHomePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion");
 
-  if (!user.onboardingCompleted) {
-    const draft = await getActiveDraftShopForUser(user.id);
-    if (draft) redirect("/personnaliser-ma-boutique");
-  }
+  // 1) Boutique d'abord — évite de renvoyer vers l'onboarding alors qu'une Shop
+  //    existe déjà (ownerId valide via FK Prisma).
+  const shopCount = await db.shop.count({ where: { ownerId: user.id } });
 
   const shop = await db.shop.findFirst({
     where: { ownerId: user.id },
+    orderBy: [{ isPublished: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }],
     select: {
       id: true,
       name: true,
       slug: true,
       logoUrl: true,
       currency: true,
+      isPublished: true,
+      status: true,
     },
   });
 
-  if (!shop) redirect("/personnaliser-ma-boutique");
+  if (shopCount > 0 && !shop) {
+    console.error(
+      "[dashboard] Incohérence boutique/propriétaire : count>0 mais findFirst null",
+      { userId: user.id, email: user.email, shopCount }
+    );
+  }
+
+  if (shop) {
+    if (!user.onboardingCompleted) {
+      console.warn(
+        "[dashboard] Boutique trouvée mais onboardingCompleted=false — réparation du flag",
+        { userId: user.id, shopId: shop.id, shopSlug: shop.slug }
+      );
+      await db.user.update({
+        where: { id: user.id },
+        data: { onboardingCompleted: true },
+      });
+    }
+  } else {
+    if (isAdminRole(user.role)) {
+      redirect("/admin");
+    }
+    if (!user.onboardingCompleted) {
+      const draft = await getActiveDraftShopForUser(user.id);
+      if (draft) redirect("/personnaliser-ma-boutique");
+    }
+    redirect("/personnaliser-ma-boutique");
+  }
 
   const displayName =
     [user.firstName, user.lastName].filter(Boolean).join(" ") ||
