@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
-import { PayoutStatus } from "@prisma/client";
+import { PayoutStatus, Prisma } from "@prisma/client";
 import {
   getMerchantWithdrawalFeeRate,
   computePayoutFees,
@@ -10,6 +10,7 @@ import {
   type CartevoCountryCode,
 } from "@/lib/cartevo/pricing";
 import { cartevoPayout } from "@/lib/cartevo/client";
+import { sendWithdrawalEmail } from "@/lib/email/transactional";
 import type {
   CartevoOperator,
   CartevoCountry,
@@ -97,6 +98,15 @@ export async function POST(req: NextRequest) {
       remaining -= Number(p.amount);
     }
 
+    // G9.A — Gestion du "reste" (monnaie). La sélection FIFO peut sur-couvrir le
+    // montant demandé : selectedTotal ≥ amount. L'excédent (changeAmount) doit
+    // RESTER disponible pour le marchand, sinon il est perdu (bug prod).
+    const selected = available.filter((p) => toRequest.includes(p.id));
+    const selectedTotal = selected.reduce((s, p) => s + Number(p.amount), 0);
+    const changeAmount = selectedTotal - amount; // > 0 si reste à conserver
+    const lastPayoutId = toRequest[toRequest.length - 1];
+    const lastPayout = selected.find((p) => p.id === lastPayoutId);
+
     const country = shop.payoutCountry || shop.country || "CM";
     const operator = (shop.payoutOperator || "mtn").replace(
       /_mobile_money$/,
@@ -114,6 +124,42 @@ export async function POST(req: NextRequest) {
         .cartevoFee
     );
 
+    // G9.A — Applique la "monnaie" DANS la même transaction que le verrouillage :
+    //   1. réduit le dernier payout consommé de changeAmount (→ somme consommée
+    //      == amount exact)
+    //   2. crée un payout "reste" AVAILABLE (orderId: null) de changeAmount.
+    // Conséquence (preuve) :
+    //   - SUCCÈS : payouts consommés (somme = amount) → SUCCESS ;
+    //     AVAILABLE = (totalAvailable − selectedTotal) + changeAmount
+    //               = totalAvailable − amount. ✓
+    //   - ÉCHEC (rollback PROCESSING→AVAILABLE) : consommés (somme = amount) +
+    //     reste (changeAmount) + intacts = totalAvailable. ✓ solde intact.
+    const applyChangeInTx = async (tx: Prisma.TransactionClient) => {
+      if (changeAmount <= 0 || !lastPayout) return;
+      await tx.payout.update({
+        where: { id: lastPayout.id },
+        data: {
+          amount: Number(lastPayout.amount) - changeAmount,
+          netAmount: Math.max(0, Number(lastPayout.netAmount) - changeAmount),
+        },
+      });
+      await tx.payout.create({
+        data: {
+          shopId: shop.id,
+          orderId: null,
+          payoutType: "MERCHANT_REQUESTED",
+          amount: changeAmount,
+          netAmount: changeAmount,
+          operator,
+          country,
+          phoneNumber: payoutPhone,
+          currency: shop.currency ?? "XAF",
+          status: PayoutStatus.AVAILABLE,
+          description: "Reste de retrait (monnaie)",
+        },
+      });
+    };
+
     // ───────────────────────────────────────────────────────────────
     // CAS A — amount > 50 000 → EN ATTENTE (validation agent)
     // ───────────────────────────────────────────────────────────────
@@ -127,6 +173,7 @@ export async function POST(req: NextRequest) {
           if (res.count !== toRequest.length) {
             throw new Error("CONFLICT");
           }
+          await applyChangeInTx(tx);
         });
       } catch (err) {
         if (err instanceof Error && err.message === "CONFLICT") {
@@ -141,6 +188,17 @@ export async function POST(req: NextRequest) {
       console.log(
         `[payout request] PENDING_VALIDATION shop ${shop.id}: ${amount} ${shop.currency} (net ${netAmount}, withdrawalFee ${withdrawalFee})`
       );
+
+      // Email best-effort (n'impacte jamais le retrait).
+      sendWithdrawalEmail({
+        shopId: shop.id,
+        mode: "pending",
+        netAmount,
+        withdrawalFee,
+        currency: shop.currency,
+        phone: payoutPhone,
+      }).catch((e) => console.error("[email withdrawal pending]", e));
+
       revalidatePath("/dashboard/paiements");
 
       return NextResponse.json({
@@ -170,6 +228,7 @@ export async function POST(req: NextRequest) {
         if (res.count !== toRequest.length) {
           throw new Error("CONFLICT");
         }
+        await applyChangeInTx(tx);
       });
     } catch (err) {
       if (err instanceof Error && err.message === "CONFLICT") {
@@ -225,6 +284,17 @@ export async function POST(req: NextRequest) {
       console.log(
         `[payout request] AUTO SUCCESS shop ${shop.id}: brut ${amount}, net ${netAmount}, withdrawalFee ${withdrawalFee}, cartevoCost ${cartevoCost}, ref ${cartevoRef ?? "n/a"}`
       );
+
+      // Email best-effort (n'impacte jamais le retrait).
+      sendWithdrawalEmail({
+        shopId: shop.id,
+        mode: "auto",
+        netAmount,
+        withdrawalFee,
+        currency: shop.currency,
+        phone: payoutPhone,
+      }).catch((e) => console.error("[email withdrawal auto]", e));
+
       revalidatePath("/dashboard/paiements");
 
       return NextResponse.json({

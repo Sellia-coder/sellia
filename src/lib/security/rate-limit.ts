@@ -57,6 +57,26 @@ export function rateLimit(
   };
 }
 
+/**
+ * Lit l'état d'un bucket SANS l'incrémenter (utile pour bloquer une tentative
+ * avant de savoir si elle va échouer — ex login : on ne consomme le quota que
+ * sur les échecs).
+ */
+export function peekRateLimit(
+  key: string,
+  limit: number
+): { allowed: boolean; resetIn: number } {
+  const now = Date.now();
+  const bucket = buckets.get(key);
+  if (!bucket || bucket.resetAt < now) return { allowed: true, resetIn: 0 };
+  return { allowed: bucket.count < limit, resetIn: bucket.resetAt - now };
+}
+
+/** Réinitialise un compteur (ex : connexion réussie → on efface les échecs). */
+export function resetRateLimit(key: string): void {
+  buckets.delete(key);
+}
+
 export const RATE_LIMITS = {
   WEBHOOK_PER_IP: { limit: 100, windowMs: 60_000 },
   WEBHOOK_PER_TX: { limit: 10, windowMs: 60_000 },

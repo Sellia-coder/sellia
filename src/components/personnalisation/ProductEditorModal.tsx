@@ -411,6 +411,23 @@ export default function ProductEditorModal({
               </div>
             </div>
             <p className="perso-form-help">Le prix barré affiche une remise visible (ancien prix rayé).</p>
+
+            <div className="perso-form-row">
+              <label className="perso-form-label">
+                Compte à rebours de promotion{" "}
+                <span className="perso-form-label-optional">(optionnel)</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={draft.promoEndsAt ?? ""}
+                onChange={(e) => update("promoEndsAt", e.target.value || null)}
+                className="perso-input"
+              />
+              <p className="perso-form-help">
+                Affiche un compteur d&apos;urgence sur la fiche produit
+                jusqu&apos;à cette date. Laisse vide pour ne pas en afficher.
+              </p>
+            </div>
           </div>
 
           <div className="perso-form-section">

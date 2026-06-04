@@ -63,6 +63,9 @@ export default async function ProductEditPage({
     emoji: product.emoji || "",
     price: product.price,
     comparePrice: product.comparePrice,
+    promoEndsAt: product.promoEndsAt
+      ? new Date(product.promoEndsAt).toISOString().slice(0, 16)
+      : "",
     category: parseCategory(product.category),
     customCategory: product.customCategory || "",
     tags: product.tags || [],

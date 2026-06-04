@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { PaymentMethodsGrid } from "@/components/icons/momo-operators";
+import CookiePrefsLink from "@/components/CookiePrefsLink";
 import styles from "./ShopFooter.module.css";
 
 interface Props {
@@ -18,15 +19,20 @@ interface Props {
 }
 
 export default async function ShopFooter({ shop }: Props) {
-  const footerPages = await db.shopPage.findMany({
-    where: {
-      shopId: shop.id,
-      isPublished: true,
-      showInFooter: true,
-    },
-    select: { slug: true, title: true },
-    orderBy: { title: "asc" },
-  });
+  const [footerPages, faqCount] = await Promise.all([
+    db.shopPage.findMany({
+      where: {
+        shopId: shop.id,
+        isPublished: true,
+        showInFooter: true,
+      },
+      select: { slug: true, title: true },
+      orderBy: { title: "asc" },
+    }),
+    db.shopFaq.count({
+      where: { shopId: shop.id, isPublished: true },
+    }),
+  ]);
 
   const initial = (shop.name?.[0] ?? "S").toUpperCase();
   const primaryColor = shop.primaryColor ?? "#E84B1F";
@@ -67,7 +73,25 @@ export default async function ShopFooter({ shop }: Props) {
           )}
         </div>
 
-        {footerPages.length > 0 && (
+        <div className={styles.footerLinks}>
+          <h4 className={styles.footerLinksTitle}>Navigation</h4>
+          <ul className={styles.footerLinksList}>
+            <li>
+              <Link href={`/shop/${shop.slug}`}>Accueil</Link>
+            </li>
+            <li>
+              <Link href={`/shop/${shop.slug}#produits`}>Produits</Link>
+            </li>
+            <li>
+              <Link href={`/shop/${shop.slug}/a-propos`}>À propos</Link>
+            </li>
+            <li>
+              <Link href={`/shop/${shop.slug}/contact`}>Contact</Link>
+            </li>
+          </ul>
+        </div>
+
+        {(footerPages.length > 0 || faqCount > 0) && (
           <div className={styles.footerLinks}>
             <h4 className={styles.footerLinksTitle}>Informations</h4>
             <ul className={styles.footerLinksList}>
@@ -78,6 +102,11 @@ export default async function ShopFooter({ shop }: Props) {
                   </Link>
                 </li>
               ))}
+              {faqCount > 0 && (
+                <li>
+                  <Link href={`/shop/${shop.slug}/faq`}>FAQ</Link>
+                </li>
+              )}
             </ul>
           </div>
         )}
@@ -154,6 +183,8 @@ export default async function ShopFooter({ shop }: Props) {
               Sellia
             </a>
           </span>
+          <span className={styles.dot}>·</span>
+          <CookiePrefsLink className={styles.selliaLink} />
         </div>
       </div>
     </footer>

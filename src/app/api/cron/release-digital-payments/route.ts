@@ -36,7 +36,7 @@ async function processRelease(): Promise<NextResponse> {
         paymentStatus: "paid_escrow",
         paidAt: { lte: threshold },
         qrScannedAt: null,
-        payout: null,
+        payouts: { none: {} },
       },
       select: {
         id: true,

@@ -4,9 +4,18 @@ import { db } from "@/lib/db";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "@/lib/auth/password";
 import { createOTP, verifyOTP } from "@/lib/auth/otp";
 import { createSession, destroySession, getSession } from "@/lib/auth/session";
-import { isDeviceTrusted, trustCurrentDevice } from "@/lib/auth/trustedDevice";
-import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from "@/lib/email/send";
+import { isDeviceTrusted, trustCurrentDevice, parseDevice } from "@/lib/auth/trustedDevice";
+import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangedEmail, sendLoginAlertEmail } from "@/lib/email/send";
 import { createPasswordResetToken, verifyPasswordResetToken, consumePasswordResetToken } from "@/lib/auth/passwordReset";
+import {
+  authClientIp,
+  checkLoginAllowed,
+  recordLoginFailure,
+  resetLoginFailures,
+  checkSignupAllowed,
+  checkForgotAllowed,
+  tooManyAttemptsMessage,
+} from "@/lib/auth/rate-limit";
 import { claimDraftShop } from "@/lib/draftShop/claim";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -32,6 +41,13 @@ export async function signUpAction(formData: FormData) {
   const pwdCheck = validatePasswordStrength(password);
   if (!pwdCheck.valid) {
     return { success: false, error: pwdCheck.error };
+  }
+
+  // Anti-spam de comptes : 5 inscriptions / heure / IP (fail-open).
+  const signupIp = authClientIp(await headers());
+  const signupRl = checkSignupAllowed(signupIp);
+  if (!signupRl.allowed) {
+    return { success: false, error: tooManyAttemptsMessage(signupRl.resetInSec) };
   }
 
   // Vérifier si l'email existe déjà
@@ -134,6 +150,11 @@ export async function verifyOTPAction(formData: FormData) {
     }
   } else {
     // LOGIN flow
+    // Alerte de sécurité : on détecte si l'appareil était déjà reconnu AVANT de
+    // le marquer comme trusted. On n'alerte que pour un appareil NON reconnu
+    // (évite de spammer les users 2FA qui reçoivent un OTP à chaque connexion).
+    const wasTrusted = await isDeviceTrusted(user.id, userAgent, ipAddress);
+
     await createSession(user.id, { userAgent, ipAddress });
     await db.user.update({
       where: { id: user.id },
@@ -142,6 +163,14 @@ export async function verifyOTPAction(formData: FormData) {
 
     if (!user.twoFactorEnabled) {
       await trustCurrentDevice(user.id, { userAgent, ipAddress });
+    }
+
+    if (!wasTrusted) {
+      sendLoginAlertEmail(email, {
+        firstName: user.firstName || undefined,
+        device: userAgent ? parseDevice(userAgent) : undefined,
+        location: undefined,
+      }).catch(() => {});
     }
   }
 
@@ -176,17 +205,15 @@ export async function resendOTPAction(formData: FormData) {
     return { success: false, error: "Email manquant." };
   }
 
+  // Anti-énumération : réponse générique. On n'envoie le code que si le compte
+  // existe, mais on ne révèle jamais qu'un compte est introuvable.
   const user = await db.user.findUnique({ where: { email } });
-  if (!user) {
-    return { success: false, error: "Compte introuvable." };
-  }
-
-  const tokenType = flow === "LOGIN" ? "LOGIN" : "EMAIL_VERIFICATION";
-  const code = await createOTP(email, tokenType);
-  const sendResult = await sendOTPEmail(email, code, { firstName: user.firstName || undefined });
-
-  if (!sendResult.success) {
-    return { success: false, error: "Impossible d'envoyer l'email." };
+  if (user) {
+    const tokenType = flow === "LOGIN" ? "LOGIN" : "EMAIL_VERIFICATION";
+    const code = await createOTP(email, tokenType);
+    await sendOTPEmail(email, code, {
+      firstName: user.firstName || undefined,
+    }).catch(() => {});
   }
 
   return { success: true };
@@ -203,8 +230,18 @@ export async function signInAction(formData: FormData) {
     return { success: false, error: "Email et mot de passe requis." };
   }
 
+  // Anti brute force : on consulte le compteur AVANT (sans le consommer) pour ne
+  // pénaliser que les ÉCHECS. Une connexion réussie réinitialise le compteur.
+  const headersList = await headers();
+  const ip = authClientIp(headersList);
+  const loginGate = checkLoginAllowed(ip, email);
+  if (!loginGate.allowed) {
+    return { success: false, error: tooManyAttemptsMessage(loginGate.resetInSec) };
+  }
+
   const user = await db.user.findUnique({ where: { email } });
   if (!user) {
+    recordLoginFailure(ip, email);
     return { success: false, error: "Email ou mot de passe incorrect." };
   }
 
@@ -218,8 +255,12 @@ export async function signInAction(formData: FormData) {
 
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) {
+    recordLoginFailure(ip, email);
     return { success: false, error: "Email ou mot de passe incorrect." };
   }
+
+  // Identifiants corrects → on efface les échecs (cooldown levé).
+  resetLoginFailures(ip, email);
 
   // Si email pas encore vérifié, on renvoie le code OTP
   if (!user.emailVerified) {
@@ -228,12 +269,9 @@ export async function signInAction(formData: FormData) {
     return { success: false, requiresVerification: true as const, email };
   }
 
-  // Récupérer metadata appareil
-  const headersList = await headers();
+  // Récupérer metadata appareil (headersList déjà résolu plus haut)
   const userAgent = headersList.get("user-agent") || undefined;
-  const ipAddress = headersList.get("x-forwarded-for")?.split(",")[0].trim()
-    || headersList.get("x-real-ip")
-    || undefined;
+  const ipAddress = ip !== "unknown" ? ip : undefined;
 
   // Vérifier si l'appareil est trusted ET si le user n'a pas activé "OTP à chaque connexion"
   const deviceTrusted = await isDeviceTrusted(user.id, userAgent, ipAddress || undefined);
@@ -310,10 +348,16 @@ export async function forgotPasswordAction(formData: FormData) {
     return { success: false, error: "Email invalide." };
   }
 
-  const user = await db.user.findUnique({ where: { email } });
+  // Anti-spam d'emails : 3 demandes / heure / email. On retourne quand même la
+  // réponse générique (anti énumération) même si la limite est atteinte.
+  const forgotRl = checkForgotAllowed(email);
+
+  const user = forgotRl.allowed
+    ? await db.user.findUnique({ where: { email } })
+    : null;
 
   // Sécurité : on retourne success même si l'email n'existe pas (anti énumération)
-  // Mais on n'envoie un email QUE si le compte existe
+  // Mais on n'envoie un email QUE si le compte existe ET sous la limite
   if (user) {
     const code = await createOTP(email, "PASSWORD_RESET");
     await sendPasswordResetEmail(email, code, {

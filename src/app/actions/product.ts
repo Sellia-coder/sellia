@@ -62,6 +62,10 @@ function mapInputToPrismaData(input: ProductEditInput, shopId: string) {
     emoji: input.emoji?.trim() ? input.emoji : null,
     price: input.price,
     comparePrice: input.comparePrice ?? null,
+    promoEndsAt:
+      input.promoEndsAt && input.promoEndsAt.trim()
+        ? new Date(input.promoEndsAt)
+        : null,
     currency: "XAF" as const,
     category: input.category ?? null,
     customCategory: input.customCategory?.trim() ? input.customCategory : null,

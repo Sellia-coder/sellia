@@ -100,7 +100,14 @@ export default async function ProductPage({ params }: Props) {
             paymentCashOnDelivery: shop.paymentCashOnDelivery,
             paymentOnlineEscrow: shop.paymentOnlineEscrow,
           }}
-          product={product}
+          product={{
+            ...product,
+            // Sérialise la Date en ISO string pour un passage fiable
+            // serveur → client (PromoCountdown la reparse via new Date()).
+            promoEndsAt: product.promoEndsAt
+              ? new Date(product.promoEndsAt).toISOString()
+              : null,
+          }}
           related={related}
           reviews={reviews}
         />

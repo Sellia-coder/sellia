@@ -1,10 +1,12 @@
 import { db } from "@/lib/db";
+import crypto from "crypto";
 
 const OTP_EXPIRY_MINUTES = 10;
 const MAX_ATTEMPTS = 5;
 
 export function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // Cryptographiquement sûr (jamais Math.random pour un secret).
+  return crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
 export async function createOTP(email: string, type: string = "EMAIL_VERIFICATION"): Promise<string> {

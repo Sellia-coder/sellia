@@ -20,10 +20,28 @@ const RESERVED_SUBDOMAINS = new Set([
 const PROTECTED_ROUTES = ["/dashboard"];
 const AUTH_ROUTES = ["/connexion", "/inscription", "/verifier-email"];
 
+/**
+ * En-têtes de sécurité (défense en profondeur). Volontairement SANS CSP stricte
+ * (risque de casser pixels/Cloudflare/Next). X-Frame-Options est retiré ensuite
+ * pour les sous-domaines boutique (embarquables en iframe par design).
+ */
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()"
+  );
+  return response;
+}
+
 function applyShopEmbedHeaders(
   response: NextResponse,
   hostname: string
 ): NextResponse {
+  applySecurityHeaders(response);
+
   const hostWithoutPort = hostname.split(":")[0] ?? "";
   const isShopSubdomain =
     (hostWithoutPort.endsWith(`.${ROOT_DOMAIN}`) &&

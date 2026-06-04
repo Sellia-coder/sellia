@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { exchangeGoogleCode, verifyGoogleState } from "@/lib/auth/google";
 import { createSession } from "@/lib/auth/session";
-import { trustCurrentDevice } from "@/lib/auth/trustedDevice";
-import { sendWelcomeEmail } from "@/lib/email/send";
+import { isDeviceTrusted, trustCurrentDevice, parseDevice } from "@/lib/auth/trustedDevice";
+import { sendWelcomeEmail, sendLoginAlertEmail } from "@/lib/email/send";
 import { claimDraftShop } from "@/lib/draftShop/claim";
 
 export async function GET(req: NextRequest) {
@@ -105,6 +105,9 @@ export async function GET(req: NextRequest) {
     || req.headers.get("x-real-ip")
     || undefined;
 
+  // Détecte si l'appareil était déjà reconnu AVANT de le trust (pour l'alerte).
+  const wasTrusted = await isDeviceTrusted(user.id, userAgent, ipAddress);
+
   // Créer la session
   await createSession(user.id, { userAgent, ipAddress });
 
@@ -116,6 +119,15 @@ export async function GET(req: NextRequest) {
   // Email de bienvenue si nouveau user (non bloquant)
   if (isNewUser && user.firstName) {
     sendWelcomeEmail(email, user.firstName).catch(() => {});
+  }
+
+  // Alerte de connexion : appareil non reconnu pour un compte existant.
+  if (!isNewUser && !wasTrusted) {
+    sendLoginAlertEmail(email, {
+      firstName: user.firstName || undefined,
+      device: userAgent ? parseDevice(userAgent) : undefined,
+      location: undefined,
+    }).catch(() => {});
   }
 
   // Claim DraftShop si cookie présent

@@ -161,6 +161,8 @@ export const productEditSchema = z
       .min(100, "Minimum 100 FCFA")
       .max(50_000_000, "Maximum 50 000 000 FCFA"),
     comparePrice: z.number().int().min(0).max(50_000_000).nullable().optional(),
+    // Compteur d'urgence (promo) : valeur datetime-local "YYYY-MM-DDTHH:mm" ou ISO.
+    promoEndsAt: z.string().max(40).nullable().optional().or(z.literal("")),
 
     category: z.enum(PRODUCT_CATEGORY_CODES).optional(),
     customCategory: z.string().max(60).optional().or(z.literal("")),

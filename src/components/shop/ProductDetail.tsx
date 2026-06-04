@@ -21,6 +21,7 @@ import { useCartContext } from "./CartProvider";
 import { buildProductGalleryImages } from "@/lib/shop-data";
 import { getProductRating, getRatingAriaLabel } from "@/lib/utils/product-rating";
 import ProductReviews from "./ProductReviews";
+import PromoCountdown from "./PromoCountdown";
 import styles from "./ProductDetail.module.css";
 
 interface VariantAxis {
@@ -80,6 +81,7 @@ interface Props {
     name: string;
     price: number;
     comparePrice: number | null;
+    promoEndsAt?: string | Date | null;
     currency?: string | null;
     imageUrl: string | null;
     galleryUrls?: unknown;
@@ -401,6 +403,13 @@ export default function ProductDetail({
                     </span>
                   )}
               </div>
+
+              {product.promoEndsAt && (
+                <PromoCountdown
+                  endsAt={product.promoEndsAt}
+                  primaryColor={primaryColor}
+                />
+              )}
 
               {hasVariants && variantAxes.map((axis) => (
                 <div key={axis.name} className={styles.variantBlock}>

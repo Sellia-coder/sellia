@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { PayoutType } from "@prisma/client";
 import { db } from "@/lib/db";
 import { releasePayout } from "@/lib/payouts";
+import { sendDeliveryReleasedMerchantEmail } from "@/lib/email/transactional";
 import { verifyOrderDeliverySignature } from "@/lib/qr/qr-signature";
 
 export async function confirmDeliveryAction(input: {
@@ -90,6 +91,10 @@ export async function confirmDeliveryAction(input: {
     // releasePayout ne touche que les payouts en PENDING_ESCROW).
     if (physicalPayout) {
       await releasePayout(physicalPayout.id);
+      // Email best-effort au marchand : fonds libérés (ne bloque jamais).
+      sendDeliveryReleasedMerchantEmail(order.id).catch((e) =>
+        console.error("[email delivery-released]", e)
+      );
     }
 
     revalidatePath(`/shop/${input.shopSlug}/livraison/${input.orderNumber}`);

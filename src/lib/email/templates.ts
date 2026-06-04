@@ -80,7 +80,7 @@ export function otpEmailTemplate(code: string, options?: { firstName?: string })
                 Sellia — Décrivez ce que vous vendez. Encaissez aujourd'hui.
               </p>
               <p style="margin:0;font-size:11px;color:#B5B7BC;">
-                © 2026 Sellia · Une marque de Rollo Technologies Inc.
+                © 2026 Sellia · Une marque de Fiable Technologies LLC
               </p>
             </td>
           </tr>
@@ -137,7 +137,7 @@ export function welcomeEmailTemplate(firstName: string): string {
           </tr>
           <tr>
             <td style="padding:24px 40px 32px;text-align:center;border-top:1px solid #E5E2DA;">
-              <p style="margin:0;font-size:11px;color:#B5B7BC;">© 2026 Sellia · Une marque de Rollo Technologies Inc.</p>
+              <p style="margin:0;font-size:11px;color:#B5B7BC;">© 2026 Sellia · Une marque de Fiable Technologies LLC</p>
             </td>
           </tr>
         </table>
@@ -231,11 +231,91 @@ export function passwordResetEmailTemplate(code: string, options?: { firstName?:
                 Sellia — Décrivez ce que vous vendez. Encaissez aujourd'hui.
               </p>
               <p style="margin:0;font-size:11px;color:#B5B7BC;">
-                © 2026 Sellia · Une marque de Rollo Technologies Inc.
+                © 2026 Sellia · Une marque de Fiable Technologies LLC
               </p>
             </td>
           </tr>
 
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
+export function loginAlertEmailTemplate(options?: {
+  firstName?: string;
+  device?: string;
+  location?: string;
+}): string {
+  const firstName = options?.firstName || "";
+  const greeting = firstName ? `Bonjour ${firstName},` : "Bonjour,";
+  const device = options?.device || "Appareil inconnu";
+  const location = options?.location || "—";
+  const date = new Date().toLocaleString("fr-FR", {
+    dateStyle: "long",
+    timeStyle: "short",
+  });
+
+  return `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Nouvelle connexion — Sellia</title>
+</head>
+<body style="margin:0;padding:0;background:#FAFAF7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0E1116;">
+  <table width="100%" cellspacing="0" cellpadding="0" border="0" style="padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="560" cellspacing="0" cellpadding="0" border="0" style="background:#FFFFFF;border-radius:16px;box-shadow:0 4px 24px rgba(14,17,22,0.06);">
+          <tr>
+            <td style="padding:40px 40px 24px;text-align:center;">
+              <div style="display:inline-block;background:#0E1116;color:#FAFAF7;padding:10px 18px;border-radius:8px;font-weight:700;letter-spacing:0.6px;font-size:18px;">
+                <span style="color:#E84B1F;">S</span>ellia
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 40px 8px;">
+              <h1 style="margin:0;font-family:Georgia,serif;font-size:26px;font-weight:400;letter-spacing:-0.6px;color:#0E1116;">
+                🔐 Nouvelle connexion à votre compte
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px 40px 24px;">
+              <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#404552;">
+                ${greeting} une connexion à votre compte Sellia vient d'avoir lieu depuis un appareil que nous n'avons pas reconnu.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 40px 24px;">
+              <div style="background:#FAFAF7;border:1px solid #E5E2DA;border-radius:12px;padding:18px;">
+                <div style="font-family:'SF Mono',Monaco,monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#8B8E94;font-weight:600;margin-bottom:8px;">Détails</div>
+                <div style="font-size:13px;color:#404552;line-height:1.7;">
+                  <strong>Date :</strong> ${date}<br>
+                  <strong>Appareil :</strong> ${device}<br>
+                  <strong>Lieu :</strong> ${location}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 40px 32px;">
+              <p style="margin:0;font-size:13px;line-height:1.5;color:#8B8E94;">
+                Si c'était bien vous, aucune action n'est nécessaire. <strong style="color:#404552;">Si ce n'était pas vous, changez votre mot de passe immédiatement</strong> et contactez-nous : <a href="mailto:support@getsellia.com" style="color:#E84B1F;text-decoration:none;">support@getsellia.com</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 40px 32px;text-align:center;border-top:1px solid #E5E2DA;">
+              <p style="margin:0;font-size:11px;color:#B5B7BC;">© 2026 Sellia · Une marque de Fiable Technologies LLC</p>
+            </td>
+          </tr>
         </table>
       </td>
     </tr>
@@ -306,7 +386,7 @@ export function passwordChangedEmailTemplate(options?: { firstName?: string; dev
           </tr>
           <tr>
             <td style="padding:24px 40px 32px;text-align:center;border-top:1px solid #E5E2DA;">
-              <p style="margin:0;font-size:11px;color:#B5B7BC;">© 2026 Sellia · Une marque de Rollo Technologies Inc.</p>
+              <p style="margin:0;font-size:11px;color:#B5B7BC;">© 2026 Sellia · Une marque de Fiable Technologies LLC</p>
             </td>
           </tr>
         </table>

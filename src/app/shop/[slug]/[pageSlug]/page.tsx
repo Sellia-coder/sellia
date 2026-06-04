@@ -18,6 +18,7 @@ const RESERVED_SLUGS = new Set([
   "commande",
   "livraison",
   "panier",
+  "faq",
 ]);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import {
   getPublishedShopBySlug,
   getShopCategoryTemplate,
@@ -9,6 +10,7 @@ import SeliaMenuPro from "@/components/shop/SeliaMenuPro";
 import ShopFooter from "@/components/shop/ShopFooter";
 import ShopPixelScripts from "@/components/shop/ShopPixelScripts";
 import ToastProvider from "@/components/shop/ToastProvider";
+import { COOKIE_CONSENT_NAME, parseConsent } from "@/lib/cookie-consent";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
@@ -66,6 +68,13 @@ export default async function ShopLayout({ children, params }: Props) {
   const shop = await getPublishedShopBySlug(slug);
   if (!shop) notFound();
 
+  // Gating RGPD : les pixels marketing ne sont rendus (donc chargés) que si le
+  // visiteur a explicitement consenti (cookie). Sinon → aucune requête tracker.
+  const consent = parseConsent(
+    (await cookies()).get(COOKIE_CONSENT_NAME)?.value
+  );
+  const allowMarketing = consent?.marketing === true;
+
   const template = getShopCategoryTemplate(shop.category);
   const cssVars: React.CSSProperties = {
     ["--shop-primary" as string]: shop.primaryColor ?? "#E84B1F",
@@ -86,12 +95,14 @@ export default async function ShopLayout({ children, params }: Props) {
 
   return (
     <>
-      <ShopPixelScripts
-        ga4Id={shop.ga4MeasurementId}
-        fbPixelId={shop.fbPixelId}
-        tiktokPixelId={shop.tiktokPixelId}
-        snapchatPixelId={shop.snapPixelId}
-      />
+      {allowMarketing && (
+        <ShopPixelScripts
+          ga4Id={shop.ga4MeasurementId}
+          fbPixelId={shop.fbPixelId}
+          tiktokPixelId={shop.tiktokPixelId}
+          snapchatPixelId={shop.snapPixelId}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

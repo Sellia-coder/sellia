@@ -28,6 +28,7 @@ const EMPTY_PRODUCT: ProductEditInput = {
   emoji: "",
   price: 100,
   comparePrice: null,
+  promoEndsAt: "",
   category: undefined,
   customCategory: "",
   tags: [],

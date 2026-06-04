@@ -13,7 +13,7 @@ function generateFingerprint(userAgent: string, ipAddress: string): string {
   return crypto.createHash("sha256").update(`${userAgent}::${ipAddress}`).digest("hex");
 }
 
-function parseDevice(userAgent: string): string {
+export function parseDevice(userAgent: string): string {
   if (!userAgent) return "Appareil inconnu";
   const lowerUA = userAgent.toLowerCase();
   let device = "Ordinateur";
