@@ -13,7 +13,10 @@ import {
   CheckCircle,
   Sparkle,
   Warning,
+  UploadSimple,
+  CircleNotch,
 } from "@phosphor-icons/react";
+import { resolveHeroImageUrl } from "@/lib/ai/hero-image-url";
 import {
   updateAppearanceAction,
   applyThemePresetAction,
@@ -39,6 +42,7 @@ interface ShopState {
   productGridCols: number;
   footerStyle: string;
   heroStyle: string;
+  heroImageUrl: string | null;
 }
 
 interface Props {
@@ -76,7 +80,7 @@ const HERO_STYLES = [
   { id: "video", name: "Vidéo", description: "Vidéo en arrière-plan" },
 ];
 
-type Tab = "theme" | "colors" | "typography" | "logo" | "layout";
+type Tab = "theme" | "colors" | "typography" | "logo" | "banner" | "layout";
 
 export default function AppearanceStudioClient({ shop: initialShop }: Props) {
   const router = useRouter();
@@ -124,6 +128,7 @@ export default function AppearanceStudioClient({ shop: initialShop }: Props) {
         productGridCols: shop.productGridCols,
         footerStyle: shop.footerStyle,
         heroStyle: shop.heroStyle,
+        heroImageUrl: shop.heroImageUrl,
         tagline: shop.tagline,
         logoUrl: shop.logoUrl,
         faviconUrl: shop.faviconUrl,
@@ -211,6 +216,7 @@ export default function AppearanceStudioClient({ shop: initialShop }: Props) {
                 { id: "colors", label: "Couleurs", icon: Palette },
                 { id: "typography", label: "Typographie", icon: TextAa },
                 { id: "logo", label: "Logo & marque", icon: ImageSquare },
+                { id: "banner", label: "Bannière", icon: ImageSquare },
                 { id: "layout", label: "Disposition", icon: Layout },
               ] as const
             ).map((t) => {
@@ -412,6 +418,19 @@ export default function AppearanceStudioClient({ shop: initialShop }: Props) {
               </div>
             )}
 
+            {activeTab === "banner" && (
+              <HeroCoverSection
+                shopSlug={shop.slug}
+                heroImageUrl={shop.heroImageUrl}
+                onHeroChange={(url) => updateField("heroImageUrl", url)}
+                onSaved={() => {
+                  setSavedAt(Date.now());
+                  setTimeout(() => setSavedAt(null), 2500);
+                  router.refresh();
+                }}
+              />
+            )}
+
             {activeTab === "layout" && (
               <div>
                 <h2 className={styles.sectionTitle}>Disposition</h2>
@@ -556,6 +575,155 @@ function ColorPickerField({
           maxLength={7}
         />
       </div>
+    </div>
+  );
+}
+
+const HERO_MAX_BYTES = 5 * 1024 * 1024;
+const HERO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function HeroCoverSection({
+  shopSlug,
+  heroImageUrl,
+  onHeroChange,
+  onSaved,
+}: {
+  shopSlug: string;
+  heroImageUrl: string | null;
+  onHeroChange: (url: string | null) => void;
+  onSaved: () => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const previewSrc = heroImageUrl
+    ? resolveHeroImageUrl(heroImageUrl) ?? heroImageUrl
+    : null;
+
+  const persistHero = async (url: string | null) => {
+    const res = await updateAppearanceAction({ heroImageUrl: url });
+    if (!res.ok) {
+      setError(res.error || "Impossible d'enregistrer l'image");
+      return false;
+    }
+    onHeroChange(url);
+    onSaved();
+    return true;
+  };
+
+  const handleUpload = async (file: File) => {
+    setError(null);
+    if (!HERO_ALLOWED_TYPES.includes(file.type)) {
+      setError("Format accepté : JPG, PNG ou WebP.");
+      return;
+    }
+    if (file.size > HERO_MAX_BYTES) {
+      setError("Image trop volumineuse (maximum 5 Mo).");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload/hero", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.imageUrl) {
+        setError(data.error || "Échec du téléversement");
+        return;
+      }
+      await persistHero(data.imageUrl);
+    } catch {
+      setError("Problème réseau. Réessayez.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRegenerate = async () => {
+    setError(null);
+    setGenerating(true);
+    try {
+      const res = await fetch(`/api/shop/${shopSlug}/regenerate-hero`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.imageUrl) {
+        setError(data.error || "Erreur de génération");
+        return;
+      }
+      onHeroChange(data.imageUrl);
+      onSaved();
+    } catch {
+      setError("Problème réseau. Réessayez.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  return (
+    <div>
+      <h2 className={styles.sectionTitle}>Image de couverture</h2>
+      <p className={styles.sectionSubtitle}>
+        La bannière affichée en haut de votre boutique. Téléversez votre visuel ou
+        régénérez-en une avec l&apos;IA (max 3 / 24h).
+      </p>
+
+      <div className={styles.heroCoverPreview}>
+        {previewSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={previewSrc} alt="Image de couverture" />
+        ) : (
+          <div className={styles.heroCoverPlaceholder}>
+            <ImageSquare size={32} weight="duotone" color="var(--sellia-subtle)" />
+            <span>Aucune image de couverture</span>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.heroCoverActions}>
+        <label className={styles.heroCoverBtn}>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            disabled={uploading || generating}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleUpload(f);
+              e.target.value = "";
+            }}
+            style={{ display: "none" }}
+          />
+          {uploading ? (
+            <CircleNotch size={22} className={styles.spin} />
+          ) : (
+            <UploadSimple size={22} weight="duotone" />
+          )}
+          <span>{uploading ? "Envoi..." : "Charger une image"}</span>
+          <span className={styles.heroCoverBtnDesc}>JPG, PNG, WebP · max 5 Mo</span>
+        </label>
+
+        <button
+          type="button"
+          className={styles.heroCoverBtn}
+          onClick={handleRegenerate}
+          disabled={uploading || generating}
+        >
+          {generating ? (
+            <CircleNotch size={22} className={styles.spin} />
+          ) : (
+            <Sparkle size={22} weight="duotone" />
+          )}
+          <span>{generating ? "Génération..." : "Régénérer avec l'IA"}</span>
+          <span className={styles.heroCoverBtnDesc}>10–15 secondes</span>
+        </button>
+      </div>
+
+      {error && <p className={styles.heroCoverError}>{error}</p>}
     </div>
   );
 }

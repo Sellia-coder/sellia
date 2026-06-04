@@ -28,6 +28,7 @@ export default async function AppearancePage() {
       productGridCols: true,
       footerStyle: true,
       heroStyle: true,
+      heroImageUrl: true,
     },
   });
 
@@ -54,6 +55,7 @@ export default async function AppearancePage() {
         productGridCols: shop.productGridCols ?? 3,
         footerStyle: shop.footerStyle || "classic",
         heroStyle: shop.heroStyle || "image-text",
+        heroImageUrl: shop.heroImageUrl,
       }}
     />
   );

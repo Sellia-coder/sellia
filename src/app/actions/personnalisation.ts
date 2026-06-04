@@ -11,6 +11,7 @@ import {
   type PublishShopInput,
 } from "@/lib/validations/personnalisation";
 import { generateHeroImage } from "@/lib/ai/generate-hero-image";
+import { generateLegalPagesForShop } from "@/lib/shop/legal-pages";
 
 type DraftGeneratedProduct = {
   id?: string;
@@ -327,6 +328,26 @@ export async function publishShopAction(input: PublishShopInput) {
           `[publishShop] Hero AI failed (${aiResult.error}), fallback template`
         );
       }
+    }
+
+    // Pages légales auto (idempotent — ne réécrase pas les pages déjà créées/éditées)
+    try {
+      await generateLegalPagesForShop({
+        id: shop.id,
+        slug: shop.slug,
+        name: shop.name,
+        contactEmail: shop.contactEmail,
+        email: null,
+        phone: null,
+        whatsappNumber: shop.whatsappNumber,
+        address: shop.address,
+        city: shop.city,
+        country: shop.country,
+        currency: shop.currency,
+      });
+      revalidatePath(`/shop/${shop.slug}`, "page");
+    } catch (legalErr) {
+      console.warn("[publishShop] Legal pages auto-generation failed:", legalErr);
     }
 
     revalidatePath("/dashboard");

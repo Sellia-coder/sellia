@@ -20,6 +20,7 @@ export interface AppearanceUpdate {
   logoUrl?: string | null;
   faviconUrl?: string | null;
   mobileLogoUrl?: string | null;
+  heroImageUrl?: string | null;
 }
 
 function mapAppearanceToDb(input: AppearanceUpdate) {
@@ -39,6 +40,7 @@ function mapAppearanceToDb(input: AppearanceUpdate) {
   if (input.logoUrl !== undefined) data.logoUrl = input.logoUrl;
   if (input.faviconUrl !== undefined) data.faviconUrl = input.faviconUrl;
   if (input.mobileLogoUrl !== undefined) data.mobileLogoUrl = input.mobileLogoUrl;
+  if (input.heroImageUrl !== undefined) data.heroImageUrl = input.heroImageUrl;
   return data;
 }
 
