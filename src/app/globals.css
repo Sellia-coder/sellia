@@ -11063,6 +11063,28 @@ footer {
 .dash-nav-badge { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600; padding: 1px 6px; border-radius: var(--dash-radius-full); background: var(--dash-ember); color: white; }
 .dash-nav-badge.muted { background: var(--dash-bg-subtle); color: var(--dash-text-secondary); }
 
+/* Entrée admin (sidebar) — visible uniquement si role === admin */
+.dash-nav-item-admin {
+  margin-bottom: 8px;
+  color: var(--dash-text-secondary);
+}
+.dash-nav-item-admin.active {
+  color: var(--dash-ember);
+}
+.dash-admin-badge {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--dash-radius-full);
+  background: rgba(232, 75, 31, 0.12);
+  color: var(--dash-ember);
+  border: 1px solid rgba(232, 75, 31, 0.25);
+}
+
 .dash-sidebar-bottom { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--dash-border); }
 .dash-user-card { display: flex; align-items: center; gap: 9px; padding: 6px 8px; border-radius: var(--dash-radius-md); cursor: pointer; transition: background 0.15s; }
 .dash-user-card:hover { background: var(--dash-bg-hover); }

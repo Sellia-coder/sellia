@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isAdminRole } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { getSidebarCounts, type SidebarCounts } from "@/lib/sidebar-counts";
 import DashboardLayoutClient from "./DashboardLayoutClient";
@@ -59,6 +60,7 @@ export default async function DashboardLayout({
         plan: shop?.plan ?? "free",
       }}
       sidebarCounts={sidebarCounts}
+      isAdmin={isAdminRole(user.role)}
     >
       {children}
     </DashboardLayoutClient>

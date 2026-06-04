@@ -1,13 +1,15 @@
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/auth/admin";
+import { getCurrentUser } from "@/lib/auth/session";
+import { isAdminRole } from "@/lib/auth/admin";
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const admin = await requireAdmin();
-  if (!admin) redirect("/connexion");
+  const user = await getCurrentUser();
+  if (!user) redirect("/connexion");
+  if (!isAdminRole(user.role)) redirect("/dashboard");
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAF7" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 20px" }}>
