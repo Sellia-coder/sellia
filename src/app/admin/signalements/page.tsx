@@ -23,17 +23,8 @@ export default async function AdminSignalementsPage() {
 
   return (
     <div>
-      <h1
-        style={{
-          fontFamily: "'Fraunces', serif",
-          fontSize: "28px",
-          color: "#0E1116",
-          marginBottom: "8px",
-        }}
-      >
-        Signalements
-      </h1>
-      <p style={{ fontSize: "14px", color: "#6B7280", marginBottom: "24px" }}>
+      <h1 className="admin-page-title">Signalements</h1>
+      <p className="admin-page-sub" style={{ marginBottom: "24px" }}>
         {reports.length} signalement(s)
       </p>
 
