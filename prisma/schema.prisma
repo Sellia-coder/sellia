@@ -29,6 +29,8 @@ model User {
   timezone         String?
   notificationPrefs Json?    @map("notification_prefs")
   role             String?   @default("user")
+  isBlocked        Boolean   @default(false)
+  blockedAt        DateTime?
 
   twoFactorEnabled Boolean   @default(false)
   onboardingCompleted Boolean @default(false)

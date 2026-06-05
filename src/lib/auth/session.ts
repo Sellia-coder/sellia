@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { isUserBlocked } from "@/lib/auth/blocked";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 
@@ -55,6 +56,12 @@ export async function getSession() {
   if (!session) return null;
   if (session.expiresAt < new Date()) {
     await db.session.delete({ where: { id: session.id } });
+    return null;
+  }
+
+  if (isUserBlocked(session.user)) {
+    await db.session.delete({ where: { id: session.id } }).catch(() => {});
+    cookieStore.delete(SESSION_COOKIE_NAME);
     return null;
   }
 

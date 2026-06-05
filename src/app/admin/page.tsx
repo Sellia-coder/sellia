@@ -5,11 +5,54 @@ import {
   formatAdminMoney,
   planLabel,
 } from "@/lib/admin/constants";
+import { payoutStatusBadge } from "@/lib/admin/status-badges";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
   const m = await getAdminOverviewMetrics();
+
+  const kpiItems = [
+    {
+      label: "Boutiques",
+      value: String(m.shopsTotal),
+      hint: `${m.shopsPublished} publiées`,
+      icon: "shops" as const,
+    },
+    {
+      label: "Utilisateurs",
+      value: String(m.usersTotal),
+      icon: "users" as const,
+    },
+    {
+      label: "GMV total",
+      value: formatAdminMoney(m.gmvTotal),
+      hint: "Commandes payées",
+      icon: "gmv" as const,
+      ember: true,
+    },
+    {
+      label: "Revenus Sellia",
+      value: m.selliaRevenue != null ? formatAdminMoney(m.selliaRevenue) : "—",
+      hint: "Commissions Sellia",
+      icon: "revenue" as const,
+      ember: true,
+    },
+    {
+      label: "Retraits en attente",
+      value: String(m.pendingWithdrawals),
+      hint: "En attente de validation",
+      icon: "withdrawals" as const,
+    },
+    {
+      label: "Transactions du mois",
+      value: String(m.ordersThisMonth),
+      hint: "Commandes payées",
+      icon: "orders" as const,
+    },
+  ];
 
   return (
     <div>
@@ -18,153 +61,131 @@ export default async function AdminOverviewPage() {
         Indicateurs plateforme Sellia — lecture seule, agrégations en temps réel.
       </p>
 
-      <div className="admin-kpi-grid">
-        <div className="admin-kpi">
-          <div className="admin-kpi-label">Boutiques</div>
-          <div className="admin-kpi-value">{m.shopsTotal}</div>
-          <div className="admin-kpi-hint">{m.shopsPublished} publiées</div>
-        </div>
-        <div className="admin-kpi">
-          <div className="admin-kpi-label">Utilisateurs</div>
-          <div className="admin-kpi-value">{m.usersTotal}</div>
-        </div>
-        <div className="admin-kpi">
-          <div className="admin-kpi-label">GMV total</div>
-          <div className="admin-kpi-value">{formatAdminMoney(m.gmvTotal)}</div>
-          <div className="admin-kpi-hint">Commandes payées (escrow + released + offline)</div>
-        </div>
-        <div className="admin-kpi">
-          <div className="admin-kpi-label">Revenus Sellia (estimé)</div>
-          <div className="admin-kpi-value">
-            {m.selliaRevenue != null ? formatAdminMoney(m.selliaRevenue) : "—"}
-          </div>
-          <div className="admin-kpi-hint">Σ commissions Payout (ORDER_*)</div>
-        </div>
-        <div className="admin-kpi">
-          <div className="admin-kpi-label">Retraits en attente</div>
-          <div className="admin-kpi-value">{m.pendingWithdrawals}</div>
-          <div className="admin-kpi-hint">Statut REQUESTED (&gt;50k)</div>
-        </div>
-        <div className="admin-kpi">
-          <div className="admin-kpi-label">Transactions du mois</div>
-          <div className="admin-kpi-value">{m.ordersThisMonth}</div>
-          <div className="admin-kpi-hint">Commandes payées ce mois</div>
-        </div>
-      </div>
+      <AdminKpiGrid items={kpiItems} />
 
       <p className="admin-method-note">
-        <strong>Méthode GMV :</strong> somme des <code>Order.total</code> avec{" "}
-        <code>paymentStatus</code> ∈ paid_escrow, paid_offline, paid_released.{" "}
-        <strong>Revenus Sellia :</strong> somme des <code>Payout.commissionAmount</code>{" "}
-        sur payouts commande (hors FAILED/CANCELLED/REFUNDED). Affiche « — » si aucune
-        commission enregistrée.
+        <strong>GMV total :</strong> le montant total de toutes les commandes payées sur
+        la plateforme. <strong>Revenus Sellia :</strong> le total des commissions
+        encaissées par Sellia sur ces ventes. Si aucune commission n&apos;est encore
+        enregistrée, on affiche « — ».
       </p>
 
       <section className="admin-section">
         <h2 className="admin-section-title">Dernières boutiques créées</h2>
         <div className="admin-card">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Slug</th>
-                <th>Propriétaire</th>
-                <th>Plan</th>
-                <th>Créée le</th>
-              </tr>
-            </thead>
-            <tbody>
-              {m.recentShops.length === 0 ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <td colSpan={4} className="admin-empty">
-                    Aucune boutique
-                  </td>
+                  <th>Slug</th>
+                  <th>Propriétaire</th>
+                  <th>Plan</th>
+                  <th>Créée le</th>
                 </tr>
-              ) : (
-                m.recentShops.map((s) => (
-                  <tr key={s.id}>
-                    <td>
-                      <Link href={`/admin/boutiques?q=${encodeURIComponent(s.slug)}`}>
-                        {s.slug}
-                      </Link>
+              </thead>
+              <tbody>
+                {m.recentShops.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="admin-empty">
+                      Aucune boutique
                     </td>
-                    <td>{s.owner.email}</td>
-                    <td>{planLabel(s.plan)}</td>
-                    <td>{formatAdminDate(s.createdAt)}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  m.recentShops.map((s) => (
+                    <tr key={s.id}>
+                      <td>
+                        <Link href={`/admin/boutiques?q=${encodeURIComponent(s.slug)}`}>
+                          {s.slug}
+                        </Link>
+                      </td>
+                      <td>{s.owner.email}</td>
+                      <td>{planLabel(s.plan)}</td>
+                      <td className="admin-date">{formatAdminDate(s.createdAt)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <section className="admin-section">
         <h2 className="admin-section-title">Dernières commandes payées</h2>
         <div className="admin-card">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>N°</th>
-                <th>Boutique</th>
-                <th>Montant</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {m.recentOrders.length === 0 ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <td colSpan={4} className="admin-empty">
-                    Aucune commande
-                  </td>
+                  <th>N°</th>
+                  <th>Boutique</th>
+                  <th className="admin-th-right">Montant</th>
+                  <th>Date</th>
                 </tr>
-              ) : (
-                m.recentOrders.map((o) => (
-                  <tr key={o.orderNumber}>
-                    <td>{o.orderNumber}</td>
-                    <td>{o.shop.name}</td>
-                    <td>{formatAdminMoney(o.total)}</td>
-                    <td>{formatAdminDate(o.createdAt)}</td>
+              </thead>
+              <tbody>
+                {m.recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="admin-empty">
+                      Aucune commande
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  m.recentOrders.map((o) => (
+                    <tr key={o.orderNumber}>
+                      <td className="admin-mono">{o.orderNumber}</td>
+                      <td>{o.shop.name}</td>
+                      <td className="admin-td-right">{formatAdminMoney(o.total)}</td>
+                      <td className="admin-date">{formatAdminDate(o.createdAt)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <section className="admin-section">
         <h2 className="admin-section-title">Derniers retraits</h2>
         <div className="admin-card">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Boutique</th>
-                <th>Montant</th>
-                <th>Statut</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {m.recentPayouts.length === 0 ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <td colSpan={4} className="admin-empty">
-                    Aucun retrait
-                  </td>
+                  <th>Boutique</th>
+                  <th className="admin-th-right">Montant</th>
+                  <th>Statut</th>
+                  <th>Date</th>
                 </tr>
-              ) : (
-                m.recentPayouts.map((p) => (
-                  <tr key={p.id}>
-                    <td>{p.shop.name}</td>
-                    <td>{formatAdminMoney(Number(p.netAmount))}</td>
-                    <td>
-                      <span className="admin-badge admin-badge--warn">{p.status}</span>
+              </thead>
+              <tbody>
+                {m.recentPayouts.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="admin-empty">
+                      Aucun retrait
                     </td>
-                    <td>{formatAdminDate(p.createdAt)}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  m.recentPayouts.map((p) => {
+                    const badge = payoutStatusBadge(p.status);
+                    return (
+                      <tr key={p.id}>
+                        <td>{p.shop.name}</td>
+                        <td className="admin-td-right">
+                          {formatAdminMoney(Number(p.netAmount))}
+                        </td>
+                        <td>
+                          <AdminStatusBadge label={badge.label} variant={badge.variant} />
+                        </td>
+                        <td className="admin-date">{formatAdminDate(p.createdAt)}</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>

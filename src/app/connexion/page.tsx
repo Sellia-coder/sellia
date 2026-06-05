@@ -15,6 +15,7 @@ function ConnexionContent() {
     : googleError === "google_init_failed" ? "Impossible de démarrer la connexion Google. Réessayez."
     : googleError === "google_invalid_state" ? "Session expirée. Réessayez."
     : googleError === "google_exchange_failed" ? "Erreur de connexion Google. Réessayez."
+    : googleError === "account_suspended" ? "Votre compte a été suspendu. Contactez le support."
     : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

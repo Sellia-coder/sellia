@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdminRole } from "@/lib/auth/admin";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminLayoutClient from "./AdminLayoutClient";
 import "./admin.css";
 
 export default async function AdminLayout({
@@ -13,12 +13,23 @@ export default async function AdminLayout({
   if (!user) redirect("/connexion");
   if (!isAdminRole(user.role)) redirect("/dashboard");
 
+  const displayName =
+    [user.firstName, user.lastName].filter(Boolean).join(" ") || "Administrateur";
+  const initial = (
+    user.firstName?.charAt(0) ||
+    user.email.charAt(0) ||
+    "A"
+  ).toUpperCase();
+
   return (
-    <div className="admin-root">
-      <div className="admin-shell">
-        <AdminSidebar />
-        <main className="admin-main">{children}</main>
-      </div>
-    </div>
+    <AdminLayoutClient
+      userHeader={{
+        name: displayName,
+        initial,
+        email: user.email,
+      }}
+    >
+      {children}
+    </AdminLayoutClient>
   );
 }

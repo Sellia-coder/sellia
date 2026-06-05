@@ -6,7 +6,10 @@ import {
   formatAdminMoney,
   planLabel,
 } from "@/lib/admin/constants";
+import { shopPublishedBadge } from "@/lib/admin/status-badges";
+import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminShopActions from "@/components/admin/AdminShopActions";
+import AdminPagination from "@/components/admin/AdminPagination";
 import AdminBoutiquesSearch from "./AdminBoutiquesSearch";
 
 export const dynamic = "force-dynamic";
@@ -36,10 +39,7 @@ export default async function AdminBoutiquesPage({
     db.shop.count({ where }),
     db.shop.findMany({
       where,
-      orderBy:
-        sort === "gmv"
-          ? { createdAt: "desc" }
-          : { createdAt: "desc" },
+      orderBy: sort === "gmv" ? { createdAt: "desc" } : { createdAt: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: {
@@ -68,95 +68,90 @@ export default async function AdminBoutiquesPage({
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const appUrl = process.env.APP_URL || "https://getsellia.com";
+  const base = `/admin/boutiques`;
+  const qParam = q ? `&q=${encodeURIComponent(q)}` : "";
 
   return (
     <div>
       <h1 className="admin-page-title">Boutiques</h1>
       <p className="admin-page-sub">
-        {total} boutique{total !== 1 ? "s" : ""} — suspension via dépublication (
-        <code>isPublished</code> + statut MAINTENANCE). Pas de champ{" "}
-        <code>isSuspended</code> dédié (migration possible plus tard).
+        {total} boutique{total !== 1 ? "s" : ""} — suspendre une boutique la retire
+        de la vente publique.
       </p>
 
       <AdminBoutiquesSearch initialQ={q} sort={sort} />
 
       <div className="admin-card">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Slug / Nom</th>
-              <th>Propriétaire</th>
-              <th>Plan</th>
-              <th>Publiée</th>
-              <th>GMV</th>
-              <th>Créée</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={7} className="admin-empty">
-                  Aucune boutique trouvée
-                </td>
+                <th>Slug / Nom</th>
+                <th>Propriétaire</th>
+                <th>Plan</th>
+                <th>Statut</th>
+                <th className="admin-th-right">GMV</th>
+                <th>Créée</th>
+                <th>Actions</th>
               </tr>
-            ) : (
-              rows.map((s) => (
-                <tr key={s.id}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{s.slug}</div>
-                    <div style={{ fontSize: 12, color: "var(--admin-muted)" }}>
-                      {s.name}
-                    </div>
-                  </td>
-                  <td>{s.owner.email}</td>
-                  <td>{planLabel(s.plan)}</td>
-                  <td>
-                    <span
-                      className={`admin-badge ${s.isPublished ? "admin-badge--ok" : "admin-badge--off"}`}
-                    >
-                      {s.isPublished ? "Oui" : "Non"}
-                    </span>
-                  </td>
-                  <td>{formatAdminMoney(s.gmv)}</td>
-                  <td>{formatAdminDate(s.createdAt)}</td>
-                  <td>
-                    <AdminShopActions
-                      shopId={s.id}
-                      isPublished={s.isPublished}
-                      publicUrl={`${appUrl.replace(/\/$/, "")}/shop/${s.slug}`}
-                    />
+            </thead>
+            <tbody>
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="admin-empty">
+                    Aucune boutique trouvée
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                rows.map((s) => {
+                  const pub = shopPublishedBadge(s.isPublished);
+                  return (
+                    <tr key={s.id}>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>
+                          <Link href={`/admin/boutiques?q=${encodeURIComponent(s.slug)}`}>
+                            {s.slug}
+                          </Link>
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--admin-muted)" }}>
+                          {s.name}
+                        </div>
+                      </td>
+                      <td>{s.owner.email}</td>
+                      <td>{planLabel(s.plan)}</td>
+                      <td>
+                        <AdminStatusBadge label={pub.label} variant={pub.variant} />
+                      </td>
+                      <td className="admin-td-right">{formatAdminMoney(s.gmv)}</td>
+                      <td className="admin-date">{formatAdminDate(s.createdAt)}</td>
+                      <td>
+                        <AdminShopActions
+                          shopId={s.id}
+                          isPublished={s.isPublished}
+                          publicUrl={`${appUrl.replace(/\/$/, "")}/shop/${s.slug}`}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {totalPages > 1 && (
-        <div className="admin-toolbar" style={{ marginTop: 16 }}>
-          {page > 1 && (
-            <Link
-              href={`/admin/boutiques?page=${page - 1}${q ? `&q=${encodeURIComponent(q)}` : ""}&sort=${sort}`}
-              className="admin-btn"
-            >
-              ← Précédent
-            </Link>
-          )}
-          <span style={{ fontSize: 13, color: "var(--admin-muted)" }}>
-            Page {page} / {totalPages}
-          </span>
-          {page < totalPages && (
-            <Link
-              href={`/admin/boutiques?page=${page + 1}${q ? `&q=${encodeURIComponent(q)}` : ""}&sort=${sort}`}
-              className="admin-btn"
-            >
-              Suivant →
-            </Link>
-          )}
-        </div>
-      )}
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        prevHref={
+          page > 1 ? `${base}?page=${page - 1}${qParam}&sort=${sort}` : undefined
+        }
+        nextHref={
+          page < totalPages
+            ? `${base}?page=${page + 1}${qParam}&sort=${sort}`
+            : undefined
+        }
+      />
     </div>
   );
 }

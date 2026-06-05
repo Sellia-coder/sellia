@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { hashPassword, verifyPassword, validatePasswordStrength } from "@/lib/auth/password";
 import { createOTP, verifyOTP } from "@/lib/auth/otp";
+import { BLOCKED_ACCOUNT_MESSAGE, isUserBlocked } from "@/lib/auth/blocked";
 import { createSession, destroySession, getSession } from "@/lib/auth/session";
 import { isDeviceTrusted, trustCurrentDevice, parseDevice } from "@/lib/auth/trustedDevice";
 import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangedEmail, sendLoginAlertEmail } from "@/lib/email/send";
@@ -114,6 +115,10 @@ export async function verifyOTPAction(formData: FormData) {
   const user = await db.user.findUnique({ where: { email } });
   if (!user) {
     return { success: false, error: "Compte introuvable." };
+  }
+
+  if (isUserBlocked(user)) {
+    return { success: false, error: BLOCKED_ACCOUNT_MESSAGE };
   }
 
   const headersList = await headers();
@@ -257,6 +262,10 @@ export async function signInAction(formData: FormData) {
   if (!valid) {
     recordLoginFailure(ip, email);
     return { success: false, error: "Email ou mot de passe incorrect." };
+  }
+
+  if (isUserBlocked(user)) {
+    return { success: false, error: BLOCKED_ACCOUNT_MESSAGE };
   }
 
   // Identifiants corrects → on efface les échecs (cooldown levé).

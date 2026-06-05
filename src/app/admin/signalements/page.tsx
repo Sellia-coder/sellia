@@ -1,4 +1,9 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
+import { formatAdminDate } from "@/lib/admin/constants";
+import { REPORT_REASON_LABELS } from "@/lib/admin/labels";
+import { reportStatusBadge } from "@/lib/admin/status-badges";
+import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -12,106 +17,61 @@ export default async function AdminSignalementsPage() {
     },
   });
 
-  const REASON_LABELS: Record<string, string> = {
-    COUNTERFEIT: "Contrefaçon",
-    INAPPROPRIATE: "Inapproprié",
-    MISLEADING: "Trompeur",
-    SCAM: "Arnaque",
-    PROHIBITED: "Interdit",
-    OTHER: "Autre",
-  };
-
   return (
     <div>
       <h1 className="admin-page-title">Signalements</h1>
-      <p className="admin-page-sub" style={{ marginBottom: "24px" }}>
-        {reports.length} signalement(s)
+      <p className="admin-page-sub">
+        {reports.length} signalement{reports.length !== 1 ? "s" : ""} de produits
+        signalés par des visiteurs.
       </p>
 
-      {reports.length === 0 ? (
-        <div
-          style={{
-            padding: "40px",
-            textAlign: "center",
-            color: "#9CA3AF",
-            background: "white",
-            borderRadius: "12px",
-            border: "1px solid #E5E5E0",
-          }}
-        >
-          Aucun signalement pour le moment
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {reports.map((r) => (
-            <div
-              key={r.id}
-              style={{
-                background: "white",
-                border: "1px solid #E5E5E0",
-                borderRadius: "12px",
-                padding: "16px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "6px",
-                }}
-              >
-                <strong style={{ fontSize: "14px", color: "#0E1116" }}>
-                  {r.product.name}
-                </strong>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    padding: "2px 8px",
-                    borderRadius: "6px",
-                    background: "#FEE2E2",
-                    color: "#B91C1C",
-                    fontWeight: 600,
-                  }}
-                >
-                  {REASON_LABELS[r.reason] || r.reason}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#6B7280",
-                  marginBottom: "8px",
-                }}
-              >
-                Boutique : {r.shop.name} ·{" "}
-                {new Date(r.createdAt).toLocaleDateString("fr-FR")} · Statut :{" "}
-                {r.status}
-              </div>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#404552",
-                  margin: 0,
-                  lineHeight: 1.5,
-                }}
-              >
-                {r.description}
-              </p>
-              {r.reporterEmail && (
-                <div
-                  style={{
-                    fontSize: "11px",
-                    color: "#9CA3AF",
-                    marginTop: "6px",
-                  }}
-                >
-                  Signalé par : {r.reporterName || "Anonyme"} ({r.reporterEmail})
-                </div>
+      <div className="admin-card">
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Boutique</th>
+                <th>Motif</th>
+                <th>Statut</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reports.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="admin-empty">
+                    Aucun signalement
+                  </td>
+                </tr>
+              ) : (
+                reports.map((r) => {
+                  const badge = reportStatusBadge(r.status);
+                  return (
+                    <tr key={r.id}>
+                      <td>
+                        <Link href={`/admin/signalements/${r.id}`}>
+                          {r.product.name}
+                        </Link>
+                      </td>
+                      <td>
+                        <Link href={`/admin/boutiques?q=${encodeURIComponent(r.shop.slug)}`}>
+                          {r.shop.name}
+                        </Link>
+                      </td>
+                      <td>{REPORT_REASON_LABELS[r.reason] ?? r.reason}</td>
+                      <td>
+                        <AdminStatusBadge label={badge.label} variant={badge.variant} />
+                      </td>
+                      <td className="admin-date">{formatAdminDate(r.createdAt)}</td>
+                    </tr>
+                  );
+                })
               )}
-            </div>
-          ))}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </div>
   );
 }

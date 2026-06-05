@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { exchangeGoogleCode, verifyGoogleState } from "@/lib/auth/google";
+import { isUserBlocked } from "@/lib/auth/blocked";
 import { createSession } from "@/lib/auth/session";
 import { isDeviceTrusted, trustCurrentDevice, parseDevice } from "@/lib/auth/trustedDevice";
 import { sendWelcomeEmail, sendLoginAlertEmail } from "@/lib/email/send";
@@ -104,6 +105,10 @@ export async function GET(req: NextRequest) {
   const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim()
     || req.headers.get("x-real-ip")
     || undefined;
+
+  if (isUserBlocked(user)) {
+    return NextResponse.redirect(`${appUrl}/connexion?error=account_suspended`);
+  }
 
   // Détecte si l'appareil était déjà reconnu AVANT de le trust (pour l'alerte).
   const wasTrusted = await isDeviceTrusted(user.id, userAgent, ipAddress);
