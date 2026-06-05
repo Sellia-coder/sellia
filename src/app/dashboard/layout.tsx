@@ -4,6 +4,8 @@ import { isAdminRole } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { getSidebarCounts, type SidebarCounts } from "@/lib/sidebar-counts";
 import DashboardLayoutClient from "./DashboardLayoutClient";
+import MerchantBanner from "@/components/dashboard/MerchantBanner";
+import { getPlatformSettings } from "@/lib/admin/platform-settings";
 import "./dashboard-typography.css";
 
 const emptySidebarCounts: SidebarCounts = {
@@ -19,6 +21,11 @@ export default async function DashboardLayout({
   const user = await getCurrentUser();
   if (!user) {
     redirect("/connexion");
+  }
+
+  const settings = await getPlatformSettings();
+  if (settings.maintenanceMode && !isAdminRole(user.role)) {
+    redirect("/maintenance");
   }
 
   const shop = await db.shop.findFirst({
@@ -62,6 +69,9 @@ export default async function DashboardLayout({
       sidebarCounts={sidebarCounts}
       isAdmin={isAdminRole(user.role)}
     >
+      {settings.merchantBannerEnabled && settings.merchantBannerMessage ? (
+        <MerchantBanner message={settings.merchantBannerMessage} />
+      ) : null}
       {children}
     </DashboardLayoutClient>
   );

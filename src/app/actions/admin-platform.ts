@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdmin, ADMIN_ROLE } from "@/lib/auth/admin";
 import type { ReportStatus } from "@prisma/client";
+import { SELLIA_PLANS, type SelliaPlan } from "@/lib/cartevo/pricing";
 
 export async function adminToggleShopVisibilityAction(shopId: string) {
   const admin = await requireAdmin();
@@ -179,6 +180,74 @@ export async function adminReplySupportTicketAction(
         unreadBySupport: 0,
       },
     });
+  });
+
+  revalidatePath("/admin/support");
+  revalidatePath(`/admin/support/${ticketId}`);
+  return { ok: true as const };
+}
+
+export async function adminChangeShopPlanAction(
+  shopId: string,
+  plan: SelliaPlan
+) {
+  const admin = await requireAdmin();
+  if (!admin) return { ok: false as const, error: "Non autorisé" };
+
+  if (!SELLIA_PLANS[plan]) {
+    return { ok: false as const, error: "Plan invalide" };
+  }
+
+  const shop = await db.shop.findUnique({
+    where: { id: shopId },
+    select: { id: true, slug: true, plan: true },
+  });
+  if (!shop) return { ok: false as const, error: "Boutique introuvable" };
+  if (shop.plan === plan) {
+    return { ok: false as const, error: "La boutique est déjà sur ce plan." };
+  }
+
+  await db.shop.update({
+    where: { id: shopId },
+    data: {
+      plan,
+      planActivatedAt: new Date(),
+      ...(plan === "pro" ? { proSince: new Date() } : {}),
+      ...(plan === "business" ? { businessSince: new Date() } : {}),
+    },
+  });
+
+  revalidatePath("/admin/boutiques");
+  revalidatePath(`/admin/boutiques/${shopId}`);
+  if (shop.slug) revalidatePath(`/shop/${shop.slug}`);
+
+  return {
+    ok: true as const,
+    plan,
+    commissionRate: SELLIA_PLANS[plan].commissionRate,
+  };
+}
+
+export async function adminReopenSupportTicketAction(ticketId: string) {
+  const admin = await requireAdmin();
+  if (!admin) return { ok: false as const, error: "Non autorisé" };
+
+  const ticket = await db.supportTicket.findUnique({
+    where: { id: ticketId },
+    select: { id: true, status: true },
+  });
+  if (!ticket) return { ok: false as const, error: "Ticket introuvable" };
+  if (ticket.status !== "CLOSED") {
+    return { ok: false as const, error: "Ce ticket n'est pas fermé." };
+  }
+
+  await db.supportTicket.update({
+    where: { id: ticketId },
+    data: {
+      status: "OPEN",
+      closedAt: null,
+      unreadBySupport: { increment: 1 },
+    },
   });
 
   revalidatePath("/admin/support");

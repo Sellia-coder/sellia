@@ -4,7 +4,8 @@ import { formatAdminDate, formatAdminMoney } from "@/lib/admin/constants";
 import { paymentStatusBadge } from "@/lib/admin/status-badges";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminPagination from "@/components/admin/AdminPagination";
-import AdminReconcileButton from "@/components/admin/AdminReconcileButton";
+import AdminTransactionRowActions from "@/components/admin/AdminTransactionRowActions";
+import AdminExportButton from "@/components/admin/AdminExportButton";
 import TransactionsFilters from "./TransactionsFilters";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +49,7 @@ export default async function AdminTransactionsPage({
         total: true,
         paymentStatus: true,
         createdAt: true,
-        shop: { select: { name: true, slug: true } },
+        shop: { select: { id: true, name: true, slug: true } },
       },
     }),
   ]);
@@ -68,7 +69,10 @@ export default async function AdminTransactionsPage({
         des paiements Mobile Money.
       </p>
 
-      <TransactionsFilters initialQ={q} initialStatus={status} />
+      <div className="admin-retraits-toolbar">
+        <TransactionsFilters initialQ={q} initialStatus={status} />
+        <AdminExportButton resource="transactions" />
+      </div>
 
       <div className="admin-card">
         <div className="admin-table-wrap">
@@ -98,7 +102,7 @@ export default async function AdminTransactionsPage({
                     <tr key={o.orderNumber}>
                       <td className="admin-mono">{o.orderNumber}</td>
                       <td>
-                        <Link href={`/admin/boutiques?q=${encodeURIComponent(o.shop.slug)}`}>
+                        <Link href={`/admin/boutiques/${o.shop.id}`}>
                           {o.shop.slug}
                         </Link>
                       </td>
@@ -109,7 +113,10 @@ export default async function AdminTransactionsPage({
                       </td>
                       <td className="admin-date">{formatAdminDate(o.createdAt)}</td>
                       <td>
-                        <AdminReconcileButton orderNumber={o.orderNumber} />
+                        <AdminTransactionRowActions
+                          orderNumber={o.orderNumber}
+                          shopAdminUrl={`/admin/boutiques/${o.shop.id}`}
+                        />
                       </td>
                     </tr>
                   );

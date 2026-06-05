@@ -7,6 +7,7 @@ import {
   rejectWithdrawalGroup,
   reconcileProcessingWithdrawals,
 } from "@/lib/payouts/withdrawal";
+import { reconcileSingleWithdrawalGroup } from "@/lib/admin/withdrawal-reconcile";
 
 export async function adminApproveWithdrawalAction(withdrawalGroupId: string) {
   const admin = await requireAdmin();
@@ -37,6 +38,20 @@ export async function adminRejectWithdrawalAction(
   revalidatePath("/admin/retraits");
   revalidatePath("/admin");
   return { ok: true as const };
+}
+
+export async function adminReconcileWithdrawalGroupAction(
+  withdrawalGroupId: string
+) {
+  const admin = await requireAdmin();
+  if (!admin) return { ok: false as const, error: "Non autorisé" };
+
+  const result = await reconcileSingleWithdrawalGroup(withdrawalGroupId);
+  if (!result.ok) return result;
+
+  revalidatePath("/admin/retraits");
+  revalidatePath(`/admin/retraits/${withdrawalGroupId}`);
+  return { ok: true as const, outcome: result.outcome };
 }
 
 export async function adminReconcilePayoutsAction() {

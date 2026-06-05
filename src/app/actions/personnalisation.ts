@@ -12,6 +12,7 @@ import {
 } from "@/lib/validations/personnalisation";
 import { generateHeroImage } from "@/lib/ai/generate-hero-image";
 import { generateLegalPagesForShop } from "@/lib/shop/legal-pages";
+import { getPlatformSettings } from "@/lib/admin/platform-settings";
 
 type DraftGeneratedProduct = {
   id?: string;
@@ -143,6 +144,14 @@ export async function publishShopAction(input: PublishShopInput) {
   const user = await getCurrentUser();
   if (!user?.id) return { ok: false, error: "Non authentifié" } as const;
   const userId = user.id;
+
+  const platform = await getPlatformSettings();
+  if (!platform.shopCreationOpen) {
+    return {
+      ok: false,
+      error: "La création de boutique est temporairement fermée.",
+    } as const;
+  }
 
   const parsed = publishShopSchema.safeParse(input);
   if (!parsed.success) {

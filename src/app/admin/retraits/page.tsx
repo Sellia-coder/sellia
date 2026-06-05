@@ -6,7 +6,8 @@ import { payoutStatusBadge } from "@/lib/admin/status-badges";
 import { payoutTypeLabel } from "@/lib/admin/labels";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminPagination from "@/components/admin/AdminPagination";
-import AdminWithdrawalActions from "@/components/admin/AdminWithdrawalActions";
+import AdminWithdrawalRowActions from "@/components/admin/AdminWithdrawalRowActions";
+import AdminExportButton from "@/components/admin/AdminExportButton";
 import AdminReconcilePayoutsButton from "@/components/admin/AdminReconcilePayoutsButton";
 import RetraitsFilters from "./RetraitsFilters";
 import {
@@ -21,9 +22,9 @@ const PAGE_SIZE = 30;
 export default async function AdminRetraitsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; page?: string; filter?: string }>;
 }) {
-  const { status = "", page: pageStr = "1" } = await searchParams;
+  const { status = "", page: pageStr = "1", filter = "" } = await searchParams;
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
 
   const legacyBackfill = await backfillLegacyWithdrawalGroups();
@@ -51,7 +52,7 @@ export default async function AdminRetraitsPage({
         withdrawalGroupId: true,
         manualReviewRequired: true,
         errorMessage: true,
-        shop: { select: { name: true, slug: true } },
+        shop: { select: { id: true, name: true, slug: true } },
       },
     }),
   ]);
@@ -77,8 +78,11 @@ export default async function AdminRetraitsPage({
       </p>
 
       <div className="admin-retraits-toolbar">
-        <RetraitsFilters initialStatus={status} />
-        <AdminReconcilePayoutsButton />
+        <RetraitsFilters initialStatus={status} initialFilter={filter} />
+        <div className="admin-reconcile-toolbar">
+          <AdminReconcilePayoutsButton />
+          <AdminExportButton resource="retraits" />
+        </div>
       </div>
 
       {pendingGroups.length > 0 ? (
@@ -111,9 +115,7 @@ export default async function AdminRetraitsPage({
                       className={isPending ? "admin-row-highlight" : undefined}
                     >
                       <td>
-                        <Link
-                          href={`/admin/boutiques?q=${encodeURIComponent(g.shopSlug)}`}
-                        >
+                        <Link href={`/admin/boutiques/${g.shopId}`}>
                           {g.shopName}
                         </Link>
                       </td>
@@ -134,9 +136,10 @@ export default async function AdminRetraitsPage({
                         {formatAdminDate(g.requestedAt)}
                       </td>
                       <td>
-                        <AdminWithdrawalActions
+                        <AdminWithdrawalRowActions
                           withdrawalGroupId={g.withdrawalGroupId}
                           status={g.status}
+                          shopAdminUrl={`/admin/boutiques/${g.shopId}`}
                         />
                       </td>
                     </tr>
@@ -192,9 +195,7 @@ export default async function AdminRetraitsPage({
                       }
                     >
                       <td>
-                        <Link
-                          href={`/admin/boutiques?q=${encodeURIComponent(p.shop.slug)}`}
-                        >
+                        <Link href={`/admin/boutiques/${p.shop.id}`}>
                           {p.shop.name}
                         </Link>
                       </td>

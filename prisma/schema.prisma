@@ -1069,3 +1069,22 @@ model ProductReport {
   @@index([status])
   @@map("product_reports")
 }
+
+/// Réglages opérationnels plateforme (une ligne id = "default").
+model PlatformSettings {
+  id                    String   @id @default("default")
+
+  maintenanceMode       Boolean  @default(false) @map("maintenance_mode")
+  maintenanceMessage    String?  @map("maintenance_message") @db.Text
+  registrationsOpen     Boolean  @default(true) @map("registrations_open")
+  shopCreationOpen      Boolean  @default(true) @map("shop_creation_open")
+  merchantBannerEnabled Boolean  @default(false) @map("merchant_banner_enabled")
+  merchantBannerMessage String?  @map("merchant_banner_message") @db.Text
+  supportEmail          String?  @map("support_email")
+  supportPhone          String?  @map("support_phone")
+  adminNotifyEmail      String?  @map("admin_notify_email")
+
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_settings")
+}

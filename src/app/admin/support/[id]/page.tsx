@@ -43,14 +43,20 @@ export default async function AdminSupportDetailPage({
         {TICKET_STATUS_LABELS[ticket.status]} · {formatAdminDate(ticket.createdAt)}
       </p>
 
-      {ticket.shopSlug ? (
+      {ticket.shopId || ticket.shopSlug ? (
         <p className="admin-page-sub" style={{ marginTop: -16 }}>
           Boutique :{" "}
-          <Link href={`/admin/boutiques?q=${encodeURIComponent(ticket.shopSlug)}`}>
-            {ticket.shopName ?? ticket.shopSlug}
-          </Link>
-          {" · "}
-          <Link href={`/admin/utilisateurs`}>Voir les marchands</Link>
+          {ticket.shopId ? (
+            <Link href={`/admin/boutiques/${ticket.shopId}`}>
+              {ticket.shopName ?? ticket.shopSlug ?? "Boutique"}
+            </Link>
+          ) : (
+            <Link
+              href={`/admin/boutiques?q=${encodeURIComponent(ticket.shopSlug!)}`}
+            >
+              {ticket.shopName ?? ticket.shopSlug}
+            </Link>
+          )}
         </p>
       ) : null}
 

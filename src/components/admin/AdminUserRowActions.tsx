@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import Link from "next/link";
 import { Eye, Storefront, Prohibit, CheckCircle } from "@phosphor-icons/react";
+import AdminIconAction from "./AdminIconAction";
 import { adminToggleUserBlockAction } from "@/app/actions/admin-platform";
 
 export default function AdminUserRowActions({
@@ -35,41 +35,34 @@ export default function AdminUserRowActions({
 
   return (
     <div className="admin-icon-actions">
-      <Link
+      <AdminIconAction
         href={`/admin/utilisateurs/${userId}`}
-        className="admin-icon-btn"
         title="Voir les détails"
-        aria-label="Voir les détails"
       >
         <Eye size={18} weight="duotone" />
-      </Link>
+      </AdminIconAction>
       {publicShopUrl ? (
-        <a
+        <AdminIconAction
           href={publicShopUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="admin-icon-btn"
+          external
           title="Voir la boutique"
-          aria-label="Voir la boutique"
         >
           <Storefront size={18} weight="duotone" />
-        </a>
+        </AdminIconAction>
       ) : null}
       {canBlock ? (
-        <button
-          type="button"
-          className={`admin-icon-btn ${isBlocked ? "admin-icon-btn--ok" : "admin-icon-btn--danger"}`}
+        <AdminIconAction
           onClick={toggleBlock}
           disabled={pending}
+          variant={isBlocked ? "ok" : "danger"}
           title={isBlocked ? "Débloquer le marchand" : "Bloquer le marchand"}
-          aria-label={isBlocked ? "Débloquer" : "Bloquer"}
         >
           {isBlocked ? (
             <CheckCircle size={18} weight="duotone" />
           ) : (
             <Prohibit size={18} weight="duotone" />
           )}
-        </button>
+        </AdminIconAction>
       ) : null}
     </div>
   );

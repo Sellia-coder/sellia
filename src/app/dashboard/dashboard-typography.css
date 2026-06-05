@@ -1,3 +1,13 @@
+.dash-merchant-banner {
+  padding: 10px 20px;
+  background: rgba(232, 75, 31, 0.08);
+  border-bottom: 1px solid rgba(232, 75, 31, 0.2);
+  color: #0e1116;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
 /* G2.2.B — Typography Sellia officielle dans /dashboard
    Fraunces (titres) + Inter (body) */
 

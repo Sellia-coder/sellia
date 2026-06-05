@@ -7,6 +7,7 @@ import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminUserRowActions from "@/components/admin/AdminUserRowActions";
 import AdminPagination from "@/components/admin/AdminPagination";
 import AdminUsersSearch from "./AdminUsersSearch";
+import AdminExportButton from "@/components/admin/AdminExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,13 @@ export default async function AdminUtilisateursPage({
         l&apos;interface.
       </p>
 
-      <AdminUsersSearch initialQ={q} />
+      <div className="admin-retraits-toolbar">
+        <div className="admin-retraits-toolbar">
+        <AdminUsersSearch initialQ={q} />
+        <AdminExportButton resource="utilisateurs" />
+      </div>
+        <AdminExportButton resource="utilisateurs" />
+      </div>
 
       <div className="admin-card">
         <div className="admin-table-wrap">

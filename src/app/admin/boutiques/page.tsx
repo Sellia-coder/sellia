@@ -8,7 +8,8 @@ import {
 } from "@/lib/admin/constants";
 import { shopPublishedBadge } from "@/lib/admin/status-badges";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
-import AdminShopActions from "@/components/admin/AdminShopActions";
+import AdminShopRowActions from "@/components/admin/AdminShopRowActions";
+import AdminExportButton from "@/components/admin/AdminExportButton";
 import AdminPagination from "@/components/admin/AdminPagination";
 import AdminBoutiquesSearch from "./AdminBoutiquesSearch";
 
@@ -19,21 +20,23 @@ const PAGE_SIZE = 25;
 export default async function AdminBoutiquesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; sort?: string; plan?: string }>;
 }) {
-  const { q = "", page: pageStr = "1", sort = "date" } = await searchParams;
+  const { q = "", page: pageStr = "1", sort = "date", plan = "" } = await searchParams;
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
   const query = q.trim().toLowerCase();
 
-  const where = query
-    ? {
-        OR: [
-          { slug: { contains: query, mode: "insensitive" as const } },
-          { name: { contains: query, mode: "insensitive" as const } },
-          { owner: { email: { contains: query, mode: "insensitive" as const } } },
-        ],
-      }
-    : {};
+  const where: Record<string, unknown> = {};
+  if (query) {
+    where.OR = [
+      { slug: { contains: query, mode: "insensitive" as const } },
+      { name: { contains: query, mode: "insensitive" as const } },
+      { owner: { email: { contains: query, mode: "insensitive" as const } } },
+    ];
+  }
+  if (plan && ["free", "pro", "business"].includes(plan)) {
+    where.plan = plan;
+  }
 
   const [total, shops] = await Promise.all([
     db.shop.count({ where }),
@@ -79,7 +82,10 @@ export default async function AdminBoutiquesPage({
         de la vente publique.
       </p>
 
-      <AdminBoutiquesSearch initialQ={q} sort={sort} />
+      <div className="admin-retraits-toolbar">
+        <AdminBoutiquesSearch initialQ={q} sort={sort} plan={plan} />
+        <AdminExportButton resource="boutiques" />
+      </div>
 
       <div className="admin-card">
         <div className="admin-table-wrap">
@@ -109,9 +115,7 @@ export default async function AdminBoutiquesPage({
                     <tr key={s.id}>
                       <td>
                         <div style={{ fontWeight: 600 }}>
-                          <Link href={`/admin/boutiques?q=${encodeURIComponent(s.slug)}`}>
-                            {s.slug}
-                          </Link>
+                          <Link href={`/admin/boutiques/${s.id}`}>{s.slug}</Link>
                         </div>
                         <div style={{ fontSize: 12, color: "var(--admin-muted)" }}>
                           {s.name}
@@ -125,10 +129,12 @@ export default async function AdminBoutiquesPage({
                       <td className="admin-td-right">{formatAdminMoney(s.gmv)}</td>
                       <td className="admin-date">{formatAdminDate(s.createdAt)}</td>
                       <td>
-                        <AdminShopActions
+                        <AdminShopRowActions
                           shopId={s.id}
                           isPublished={s.isPublished}
                           publicUrl={`${appUrl.replace(/\/$/, "")}/shop/${s.slug}`}
+                          ownerEmail={s.owner.email}
+                          plan={s.plan}
                         />
                       </td>
                     </tr>

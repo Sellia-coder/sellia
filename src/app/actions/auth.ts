@@ -18,6 +18,7 @@ import {
   tooManyAttemptsMessage,
 } from "@/lib/auth/rate-limit";
 import { claimDraftShop } from "@/lib/draftShop/claim";
+import { getPlatformSettings } from "@/lib/admin/platform-settings";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
@@ -25,6 +26,14 @@ import { headers } from "next/headers";
 // SIGN UP
 // ============================================
 export async function signUpAction(formData: FormData) {
+  const platform = await getPlatformSettings();
+  if (!platform.registrationsOpen) {
+    return {
+      success: false,
+      error: "Les inscriptions sont temporairement fermées.",
+    };
+  }
+
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
   const firstName = String(formData.get("firstName") || "").trim();
