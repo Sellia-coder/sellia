@@ -549,12 +549,24 @@ model Payout {
   requestedAt     DateTime @default(now()) @map("requested_at")
   processedAt     DateTime? @map("processed_at")
   completedAt     DateTime? @map("completed_at")
+
+  withdrawalGroupId    String?   @map("withdrawal_group_id")
+  withdrawalGrossAmount Decimal? @map("withdrawal_gross_amount") @db.Decimal(14, 2)
+  withdrawalNetAmount   Decimal? @map("withdrawal_net_amount") @db.Decimal(14, 2)
+  cartevoTxId           String?   @map("cartevo_tx_id")
+  reviewedBy            String?   @map("reviewed_by")
+  reviewedAt            DateTime? @map("reviewed_at")
+  rejectionReason       String?   @map("rejection_reason") @db.Text
+  manualReviewRequired  Boolean   @default(false) @map("manual_review_required")
+
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@unique([orderId, payoutType])
   @@index([shopId, status])
   @@index([shopId, releasedAt])
+  @@index([withdrawalGroupId])
+  @@index([cartevoTxId])
   @@index([createdAt])
   @@map("payouts")
 }

@@ -6,7 +6,13 @@ import { payoutStatusBadge } from "@/lib/admin/status-badges";
 import { payoutTypeLabel } from "@/lib/admin/labels";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminPagination from "@/components/admin/AdminPagination";
+import AdminWithdrawalActions from "@/components/admin/AdminWithdrawalActions";
+import AdminReconcilePayoutsButton from "@/components/admin/AdminReconcilePayoutsButton";
 import RetraitsFilters from "./RetraitsFilters";
+import {
+  listWithdrawalGroups,
+  backfillLegacyWithdrawalGroups,
+} from "@/lib/payouts/withdrawal";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +25,9 @@ export default async function AdminRetraitsPage({
 }) {
   const { status = "", page: pageStr = "1" } = await searchParams;
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
+
+  const legacyBackfill = await backfillLegacyWithdrawalGroups();
+  const pendingGroups = await listWithdrawalGroups();
 
   const where = status
     ? { status: status as PayoutStatus }
@@ -39,6 +48,9 @@ export default async function AdminRetraitsPage({
         status: true,
         payoutType: true,
         createdAt: true,
+        withdrawalGroupId: true,
+        manualReviewRequired: true,
+        errorMessage: true,
         shop: { select: { name: true, slug: true } },
       },
     }),
@@ -52,13 +64,92 @@ export default async function AdminRetraitsPage({
     <div>
       <h1 className="admin-page-title">Retraits</h1>
       <p className="admin-page-sub">
-        {total} retrait{total !== 1 ? "s" : ""} — consultation uniquement. La
-        validation des retraits importants sera disponible prochainement.
+        Validation des retraits importants (&gt; 50 000 FCFA) et réconciliation
+        des versements en cours.
+        {legacyBackfill.hadLegacy ? (
+          <span className="admin-legacy-warn">
+            {" "}
+            — Des demandes anciennes ont été regroupées automatiquement (
+            {legacyBackfill.groupsCreated} groupe
+            {legacyBackfill.groupsCreated !== 1 ? "s" : ""}).
+          </span>
+        ) : null}
       </p>
 
-      <RetraitsFilters initialStatus={status} />
+      <div className="admin-retraits-toolbar">
+        <RetraitsFilters initialStatus={status} />
+        <AdminReconcilePayoutsButton />
+      </div>
+
+      {pendingGroups.length > 0 ? (
+        <div className="admin-card" style={{ marginBottom: 24 }}>
+          <h2 className="admin-section-title">Demandes de retrait</h2>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Boutique</th>
+                  <th className="admin-th-right">Brut</th>
+                  <th className="admin-th-right">Net versé</th>
+                  <th>Statut</th>
+                  <th>Lignes</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingGroups.map((g) => {
+                  const badge = payoutStatusBadge(g.status);
+                  const isPending = g.status === PayoutStatus.REQUESTED;
+                  const displayBadge = g.manualReviewRequired
+                    ? { label: "À vérifier manuellement", variant: "warn" as const }
+                    : badge;
+
+                  return (
+                    <tr
+                      key={g.withdrawalGroupId}
+                      className={isPending ? "admin-row-highlight" : undefined}
+                    >
+                      <td>
+                        <Link
+                          href={`/admin/boutiques?q=${encodeURIComponent(g.shopSlug)}`}
+                        >
+                          {g.shopName}
+                        </Link>
+                      </td>
+                      <td className="admin-td-right">
+                        {formatAdminMoney(g.grossAmount)}
+                      </td>
+                      <td className="admin-td-right">
+                        {formatAdminMoney(g.netAmount)}
+                      </td>
+                      <td>
+                        <AdminStatusBadge
+                          label={displayBadge.label}
+                          variant={displayBadge.variant}
+                        />
+                      </td>
+                      <td>{g.payoutCount}</td>
+                      <td className="admin-date">
+                        {formatAdminDate(g.requestedAt)}
+                      </td>
+                      <td>
+                        <AdminWithdrawalActions
+                          withdrawalGroupId={g.withdrawalGroupId}
+                          status={g.status}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
 
       <div className="admin-card">
+        <h2 className="admin-section-title">Historique des payouts</h2>
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
@@ -80,15 +171,30 @@ export default async function AdminRetraitsPage({
                 </tr>
               ) : (
                 payouts.map((p) => {
-                  const badge = payoutStatusBadge(p.status);
+                  let badge = payoutStatusBadge(p.status);
+                  if (p.manualReviewRequired) {
+                    badge = {
+                      label: "À vérifier manuellement",
+                      variant: "warn",
+                    };
+                  } else if (p.errorMessage?.includes("fonds restitués")) {
+                    badge = {
+                      label: "Échoué (fonds restitués)",
+                      variant: "danger",
+                    };
+                  }
                   const isPendingValidation = p.status === PayoutStatus.REQUESTED;
                   return (
                     <tr
                       key={p.id}
-                      className={isPendingValidation ? "admin-row-highlight" : undefined}
+                      className={
+                        isPendingValidation ? "admin-row-highlight" : undefined
+                      }
                     >
                       <td>
-                        <Link href={`/admin/boutiques?q=${encodeURIComponent(p.shop.slug)}`}>
+                        <Link
+                          href={`/admin/boutiques?q=${encodeURIComponent(p.shop.slug)}`}
+                        >
                           {p.shop.name}
                         </Link>
                       </td>
@@ -101,10 +207,15 @@ export default async function AdminRetraitsPage({
                           : "—"}
                       </td>
                       <td>
-                        <AdminStatusBadge label={badge.label} variant={badge.variant} />
+                        <AdminStatusBadge
+                          label={badge.label}
+                          variant={badge.variant}
+                        />
                       </td>
                       <td>{payoutTypeLabel(p.payoutType)}</td>
-                      <td className="admin-date">{formatAdminDate(p.createdAt)}</td>
+                      <td className="admin-date">
+                        {formatAdminDate(p.createdAt)}
+                      </td>
                     </tr>
                   );
                 })
