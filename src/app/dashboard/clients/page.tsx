@@ -28,7 +28,7 @@ export default async function CustomersListPage() {
     );
   }
 
-  const [customersRaw, reviewsRaw, paidOrders, conversationsRaw] = await Promise.all([
+  const [customersRaw, reviewsRaw, paidOrders, conversationsRaw, disputesRaw] = await Promise.all([
     db.customer.findMany({
       where: { shopId: shop.id },
       orderBy: { lastOrderAt: "desc" },
@@ -67,6 +67,13 @@ export default async function CustomersListPage() {
             createdAt: true,
           },
         },
+      },
+    }),
+    db.dispute.findMany({
+      where: { shopId: shop.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        order: { select: { orderNumber: true } },
       },
     }),
   ]);
@@ -133,12 +140,33 @@ export default async function CustomersListPage() {
   const productMix = computeProductMixFromOrders(paidOrders);
   const paymentBreakdown = computePaymentBreakdown(paidOrders);
 
+  const openDisputes = disputesRaw.filter((d) =>
+    ["OPEN", "IN_REVIEW"].includes(d.status)
+  ).length;
+
+  const disputes = disputesRaw.map((d) => ({
+    id: d.id,
+    orderNumber: d.order.orderNumber,
+    orderId: d.orderId,
+    customerEmail: d.customerEmail,
+    reason: d.reason,
+    description: d.description,
+    status: d.status,
+    merchantResponse: d.merchantResponse,
+    merchantRespondedAt: d.merchantRespondedAt?.toISOString() ?? null,
+    adminResolution: d.adminResolution,
+    resolvedAt: d.resolvedAt?.toISOString() ?? null,
+    createdAt: d.createdAt.toISOString(),
+  }));
+
   return (
     <ClientsHubClient
       currency={shop.currency || "FCFA"}
       customers={customers}
       reviews={reviews}
       conversations={conversations}
+      disputes={disputes}
+      openDisputes={openDisputes}
       unreadMessages={unreadMessages}
       segments={segments}
       cities={cities}

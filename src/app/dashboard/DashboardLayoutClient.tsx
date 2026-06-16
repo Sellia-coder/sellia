@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/actions/auth";
 import SidebarBadge from "@/components/dashboard/SidebarBadge";
 import type { SidebarCounts } from "@/lib/sidebar-counts";
+import MerchantFeedbackModal from "@/components/dashboard/MerchantFeedbackModal";
 import {
   getNotificationsAction,
   type SelliaNotification,
@@ -42,6 +43,7 @@ export default function DashboardLayoutClient({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [notifs, setNotifs] = useState<SelliaNotification[]>([]);
   const [notifLoaded, setNotifLoaded] = useState(false);
 
@@ -58,6 +60,7 @@ export default function DashboardLayoutClient({
   useEffect(() => {
     setMobileSidebarOpen(false);
     setNotifOpen(false);
+    setFeedbackOpen(false);
   }, [pathname]);
 
   const isActive = (path: string) => pathname === path;
@@ -153,6 +156,15 @@ export default function DashboardLayoutClient({
               <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
             Promotions
+          </Link>
+          <Link className={`dash-nav-item ${pathname.startsWith("/dashboard/capital") ? "active" : ""}`} href="/dashboard/capital">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2v20"/>
+              <path d="M17 5l-5-3-5 3v14l5 3 5-3V5z"/>
+              <path d="M9 9h6"/>
+              <path d="M9 13h6"/>
+            </svg>
+            Capital
           </Link>
         </div>
 
@@ -304,6 +316,17 @@ export default function DashboardLayoutClient({
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
             </Link>
+            <button
+              type="button"
+              className="dash-topbar-btn"
+              aria-label="Feedback marchand"
+              onClick={() => setFeedbackOpen(true)}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 21s8-4 8-10V5l-8-3-8 3v6c0 6 8 10 8 10z" />
+                <path d="M12 11l2 2 4-4" />
+              </svg>
+            </button>
             <div style={{ position: "relative" }}>
               <button
                 className="dash-topbar-btn dash-topbar-btn-notif"
@@ -432,6 +455,10 @@ export default function DashboardLayoutClient({
             </div>
           </footer>
         </main>
+
+        {feedbackOpen ? (
+          <MerchantFeedbackModal onClose={() => setFeedbackOpen(false)} />
+        ) : null}
       </div>
     </div>
   );

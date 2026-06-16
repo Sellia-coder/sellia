@@ -34,6 +34,13 @@ export default function AdminTodoBanner({ counts }: { counts: AdminTodoCounts })
       count: counts.openTickets,
     });
   }
+  if (counts.newMerchantFeedbacks > 0) {
+    items.push({
+      label: "Feedback marchands",
+      href: "/admin/feedback",
+      count: counts.newMerchantFeedbacks,
+    });
+  }
 
   return (
     <div className="admin-todo-banner">

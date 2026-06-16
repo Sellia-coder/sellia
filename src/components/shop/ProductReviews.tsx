@@ -17,6 +17,8 @@ interface Props {
   onFormClose?: () => void;
   /** Masque le bouton interne (CTA géré par le parent) */
   hideTrigger?: boolean;
+  /** Couleur accent boutique pour le bouton Envoyer */
+  primaryColor?: string;
 }
 
 interface ReviewRow {
@@ -37,7 +39,9 @@ export default function ProductReviews({
   forceOpen = false,
   onFormClose,
   hideTrigger = false,
+  primaryColor,
 }: Props) {
+  const accent = primaryColor || "#E84B1F";
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -214,10 +218,11 @@ export default function ProductReviews({
                 {error}
               </div>
             )}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div className="shop-review-form-actions">
               <button
                 type="button"
-                className="shop-btn shop-btn-primary"
+                className="shop-btn shop-btn-primary shop-review-submit-btn"
+                style={{ background: accent, color: "#FFFFFF" }}
                 onClick={handleSubmit}
                 disabled={isPending}
               >
@@ -445,7 +450,8 @@ export default function ProductReviews({
           <div style={{ display: "flex", gap: 8 }}>
             <button
               type="button"
-              className="shop-btn shop-btn-primary"
+              className="shop-btn shop-btn-primary shop-review-submit-btn"
+              style={{ background: accent, color: "#FFFFFF" }}
               onClick={handleSubmit}
               disabled={isPending}
             >

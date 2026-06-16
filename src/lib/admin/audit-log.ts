@@ -210,4 +210,5 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "platform.money_settings_reset": "Réglages money réinitialisés",
   "admin.promote": "Promotion admin",
   "admin.demote": "Rétrogradation admin",
+  "dispute.resolve": "Litige tranché",
 };

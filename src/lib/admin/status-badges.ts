@@ -64,6 +64,25 @@ export function reportStatusBadge(status: ReportStatus): {
   return { label, variant: "warn" };
 }
 
+export function disputeStatusBadge(status: string): {
+  label: string;
+  variant: AdminBadgeVariant;
+} {
+  const labels: Record<string, string> = {
+    OPEN: "Ouvert",
+    IN_REVIEW: "En cours",
+    RESOLVED_CUSTOMER: "Tranché — client",
+    RESOLVED_MERCHANT: "Tranché — marchand",
+    CLOSED: "Clôturé",
+  };
+  const label = labels[status] ?? status;
+  if (status === "RESOLVED_CUSTOMER") return { label, variant: "ok" };
+  if (status === "RESOLVED_MERCHANT") return { label, variant: "info" };
+  if (status === "CLOSED") return { label, variant: "off" };
+  if (status === "IN_REVIEW") return { label, variant: "info" };
+  return { label, variant: "warn" };
+}
+
 export function shopPublishedBadge(isPublished: boolean): {
   label: string;
   variant: AdminBadgeVariant;

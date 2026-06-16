@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Star, ChatCircle } from "@phosphor-icons/react";
+import { Users, Star, ChatCircle, Scales } from "@phosphor-icons/react";
 import CustomersListClient from "./CustomersListClient";
 import ShopReviewsClient from "./ShopReviewsClient";
 import ShopMessagesClient, {
   type ChatConversationRow,
 } from "./ShopMessagesClient";
+import ShopDisputesClient, {
+  type ShopDisputeRow,
+} from "./ShopDisputesClient";
 import styles from "./customers-list.module.css";
 import type { CustomerRow } from "@/lib/dashboard/customer-insights";
 import type { SegmentAnalytics } from "@/lib/dashboard/customer-insights";
@@ -41,6 +44,8 @@ interface Props {
   customers: CustomerRow[];
   reviews: ShopReviewRow[];
   conversations: ChatConversationRow[];
+  disputes: ShopDisputeRow[];
+  openDisputes: number;
   unreadMessages: number;
   segments: SegmentAnalytics[];
   cities: CityRow[];
@@ -48,13 +53,15 @@ interface Props {
   paymentBreakdown: PaymentRow[];
 }
 
-type HubTab = "clients" | "reviews" | "messages";
+type HubTab = "clients" | "reviews" | "messages" | "disputes";
 
 export default function ClientsHubClient({
   currency,
   customers,
   reviews,
   conversations,
+  disputes,
+  openDisputes,
   unreadMessages,
   segments,
   cities,
@@ -110,6 +117,19 @@ export default function ClientsHubClient({
               <span className={styles.hubTabBadge}>{reviews.length}</span>
             ) : null}
           </button>
+          <button
+            type="button"
+            className={`${styles.hubTab} ${hubTab === "disputes" ? styles.hubTabActive : ""}`}
+            onClick={() => setHubTab("disputes")}
+          >
+            <Scales size={16} weight="duotone" />
+            Litiges
+            {openDisputes > 0 ? (
+              <span className={styles.hubTabBadgeUnread}>{openDisputes}</span>
+            ) : disputes.length > 0 ? (
+              <span className={styles.hubTabBadge}>{disputes.length}</span>
+            ) : null}
+          </button>
         </div>
       </div>
 
@@ -124,6 +144,8 @@ export default function ClientsHubClient({
         />
       ) : hubTab === "messages" ? (
         <ShopMessagesClient conversations={conversations} />
+      ) : hubTab === "disputes" ? (
+        <ShopDisputesClient disputes={disputes} />
       ) : (
         <ShopReviewsClient reviews={reviews} />
       )}

@@ -698,15 +698,6 @@ export default function ProductDetail({
               >
                 <Flag size={14} weight="regular" /> Signaler ce produit
               </button>
-              <button
-                type="button"
-                className={styles.leaveReviewCta}
-                style={{ borderColor: primaryColor, color: primaryColor }}
-                onClick={() => scrollToReviews(true)}
-              >
-                <MessageCircle size={16} strokeWidth={2.2} />
-                Laisser un avis
-              </button>
             </div>
           </div>
 
@@ -868,6 +859,7 @@ export default function ProductDetail({
                       productId={product.id}
                       embedded
                       hideTrigger
+                      primaryColor={primaryColor}
                       forceOpen={showReviewForm}
                       onFormClose={() => setShowReviewForm(false)}
                     />

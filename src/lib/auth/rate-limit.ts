@@ -24,6 +24,8 @@ export const AUTH_LIMITS = {
   SIGNUP: { limit: 5, windowMs: HOUR },
   /** Forgot password : 3 / heure / email (anti-spam d'emails). */
   FORGOT: { limit: 3, windowMs: HOUR },
+  SHOP_CUSTOMER_OTP: { limit: 3, windowMs: HOUR },
+  SHOP_CUSTOMER_OTP_IP: { limit: 10, windowMs: HOUR },
 } as const;
 
 /** Récupère l'IP cliente (cf-connecting-ip > 1ère IP de x-forwarded-for). */
@@ -113,6 +115,25 @@ export function checkForgotAllowed(email: string): {
     `auth:forgot:${norm(email)}`,
     AUTH_LIMITS.FORGOT.limit,
     AUTH_LIMITS.FORGOT.windowMs
+  );
+}
+
+/** OTP connexion client boutique : 3 / heure / email+shop. */
+export function checkShopCustomerOtpAllowed(
+  ip: string,
+  shopId: string,
+  email: string
+): { allowed: boolean; resetInSec: number } {
+  const emailKey = consume(
+    `auth:shop-cust-otp:${shopId}:${norm(email)}`,
+    AUTH_LIMITS.SHOP_CUSTOMER_OTP.limit,
+    AUTH_LIMITS.SHOP_CUSTOMER_OTP.windowMs
+  );
+  if (!emailKey.allowed) return emailKey;
+  return consume(
+    `auth:shop-cust-otp-ip:${ip}`,
+    AUTH_LIMITS.SHOP_CUSTOMER_OTP_IP.limit,
+    AUTH_LIMITS.SHOP_CUSTOMER_OTP_IP.windowMs
   );
 }
 

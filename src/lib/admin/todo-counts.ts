@@ -6,6 +6,7 @@ export type AdminTodoCounts = {
   manualReviewWithdrawals: number;
   openReports: number;
   openTickets: number;
+  newMerchantFeedbacks: number;
   total: number;
 };
 
@@ -24,6 +25,7 @@ export async function getAdminTodoCounts(): Promise<AdminTodoCounts> {
     manualReviewWithdrawals,
     openReports,
     openTickets,
+    newMerchantFeedbacks,
   ] = await Promise.all([
     db.payout.count({
       where: {
@@ -36,6 +38,7 @@ export async function getAdminTodoCounts(): Promise<AdminTodoCounts> {
     }),
     db.productReport.count({ where: { status: { in: OPEN_REPORT_STATUSES } } }),
     db.supportTicket.count({ where: { status: { in: OPEN_TICKET_STATUSES } } }),
+    db.merchantFeedback.count({ where: { status: "NEW" } }),
   ]);
 
   return {
@@ -43,10 +46,12 @@ export async function getAdminTodoCounts(): Promise<AdminTodoCounts> {
     manualReviewWithdrawals,
     openReports,
     openTickets,
+    newMerchantFeedbacks,
     total:
       pendingWithdrawals +
       manualReviewWithdrawals +
       openReports +
-      openTickets,
+      openTickets +
+      newMerchantFeedbacks,
   };
 }

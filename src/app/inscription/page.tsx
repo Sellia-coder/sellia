@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { signUpAction } from "@/app/actions/auth";
 import { useRouter, useSearchParams } from "next/navigation";
+import ShopCategoryIcon from "@/components/shop/ShopCategoryIcon";
 
 function InscriptionContent() {
   const router = useRouter();
@@ -21,7 +22,7 @@ function InscriptionContent() {
   const [draftPreview, setDraftPreview] = useState<{
     name: string;
     tagline?: string;
-    emoji?: string;
+    category?: string;
     primaryColor?: string;
   } | null>(null);
 
@@ -57,7 +58,7 @@ function InscriptionContent() {
           setDraftPreview({
             name: resolvedName,
             tagline: data.tagline,
-            emoji: data.products?.[0]?.emoji || "🛍️",
+            category: data.category,
             primaryColor: data.primaryColor,
           });
           setShopName(resolvedName);
@@ -247,22 +248,12 @@ function InscriptionContent() {
                 gap: "12px",
               }}
             >
-              <div
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "10px",
-                  background: draftPreview.primaryColor || "#0E1116",
-                  color: "#FFFFFF",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "24px",
-                  flexShrink: 0,
-                }}
-              >
-                {draftPreview.emoji}
-              </div>
+              <ShopCategoryIcon
+                category={draftPreview.category}
+                boxSize={44}
+                size={24}
+                accentColor={draftPreview.primaryColor || "#E84B1F"}
+              />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{

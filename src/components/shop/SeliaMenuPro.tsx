@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Heart, ShoppingBag } from "lucide-react";
+import { Search, Heart, ShoppingBag, UserCircle } from "lucide-react";
 import { useCartContext } from "./CartProvider";
 import SearchOverlay from "./SearchOverlay";
+import ShopCustomerAuthModal from "./ShopCustomerAuthModal";
 import styles from "./SeliaMenuPro.module.css";
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 
 export default function SeliaMenuPro({ shop }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [customerOpen, setCustomerOpen] = useState(false);
   const router = useRouter();
   const { cartCount, favsCount } = useCartContext();
 
@@ -78,6 +80,15 @@ export default function SeliaMenuPro({ shop }: Props) {
             <button
               type="button"
               className={styles.iconBtn}
+              aria-label="Mes achats"
+              onClick={() => setCustomerOpen(true)}
+            >
+              <UserCircle size={18} strokeWidth={2.2} />
+            </button>
+
+            <button
+              type="button"
+              className={styles.iconBtn}
               aria-label="Panier"
               onClick={() => router.push(`${homePath}/panier`)}
             >
@@ -101,6 +112,15 @@ export default function SeliaMenuPro({ shop }: Props) {
         onClose={() => setSearchOpen(false)}
         shopSlug={shop.slug}
       />
+
+      {customerOpen && (
+        <ShopCustomerAuthModal
+          shopSlug={shop.slug}
+          shopName={shop.name}
+          primaryColor={primaryColor}
+          onClose={() => setCustomerOpen(false)}
+        />
+      )}
     </>
   );
 }

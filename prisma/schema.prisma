@@ -40,6 +40,7 @@ model User {
   trustedDevices   TrustedDevice[]
   supportTickets   SupportTicket[]  @relation("TicketOwner")
   supportMessages  SupportMessage[] @relation("MessageSender")
+  merchantFeedbacks MerchantFeedback[]
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -158,6 +159,8 @@ model Shop {
   featureUnlocks      ShopFeatureUnlock[]
   productReports      ProductReport[]
   chatConversations   ChatConversation[]
+  disputes            Dispute[]
+  merchantFeedbacks   MerchantFeedback[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -420,6 +423,7 @@ model Order {
 
   cartevoTransaction CartevoTransaction? @relation("OrderCartevoTx")
   payouts            Payout[]
+  disputes           Dispute[]
 
   @@index([shopId])
   @@index([orderNumber])
@@ -427,6 +431,68 @@ model Order {
   @@index([status])
   @@index([paymentStatus])
   @@index([createdAt])
+}
+
+// ============= DISPUTES (litiges client / marchand / admin) =============
+model Dispute {
+  id                  String    @id @default(cuid())
+  orderId             String    @map("order_id")
+  order               Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shopId              String    @map("shop_id")
+  shop                Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  customerEmail       String    @map("customer_email")
+  reason              String
+  description         String    @db.Text
+  status              String    @default("OPEN")
+
+  merchantResponse    String?   @map("merchant_response") @db.Text
+  merchantRespondedAt DateTime? @map("merchant_responded_at")
+
+  adminResolution     String?   @map("admin_resolution") @db.Text
+  resolvedBy          String?   @map("resolved_by")
+  resolvedAt          DateTime? @map("resolved_at")
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@unique([orderId])
+  @@index([shopId, status])
+  @@index([customerEmail])
+  @@map("disputes")
+}
+
+// ============================================
+// MERCHANT FEEDBACK (retours produit → admin)
+// ============================================
+
+enum MerchantFeedbackType {
+  SUGGESTION
+  REMARQUE
+  BUG
+  AUTRE
+}
+
+enum MerchantFeedbackStatus {
+  NEW
+  READ
+  HANDLED
+}
+
+model MerchantFeedback {
+  id        String                 @id @default(cuid())
+  userId    String                 @map("user_id")
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId    String?                @map("shop_id")
+  shop      Shop?                  @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  type      MerchantFeedbackType   @default(SUGGESTION)
+  message   String                 @db.Text
+  status    MerchantFeedbackStatus @default(NEW)
+  createdAt DateTime               @default(now()) @map("created_at")
+  updatedAt DateTime               @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@map("merchant_feedbacks")
 }
 
 model Customer {

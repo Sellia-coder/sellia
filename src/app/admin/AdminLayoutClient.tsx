@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-type NavItem = { href: string; label: string; icon: React.ReactNode };
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  badgeCount?: number;
+};
 
 const PLATFORM_LINKS: NavItem[] = [
   {
@@ -44,6 +49,18 @@ const PLATFORM_LINKS: NavItem[] = [
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
         <line x1="4" y1="22" x2="4" y2="15" />
+      </svg>
+    ),
+  },
+  {
+    href: "/admin/litiges",
+    label: "Litiges",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M12 3v18" />
+        <path d="M5 7h14" />
+        <path d="M7 11h10" />
+        <path d="M9 15h6" />
       </svg>
     ),
   },
@@ -157,6 +174,24 @@ const SYSTEM_LINKS_BASE: NavItem[] = [
     ),
   },
   {
+    href: "/admin/feedback",
+    label: "Feedback",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+        <path d="M8 10h8" />
+        <path d="M8 14h5" />
+      </svg>
+    ),
+  },
+  {
     href: "/admin/support",
     label: "Support",
     icon: (
@@ -181,7 +216,7 @@ function NavSection({ label, links, pathname }: { label: string; links: NavItem[
   return (
     <div className="dash-nav-section">
       <div className="dash-nav-section-label">{label}</div>
-      {links.map(({ href, label: linkLabel, icon }) => (
+      {links.map(({ href, label: linkLabel, icon, badgeCount }) => (
         <Link
           key={href}
           href={href}
@@ -189,6 +224,22 @@ function NavSection({ label, links, pathname }: { label: string; links: NavItem[
         >
           {icon}
           {linkLabel}
+          {badgeCount && badgeCount > 0 ? (
+            <span
+              style={{
+                marginLeft: 10,
+                background: "var(--dash-ember)",
+                color: "white",
+                borderRadius: 999,
+                padding: "2px 8px",
+                fontSize: 11,
+                fontWeight: 800,
+                lineHeight: "18px",
+              }}
+            >
+              {badgeCount}
+            </span>
+          ) : null}
         </Link>
       ))}
     </div>
@@ -214,10 +265,12 @@ export default function AdminLayoutClient({
   children,
   userHeader,
   isSuperAdmin = false,
+  newMerchantFeedbacks = 0,
 }: {
   children: React.ReactNode;
   userHeader: { name: string; initial: string; email: string };
   isSuperAdmin?: boolean;
+  newMerchantFeedbacks?: number;
 }) {
   const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -268,9 +321,15 @@ export default function AdminLayoutClient({
         <NavSection
           label="Système"
           links={
-            isSuperAdmin
-              ? [SUPER_ADMIN_LINK, ...SYSTEM_LINKS_BASE]
-              : SYSTEM_LINKS_BASE
+            (
+              isSuperAdmin
+                ? [SUPER_ADMIN_LINK, ...SYSTEM_LINKS_BASE]
+                : SYSTEM_LINKS_BASE
+            ).map((l) =>
+              l.href === "/admin/feedback"
+                ? { ...l, badgeCount: newMerchantFeedbacks }
+                : l
+            )
           }
           pathname={pathname}
         />
