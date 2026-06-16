@@ -9,6 +9,8 @@ import {
 import { reportStatusBadge } from "@/lib/admin/status-badges";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminReportDetailClient from "./AdminReportDetailClient";
+import AdminShopLink from "@/components/admin/AdminShopLink";
+import AdminEntityHistory from "@/components/admin/AdminEntityHistory";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,7 @@ export default async function AdminSignalementDetailPage({
       product: { select: { id: true, name: true, status: true, slug: true } },
       shop: {
         select: {
+          id: true,
           slug: true,
           name: true,
           owner: { select: { email: true } },
@@ -81,8 +84,15 @@ export default async function AdminSignalementDetailPage({
           <h2 className="admin-detail-card-title">Boutique</h2>
           <dl>
             <div className="admin-detail-row">
-              <dt>Nom</dt>
-              <dd>{report.shop.name}</dd>
+              <dt>Boutique</dt>
+              <dd>
+                <AdminShopLink
+                  shopId={report.shop.id}
+                  name={report.shop.name}
+                  slug={report.shop.slug}
+                  className="admin-link"
+                />
+              </dd>
             </div>
             <div className="admin-detail-row">
               <dt>Marchand</dt>
@@ -103,6 +113,12 @@ export default async function AdminSignalementDetailPage({
         productHidden={productHidden}
         merchantEmail={report.shop.owner.email}
         shopSlug={report.shop.slug}
+      />
+
+      <AdminEntityHistory
+        targetType="shop"
+        targetId={report.shop.id}
+        title="Historique admin — boutique"
       />
     </div>
   );

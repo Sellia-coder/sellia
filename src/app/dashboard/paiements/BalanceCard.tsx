@@ -83,7 +83,7 @@ export default function BalanceCard({
       <div
         style={{
           marginTop: 18,
-          fontFamily: "Fraunces, serif",
+          fontFamily: "Manrope, sans-serif",
           fontSize: 38,
           fontWeight: 500,
           color,

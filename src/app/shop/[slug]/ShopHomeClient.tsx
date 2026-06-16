@@ -4,7 +4,6 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowRight, Truck, Star, ShoppingBag, Heart } from "lucide-react";
 import styles from "./shop-home.module.css";
-import { getProductRating } from "@/lib/utils/product-rating";
 import TrustSection from "@/components/shop/TrustSection";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 import { getHeroBackground } from "@/components/shop/HeroTemplate";
@@ -26,6 +25,8 @@ export interface ShopHomeProduct {
   emoji: string;
   type?: string;
   isNew?: boolean;
+  ratingAvg?: number | null;
+  ratingCount?: number | null;
 }
 
 export interface ShopHomeTestimonial {
@@ -171,9 +172,8 @@ export default function ShopHomeClient(props: Props) {
         </div>
         <div className={styles.productsGrid}>
           {props.products.slice(0, 8).map((product) => {
-            const { value: rating, count: reviewsCount } = getProductRating(
-              product.id
-            );
+            const rating = product.ratingAvg ?? 0;
+            const reviewsCount = product.ratingCount ?? 0;
             return (
               <Link
                 key={product.id}

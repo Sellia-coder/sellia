@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import ShopPageMarkdown from "@/components/shop/ShopPageMarkdown";
+import { LEGAL_TEMPLATE_KEYS } from "@/lib/shop/legal-templates";
 
 interface Props {
   params: Promise<{ slug: string; pageSlug: string }>;
@@ -65,6 +66,11 @@ export default async function ShopCustomPageView({ params }: Props) {
       <article className="shop-page-content">
         <header className="shop-page-header">
           <h1 className="shop-page-title">{page.title}</h1>
+          {page.templateKey && LEGAL_TEMPLATE_KEYS.has(page.templateKey) && (
+            <p className="shop-page-legal-disclaimer">
+              Modèle fourni à titre indicatif — à faire valider par un conseil juridique.
+            </p>
+          )}
         </header>
         <ShopPageMarkdown content={page.content} />
       </article>

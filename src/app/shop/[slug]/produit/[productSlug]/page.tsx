@@ -4,6 +4,8 @@ import {
   getShopProductBySlug,
   getRelatedProducts,
   getApprovedProductReviews,
+  getProductPaidSalesCount,
+  parseShippingZones,
 } from "@/lib/shop-data";
 import ProductDetail from "@/components/shop/ProductDetail";
 
@@ -63,9 +65,14 @@ export default async function ProductPage({ params }: Props) {
   };
 
   const product = normalizedProduct;
-  const [related, reviews] = await Promise.all([
+  const zones = parseShippingZones(shop.shippingZones);
+  const zoneEta = zones.find((z) => z.eta)?.eta ?? null;
+  const shippingEta = zoneEta ?? null;
+
+  const [related, reviews, salesCount] = await Promise.all([
     getRelatedProducts(shop.id, product.id, 5),
     getApprovedProductReviews(product.id),
+    getProductPaidSalesCount(product.id, shop.id),
   ]);
 
   const productJsonLd = {
@@ -110,6 +117,8 @@ export default async function ProductPage({ params }: Props) {
           }}
           related={related}
           reviews={reviews}
+          salesCount={salesCount}
+          shippingEta={shippingEta}
         />
       </div>
     </>

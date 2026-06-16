@@ -7,6 +7,9 @@ import { payoutStatusBadge } from "@/lib/admin/status-badges";
 import { payoutStatusLabel, payoutTypeLabel } from "@/lib/admin/labels";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminWithdrawalRowActions from "@/components/admin/AdminWithdrawalRowActions";
+import AdminWithdrawalMgmt from "@/components/admin/AdminWithdrawalMgmt";
+import AdminShopLink from "@/components/admin/AdminShopLink";
+import AdminEntityHistory from "@/components/admin/AdminEntityHistory";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +58,18 @@ export default async function AdminRetraitDetailPage({
     reviewerEmail = reviewer?.email ?? lead.reviewedBy;
   }
 
+  let verifierEmail: string | null = null;
+  if (lead.adminVerifiedBy) {
+    const verifier = await db.user.findUnique({
+      where: { id: lead.adminVerifiedBy },
+      select: { email: true },
+    });
+    verifierEmail = verifier?.email ?? lead.adminVerifiedBy;
+  }
+
+  const manualReviewRequired =
+    lead.manualReviewRequired || rows.some((r) => r.manualReviewRequired);
+
   return (
     <div>
       <div className="admin-back-bar">
@@ -69,7 +84,7 @@ export default async function AdminRetraitDetailPage({
         {formatAdminDate(lead.requestedAt)}
       </p>
 
-      {lead.manualReviewRequired || rows.some((r) => r.manualReviewRequired) ? (
+      {manualReviewRequired ? (
         <div className="admin-alert admin-alert--warn">
           <strong>À vérifier manuellement</strong> — Ce retrait nécessite une
           décision humaine avant toute action sur les fonds.
@@ -94,7 +109,12 @@ export default async function AdminRetraitDetailPage({
             <div className="admin-detail-row">
               <dt>Boutique</dt>
               <dd>
-                <Link href={shopUrl}>{lead.shop.name}</Link>
+                <AdminShopLink
+                  shopId={lead.shop.id}
+                  name={lead.shop.name}
+                  slug={lead.shop.slug}
+                  className="admin-link"
+                />
               </dd>
             </div>
             <div className="admin-detail-row">
@@ -147,9 +167,25 @@ export default async function AdminRetraitDetailPage({
               <dt>Lignes payout</dt>
               <dd>{rows.length}</dd>
             </div>
+            <div className="admin-detail-row">
+              <dt>Vérifié manuellement</dt>
+              <dd>
+                {lead.adminVerifiedAt
+                  ? `${verifierEmail ?? "—"} · ${formatAdminDate(lead.adminVerifiedAt)}`
+                  : "—"}
+              </dd>
+            </div>
           </dl>
         </div>
       </div>
+
+      <AdminWithdrawalMgmt
+        withdrawalGroupId={withdrawalGroupId}
+        initialNote={lead.adminInternalNote}
+        manualReviewRequired={manualReviewRequired}
+        cartevoTxId={lead.cartevoTxId}
+        status={status}
+      />
 
       <section className="admin-section">
         <h2 className="admin-section-title">Lignes du groupe</h2>
@@ -182,6 +218,12 @@ export default async function AdminRetraitDetailPage({
           </div>
         </div>
       </section>
+
+      <AdminEntityHistory
+        targetType="withdrawal_group"
+        targetId={withdrawalGroupId}
+        title="Historique admin — retrait"
+      />
     </div>
   );
 }

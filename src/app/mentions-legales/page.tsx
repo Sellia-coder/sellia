@@ -250,7 +250,7 @@ export default function MentionsLegales() {
               </p>
               <ul>
                 <li>La marque verbale et figurative « Sellia » et son logo associé</li>
-                <li>L&apos;identité visuelle du Service (charte graphique, palette de couleurs Ink/Ivory/Ember, typographies Fraunces et Inter)</li>
+                <li>L&apos;identité visuelle du Service (charte graphique, palette de couleurs Ink/Ivory/Ember, typographies Manrope et Inter)</li>
                 <li>Le code source de l&apos;application web et de ses composants</li>
                 <li>L&apos;architecture logicielle et les bases de données associées</li>
                 <li>Les textes, illustrations, photographies, vidéos, animations</li>
@@ -371,7 +371,7 @@ export default function MentionsLegales() {
                 <li><strong>TypeScript</strong> — Microsoft Corporation</li>
                 <li><strong>Tailwind CSS</strong> — Tailwind Labs, Inc.</li>
                 <li><strong>Polices Inter</strong> — Rasmus Andersson (licence SIL Open Font License)</li>
-                <li><strong>Polices Fraunces</strong> — Undercase Type (licence SIL Open Font License)</li>
+                <li><strong>Police Manrope</strong> — Mikhail Sharanda (licence SIL Open Font License)</li>
                 <li><strong>Polices JetBrains Mono</strong> — JetBrains s.r.o. (licence SIL Open Font License)</li>
               </ul>
             </section>

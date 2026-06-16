@@ -13,6 +13,7 @@ import {
 import { generateHeroImage } from "@/lib/ai/generate-hero-image";
 import { generateLegalPagesForShop } from "@/lib/shop/legal-pages";
 import { getPlatformSettings } from "@/lib/admin/platform-settings";
+import { assertShopNameAvailable } from "@/lib/shop-name";
 
 type DraftGeneratedProduct = {
   id?: string;
@@ -48,8 +49,8 @@ function fontsFromAppearanceStyle(fontStyle: string): {
 } {
   if (fontStyle === "modern") return { displayFont: "Inter", bodyFont: "Inter" };
   if (fontStyle === "editorial")
-    return { displayFont: "Fraunces", bodyFont: "Fraunces" };
-  return { displayFont: "Fraunces", bodyFont: "Inter" };
+    return { displayFont: "Manrope", bodyFont: "Manrope" };
+  return { displayFont: "Manrope", bodyFont: "Inter" };
 }
 
 export async function getActiveDraftShopAction() {
@@ -93,6 +94,23 @@ export async function getActiveDraftShopAction() {
   };
 
   return { ok: true, draft: normalizedDraft } as const;
+}
+
+export async function checkShopNameAvailabilityAction(
+  name: string,
+  excludeShopId?: string
+) {
+  const { assertShopNameAvailable } = await import("@/lib/shop-name");
+  const result = await assertShopNameAvailable(name, excludeShopId);
+  if (!result.ok) {
+    return {
+      ok: false as const,
+      available: false,
+      error: result.error,
+      suggestion: result.suggestion,
+    };
+  }
+  return { ok: true as const, available: true };
 }
 
 export async function checkSlugAvailabilityAction(slug: string) {
@@ -188,6 +206,21 @@ export async function publishShopAction(input: PublishShopInput) {
   });
   if (existingShop) return { ok: false, error: "Tu as déjà une boutique publiée." } as const;
 
+  const shopDisplayName =
+    draft.shopName?.trim() ||
+    generatedData?.name?.trim() ||
+    "Ma boutique";
+  const nameCheck = await assertShopNameAvailable(shopDisplayName);
+  if (!nameCheck.ok) {
+    return {
+      ok: false,
+      error: nameCheck.suggestion
+        ? `${nameCheck.error} Essayez « ${nameCheck.suggestion} ».`
+        : nameCheck.error,
+      field: "name",
+    } as const;
+  }
+
   try {
     const includedProducts = data.step2.products.filter((p) => p.included);
     const appearance = data.stepAppearance;
@@ -200,10 +233,7 @@ export async function publishShopAction(input: PublishShopInput) {
       const createdShop = await tx.shop.create({
         data: {
           ownerId: userId,
-          name:
-            draft.shopName?.trim() ||
-            generatedData?.name?.trim() ||
-            "Ma boutique",
+          name: nameCheck.normalizedName,
           slug,
           tagline: generatedData?.tagline ?? null,
           description: data.step4.description,

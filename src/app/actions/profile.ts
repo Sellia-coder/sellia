@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
 import type { Prisma } from "@prisma/client";
+import { assertShopNameAvailable } from "@/lib/shop-name";
 
 interface ProfileUpdate {
   firstName?: string;
@@ -72,9 +73,16 @@ export async function updateShopBasicsAction(input: ShopBasicsUpdate) {
 
     const updates: Prisma.ShopUpdateInput = {};
     if (input.name !== undefined) {
-      const name = input.name.trim();
-      if (!name) return { ok: false, error: "Le nom de la boutique est requis" };
-      updates.name = name;
+      const nameCheck = await assertShopNameAvailable(input.name, shop.id);
+      if (!nameCheck.ok) {
+        return {
+          ok: false,
+          error: nameCheck.suggestion
+            ? `${nameCheck.error} Essayez « ${nameCheck.suggestion} ».`
+            : nameCheck.error,
+        };
+      }
+      updates.name = nameCheck.normalizedName;
     }
     if (input.tagline !== undefined) updates.tagline = input.tagline.trim() || null;
     if (input.description !== undefined) updates.description = input.description.trim() || null;

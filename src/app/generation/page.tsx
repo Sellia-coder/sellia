@@ -348,7 +348,7 @@ function GenerationContent() {
             }}
           >
             <div style={{ fontSize: "40px", marginBottom: "16px" }}>⚠️</div>
-            <h2 style={{ fontFamily: "Fraunces, serif", fontSize: "24px", marginBottom: "12px", color: "#0E1116" }}>
+            <h2 style={{ fontFamily: "Manrope, sans-serif", fontSize: "24px", marginBottom: "12px", color: "#0E1116" }}>
               Génération échouée
             </h2>
             <p style={{ fontSize: "14px", color: "#404552", marginBottom: "24px", lineHeight: 1.5 }}>
@@ -397,7 +397,7 @@ function GenerationContent() {
             }}
           >
             <div style={{ fontSize: "40px", marginBottom: "16px" }}>⏱️</div>
-            <h2 style={{ fontFamily: "Fraunces, serif", fontSize: "24px", marginBottom: "12px", color: "#0E1116" }}>
+            <h2 style={{ fontFamily: "Manrope, sans-serif", fontSize: "24px", marginBottom: "12px", color: "#0E1116" }}>
               Lien expiré
             </h2>
             <p style={{ fontSize: "14px", color: "#404552", marginBottom: "24px", lineHeight: 1.5 }}>

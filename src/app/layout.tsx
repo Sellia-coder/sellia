@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter, Manrope, Fraunces } from "next/font/google";
 import CookieConsent from "@/components/CookieConsent";
+import PublicMaintenanceBoundary from "@/components/PublicMaintenanceBoundary";
 import "./globals.css";
 
 const inter = Inter({
@@ -11,9 +12,16 @@ const inter = Inter({
 
 const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-fraunces",
   display: "swap",
   axes: ["opsz"],
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+  weight: ["500", "600", "700", "800"],
 });
 
 const SITE_URL = "https://getsellia.com";
@@ -147,13 +155,13 @@ const jsonLd = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="fr" className={`${inter.variable} ${manrope.variable} ${fraunces.variable}`}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="alternate icon" href="/favicon.ico" />
@@ -165,6 +173,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen antialiased">
+        <PublicMaintenanceBoundary />
         {children}
         <CookieConsent />
       </body>

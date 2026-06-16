@@ -10,13 +10,16 @@ export interface SidebarCounts {
     toDeliver: number;
     actionRequired: number;
   };
+  chat: {
+    unread: number;
+  };
 }
 
 /**
  * Compteurs pour les badges sidebar (request-scoped, pas de cache global).
  */
 export async function getSidebarCounts(shopId: string): Promise<SidebarCounts> {
-  const [productsLowStock, productsTotal, ordersPending, ordersToDeliver] =
+  const [productsLowStock, productsTotal, ordersPending, ordersToDeliver, chatUnread] =
     await Promise.all([
       db.product.count({
         where: {
@@ -44,6 +47,10 @@ export async function getSidebarCounts(shopId: string): Promise<SidebarCounts> {
           status: { not: "cancelled" },
         },
       }),
+      db.chatConversation.aggregate({
+        where: { shopId, status: "OPEN" },
+        _sum: { unreadForMerchant: true },
+      }),
     ]);
 
   return {
@@ -55,6 +62,9 @@ export async function getSidebarCounts(shopId: string): Promise<SidebarCounts> {
       pending: ordersPending,
       toDeliver: ordersToDeliver,
       actionRequired: ordersPending + ordersToDeliver,
+    },
+    chat: {
+      unread: chatUnread._sum.unreadForMerchant ?? 0,
     },
   };
 }

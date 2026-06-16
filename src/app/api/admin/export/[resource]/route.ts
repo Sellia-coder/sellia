@@ -162,5 +162,39 @@ export async function GET(
     });
   }
 
+  if (resource === "clients") {
+    const customers = await db.customer.findMany({
+      orderBy: { totalSpent: "desc" },
+      take: 5000,
+      include: { shop: { select: { slug: true } } },
+    });
+    const csv = toCsv(
+      [
+        "boutique",
+        "nom",
+        "telephone",
+        "email",
+        "commandes",
+        "total_depense",
+        "derniere_commande",
+      ],
+      customers.map((c) => [
+        c.shop.slug,
+        c.fullName,
+        c.phone,
+        c.email ?? "",
+        String(c.totalOrders),
+        String(c.totalSpent),
+        c.lastOrderAt?.toISOString() ?? "",
+      ])
+    );
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="clients-${date}.csv"`,
+      },
+    });
+  }
+
   return NextResponse.json({ error: "Resource inconnue" }, { status: 404 });
 }

@@ -1,5 +1,8 @@
 import { PAYMENT_STATUS } from "@/lib/cartevo/order-status";
 import { SELLIA_PLANS, type SelliaPlan } from "@/lib/cartevo/pricing";
+import { SELLIA_NUM_CLASS } from "@/lib/format-num";
+
+export { SELLIA_NUM_CLASS };
 
 /** Commandes dont le paiement est confirmé (GMV plateforme). */
 export const ADMIN_PAID_PAYMENT_STATUSES = [

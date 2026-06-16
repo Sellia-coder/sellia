@@ -37,7 +37,7 @@ export default function PricingPage() {
           </div>
           <h1
             style={{
-              fontFamily: "Fraunces, serif",
+              fontFamily: "Manrope, sans-serif",
               fontSize: 48,
               fontWeight: 500,
               color: "#0A0E13",
@@ -108,7 +108,7 @@ export default function PricingPage() {
                 )}
                 <h3
                   style={{
-                    fontFamily: "Fraunces, serif",
+                    fontFamily: "Manrope, sans-serif",
                     fontSize: 26,
                     fontWeight: 500,
                     margin: "0 0 8px",
@@ -119,7 +119,7 @@ export default function PricingPage() {
                 <div style={{ marginBottom: 6 }}>
                   <span
                     style={{
-                      fontFamily: "Fraunces, serif",
+                      fontFamily: "Manrope, sans-serif",
                       fontSize: 44,
                       fontWeight: 500,
                       letterSpacing: "-1.2px",
@@ -192,7 +192,7 @@ export default function PricingPage() {
         <div style={{ marginBottom: 80 }}>
           <h2
             style={{
-              fontFamily: "Fraunces, serif",
+              fontFamily: "Manrope, sans-serif",
               fontSize: 32,
               fontWeight: 500,
               textAlign: "center",
@@ -217,7 +217,7 @@ export default function PricingPage() {
         <div>
           <h2
             style={{
-              fontFamily: "Fraunces, serif",
+              fontFamily: "Manrope, sans-serif",
               fontSize: 32,
               fontWeight: 500,
               textAlign: "center",

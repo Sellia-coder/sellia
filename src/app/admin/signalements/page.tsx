@@ -4,18 +4,24 @@ import { formatAdminDate } from "@/lib/admin/constants";
 import { REPORT_REASON_LABELS } from "@/lib/admin/labels";
 import { reportStatusBadge } from "@/lib/admin/status-badges";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import { getSignalementsPageKpis } from "@/lib/admin/page-stats";
+import AdminShopLink from "@/components/admin/AdminShopLink";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSignalementsPage() {
-  const reports = await db.productReport.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      product: { select: { name: true } },
-      shop: { select: { name: true, slug: true } },
-    },
-  });
+  const [kpis, reports] = await Promise.all([
+    getSignalementsPageKpis(),
+    db.productReport.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: {
+        product: { select: { name: true } },
+        shop: { select: { id: true, name: true, slug: true } },
+      },
+    }),
+  ]);
 
   return (
     <div>
@@ -25,7 +31,9 @@ export default async function AdminSignalementsPage() {
         signalés par des visiteurs.
       </p>
 
-      <div className="admin-card">
+      <AdminKpiGrid items={kpis} />
+
+      <div className="admin-card admin-card--premium">
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
@@ -55,9 +63,11 @@ export default async function AdminSignalementsPage() {
                         </Link>
                       </td>
                       <td>
-                        <Link href={`/admin/boutiques?q=${encodeURIComponent(r.shop.slug)}`}>
-                          {r.shop.name}
-                        </Link>
+                        <AdminShopLink
+                          shopId={r.shop.id}
+                          name={r.shop.name}
+                          slug={r.shop.slug}
+                        />
                       </td>
                       <td>{REPORT_REASON_LABELS[r.reason] ?? r.reason}</td>
                       <td>

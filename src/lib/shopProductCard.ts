@@ -1,6 +1,5 @@
 import type { ShopWithProducts } from "@/lib/shop-data";
 import type { ProductCardProduct } from "@/components/shop/ProductCard";
-import { getProductRating } from "@/lib/utils/product-rating";
 
 export function categoryLabel(
   p: ShopWithProducts["products"][number]
@@ -21,13 +20,12 @@ export function currencyDisplay(c: string): string {
 
 export function mapShopProductToCard(
   p: ShopWithProducts["products"][number],
-  currency: string
+  currency: string,
+  reviewStats?: { avg: number; count: number } | null
 ): ProductCardProduct {
   const tags = p.tags ?? [];
   const t = (x: string) => tags.some((tag) => tag.toLowerCase() === x);
   const stock = p.unlimitedStock ? null : p.stock ?? null;
-
-  const { value: rating, count: reviewsCount } = getProductRating(p.id);
 
   return {
     id: p.id,
@@ -38,8 +36,8 @@ export function mapShopProductToCard(
     imageUrl: p.imageUrl,
     description: stripHtml(p.shortDescription),
     category: categoryLabel(p),
-    rating,
-    reviewsCount,
+    rating: reviewStats && reviewStats.count > 0 ? reviewStats.avg : null,
+    reviewsCount: reviewStats && reviewStats.count > 0 ? reviewStats.count : null,
     isNew: t("nouveau") || t("new"),
     isBestSeller: tags.some((tag) =>
       /best|bestseller|vedette/i.test(tag)

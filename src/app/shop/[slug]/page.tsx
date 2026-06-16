@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { getPublishedShopBySlug } from "@/lib/shop-data";
+import { getPublishedShopBySlug, getProductReviewStatsForShop } from "@/lib/shop-data";
 import { categoryLabel, currencyDisplay } from "@/lib/shopProductCard";
 import ShopHomeClient from "./ShopHomeClient";
 
@@ -34,12 +34,15 @@ export default async function ShopHomePage({ params }: Props) {
   const shop = await getPublishedShopBySlug(slug);
   if (!shop) notFound();
 
-  const reviews = await db.review.findMany({
-    where: { shopId: shop.id, status: "approved" },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-    include: { product: { select: { name: true } } },
-  });
+  const [reviews, reviewStats] = await Promise.all([
+    db.review.findMany({
+      where: { shopId: shop.id, status: "approved" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      include: { product: { select: { name: true } } },
+    }),
+    getProductReviewStatsForShop(shop.id),
+  ]);
 
   const categoriesMap = new Map<
     string,
@@ -65,17 +68,22 @@ export default async function ShopHomePage({ params }: Props) {
   const currency = currencyDisplay(shop.currency);
   const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
 
-  const products = shop.products.map((p) => ({
-    id: p.id,
-    slug: p.slug ?? p.id,
-    name: p.name,
-    price: p.price,
-    comparePrice: p.comparePrice,
-    imageUrl: p.imageUrl,
-    emoji: p.emoji || "📦",
-    type: p.type,
-    isNew: new Date(p.createdAt).getTime() > twoWeeksAgo,
-  }));
+  const products = shop.products.map((p) => {
+    const stats = reviewStats.get(p.id);
+    return {
+      id: p.id,
+      slug: p.slug ?? p.id,
+      name: p.name,
+      price: p.price,
+      comparePrice: p.comparePrice,
+      imageUrl: p.imageUrl,
+      emoji: p.emoji || "📦",
+      type: p.type,
+      isNew: new Date(p.createdAt).getTime() > twoWeeksAgo,
+      ratingAvg: stats && stats.count > 0 ? stats.avg : null,
+      ratingCount: stats && stats.count > 0 ? stats.count : null,
+    };
+  });
 
   const testimonials = reviews.map((r) => ({
     name: r.authorName,

@@ -8,6 +8,9 @@ import AdminUserRowActions from "@/components/admin/AdminUserRowActions";
 import AdminPagination from "@/components/admin/AdminPagination";
 import AdminUsersSearch from "./AdminUsersSearch";
 import AdminExportButton from "@/components/admin/AdminExportButton";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import { getUtilisateursPageKpis } from "@/lib/admin/page-stats";
+import AdminShopLink from "@/components/admin/AdminShopLink";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +26,7 @@ export default async function AdminUtilisateursPage({
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
   const query = q.trim().toLowerCase();
   const appUrl = process.env.APP_URL || "https://getsellia.com";
+  const kpis = await getUtilisateursPageKpis();
 
   const where = query
     ? { email: { contains: query, mode: "insensitive" as const } }
@@ -44,7 +48,7 @@ export default async function AdminUtilisateursPage({
         shops: {
           take: 1,
           orderBy: { createdAt: "desc" },
-          select: { slug: true, name: true },
+          select: { id: true, slug: true, name: true },
         },
       },
     }),
@@ -59,15 +63,13 @@ export default async function AdminUtilisateursPage({
       <h1 className="admin-page-title">Utilisateurs</h1>
       <p className="admin-page-sub">
         {total} compte{total !== 1 ? "s" : ""} — gestion des marchands (lecture,
-        boutique publique, blocage). La promotion admin se fait en SQL, pas via
-        l&apos;interface.
+        blocage avec motif, liens croisés).
       </p>
 
+      <AdminKpiGrid items={kpis} />
+
       <div className="admin-retraits-toolbar">
-        <div className="admin-retraits-toolbar">
         <AdminUsersSearch initialQ={q} />
-        <AdminExportButton resource="utilisateurs" />
-      </div>
         <AdminExportButton resource="utilisateurs" />
       </div>
 
@@ -110,9 +112,11 @@ export default async function AdminUtilisateursPage({
                       </td>
                       <td>
                         {shop ? (
-                          <Link href={`/admin/boutiques?q=${encodeURIComponent(shop.slug)}`}>
-                            {shop.slug}
-                          </Link>
+                          <AdminShopLink
+                            shopId={shop.id}
+                            name={shop.name}
+                            slug={shop.slug}
+                          />
                         ) : (
                           "—"
                         )}

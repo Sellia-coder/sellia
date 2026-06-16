@@ -59,7 +59,7 @@ const THEMES = [
 ];
 
 const FONT_COMBOS = [
-  { heading: "Fraunces", body: "Inter", label: "Classique élégant" },
+  { heading: "Manrope", body: "Inter", label: "Classique élégant" },
   { heading: "Playfair Display", body: "Lato", label: "Magazine moderne" },
   { heading: "Cormorant Garamond", body: "Lato", label: "Sophistiqué naturel" },
   { heading: "DM Serif Display", body: "Inter", label: "Boutique luxe" },
@@ -209,6 +209,7 @@ export default function AppearanceStudioClient({ shop: initialShop }: Props) {
         className={`${styles.splitView} ${!showPreview ? styles.noPreview : ""}`}
       >
         <div className={styles.configPanel}>
+          <div className={styles.tabsWrap}>
           <div className={styles.tabs}>
             {(
               [
@@ -233,6 +234,7 @@ export default function AppearanceStudioClient({ shop: initialShop }: Props) {
                 </button>
               );
             })}
+          </div>
           </div>
 
           <div className={styles.configContent}>

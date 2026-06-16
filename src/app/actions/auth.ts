@@ -18,6 +18,7 @@ import {
   tooManyAttemptsMessage,
 } from "@/lib/auth/rate-limit";
 import { claimDraftShop } from "@/lib/draftShop/claim";
+import { adminRequiresOtpAtLogin } from "@/lib/auth/admin";
 import { getPlatformSettings } from "@/lib/admin/platform-settings";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -144,7 +145,7 @@ export async function verifyOTPAction(formData: FormData) {
 
     await createSession(user.id, { userAgent, ipAddress });
 
-    if (!user.twoFactorEnabled) {
+    if (!user.twoFactorEnabled && !adminRequiresOtpAtLogin(user)) {
       await trustCurrentDevice(user.id, { userAgent, ipAddress });
     }
 
@@ -175,7 +176,7 @@ export async function verifyOTPAction(formData: FormData) {
       data: { lastLoginAt: new Date() },
     });
 
-    if (!user.twoFactorEnabled) {
+    if (!user.twoFactorEnabled && !adminRequiresOtpAtLogin(user)) {
       await trustCurrentDevice(user.id, { userAgent, ipAddress });
     }
 
@@ -293,7 +294,8 @@ export async function signInAction(formData: FormData) {
 
   // Vérifier si l'appareil est trusted ET si le user n'a pas activé "OTP à chaque connexion"
   const deviceTrusted = await isDeviceTrusted(user.id, userAgent, ipAddress || undefined);
-  const requireOTPAlways = user.twoFactorEnabled;
+  const requireOTPAlways =
+    user.twoFactorEnabled || adminRequiresOtpAtLogin(user);
 
   if (deviceTrusted && !requireOTPAlways) {
     // Appareil connu + 2FA pas forcée → connexion directe

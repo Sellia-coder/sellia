@@ -15,7 +15,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 38px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -57,7 +57,7 @@
 }
 
 .statValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 42px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -318,7 +318,7 @@
 }
 
 .emptyState h3 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   font-weight: 500;
   color: var(--sellia-ink);

@@ -1,0 +1,49 @@
+/**
+ * Fraunces — page d'accueil « / » UNIQUEMENT (importé par page.tsx).
+ * Les chiffres restent Manrope via --font-num / .sellia-num.
+ */
+.sellia-landing :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  .hero h1,
+  .section-title,
+  .problem-card h4,
+  .step h4,
+  .persona-avatar,
+  .persona-name,
+  .persona-quote,
+  .feature-text h4,
+  .plan-name,
+  .plan-amount,
+  .testimonial-quote,
+  .testimonial-avatar,
+  .cta-final h2,
+  .footer-brand h3,
+  .form-input-name,
+  .demo-shopname-input,
+  .pricing-v2-title,
+  .pricing-v2-plan-name h3,
+  .payments-mono-title
+) {
+  font-family: var(--font-fraunces), "Fraunces", Georgia, serif;
+  font-weight: 500;
+}
+
+.sellia-landing .hero h1 {
+  font-weight: 400;
+}
+
+.sellia-landing .hero h1 em,
+.sellia-landing .section-title em,
+.sellia-landing .payments-mono-title em,
+.sellia-landing .pricing-v2-title em,
+.sellia-landing .cta-final h2 em {
+  font-family: inherit;
+  font-style: italic;
+}
+
+.sellia-landing .testimonial-quote::before {
+  font-family: var(--font-fraunces), "Fraunces", Georgia, serif;
+}

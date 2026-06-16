@@ -3,6 +3,8 @@ import { Prisma, PayoutStatus, PayoutType } from "@prisma/client";
 import { type OrderItem } from "@/lib/order-status";
 import { PAYMENT_STATUS, ORDER_STATUS } from "@/lib/cartevo/order-status";
 import { sendDeliveryCodeEmail } from "@/lib/email/delivery-code";
+import { getSelliaRate, type SelliaPlan } from "@/lib/cartevo/pricing";
+import { refreshMoneyConfigCache } from "@/lib/admin/money-config";
 
 interface CreatePayoutInput {
   orderId: string;
@@ -13,8 +15,8 @@ interface CreatePayoutInput {
 type PayoutKind = "physical" | "digital" | "service";
 
 function selliaCommissionRate(plan: string): number {
-  if (plan === "pro" || plan === "business") return 4;
-  return 6;
+  const key = (plan === "pro" || plan === "business" ? plan : "free") as SelliaPlan;
+  return getSelliaRate(key);
 }
 
 function normalizePayoutKind(t?: string | null): PayoutKind {
@@ -165,6 +167,8 @@ export async function createPayoutFromOrder(input: CreatePayoutInput) {
     },
   });
   if (existing) return existing;
+
+  await refreshMoneyConfigCache();
 
   const plan = order.shop.plan || "free";
   const commissionRate = selliaCommissionRate(plan);

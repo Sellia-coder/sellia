@@ -9,6 +9,8 @@ import {
 import { shopPublishedBadge } from "@/lib/admin/status-badges";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminShopRowActions from "@/components/admin/AdminShopRowActions";
+import AdminEntityHistory from "@/components/admin/AdminEntityHistory";
+import AdminUserDetailActions from "@/app/admin/utilisateurs/[id]/AdminUserDetailActions";
 import { getAdminShopStats } from "@/lib/admin/shop-stats";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +31,16 @@ export default async function AdminBoutiqueDetailPage({
       isPublished: true,
       status: true,
       createdAt: true,
-      owner: { select: { email: true, firstName: true, lastName: true } },
+      owner: {
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isBlocked: true,
+        },
+      },
     },
   });
   if (!shop) notFound();
@@ -62,6 +73,15 @@ export default async function AdminBoutiqueDetailPage({
           publicUrl={publicUrl}
           ownerEmail={shop.owner.email}
           plan={shop.plan}
+        />
+        <AdminUserDetailActions
+          userId={shop.owner.id}
+          role={shop.owner.role}
+          isBlocked={shop.owner.isBlocked}
+          isSelf={false}
+          shopId={shop.id}
+          shopSlug={shop.slug}
+          publicShopUrl={publicUrl}
         />
       </div>
 
@@ -140,6 +160,8 @@ export default async function AdminBoutiqueDetailPage({
           </dl>
         </div>
       </div>
+
+      <AdminEntityHistory targetType="shop" targetId={shop.id} title="Historique admin — boutique" />
     </div>
   );
 }

@@ -24,7 +24,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 38px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -112,7 +112,7 @@
 }
 
 .statsKpiValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 32px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -177,7 +177,7 @@
 }
 
 .sectionTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 19px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -240,7 +240,7 @@
 }
 
 .pieLegendValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-weight: 500;
   color: var(--sellia-muted);
 }

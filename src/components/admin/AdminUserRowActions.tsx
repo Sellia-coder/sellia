@@ -23,13 +23,41 @@ export default function AdminUserRowActions({
   const canBlock = !isAdmin && !isSelf;
 
   const toggleBlock = () => {
-    const msg = isBlocked
-      ? "Débloquer ce marchand ? Il pourra à nouveau se connecter."
-      : "Bloquer ce marchand ? Il ne pourra plus se connecter ni accéder à son dashboard.";
-    if (!window.confirm(msg)) return;
+    if (isBlocked) {
+      if (
+        !window.confirm(
+          "Débloquer ce marchand ? Il pourra à nouveau se connecter."
+        )
+      ) {
+        return;
+      }
+      startTransition(async () => {
+        const res = await adminToggleUserBlockAction(userId, false);
+        if (res.ok) window.location.reload();
+        else alert(res.error ?? "Erreur");
+      });
+      return;
+    }
+    const motif = window.prompt(
+      "Motif du blocage (obligatoire pour l'audit) :",
+      ""
+    );
+    if (motif === null) return;
+    if (!motif.trim()) {
+      alert("Le motif est requis pour bloquer un marchand.");
+      return;
+    }
+    if (
+      !window.confirm(
+        `Bloquer ce marchand ?\nMotif : ${motif.trim()}\n\nIl ne pourra plus se connecter.`
+      )
+    ) {
+      return;
+    }
     startTransition(async () => {
-      const res = await adminToggleUserBlockAction(userId, !isBlocked);
-      if (!res.ok) alert(res.error ?? "Erreur");
+      const res = await adminToggleUserBlockAction(userId, true, motif.trim());
+      if (res.ok) window.location.reload();
+      else alert(res.error ?? "Erreur");
     });
   };
 

@@ -26,6 +26,8 @@ import {
   Clock,
 } from "@phosphor-icons/react";
 import type { DateRange } from "@/lib/analytics";
+import type { VisitStats } from "@/lib/shop-visits";
+import VisitAudienceBlock from "@/components/dashboard/VisitAudienceBlock";
 import styles from "./stats.module.css";
 
 interface Kpi {
@@ -55,6 +57,7 @@ interface Props {
   }>;
   heatmap: number[][];
   pendingEscrow: number;
+  visitStats: VisitStats | null;
 }
 
 const formatPrice = (n: number) => n.toLocaleString("fr-FR");
@@ -98,6 +101,7 @@ export default function StatsClient({
   productTypeBreakdown,
   heatmap,
   pendingEscrow,
+  visitStats,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -473,6 +477,8 @@ export default function StatsClient({
           <span>Plus</span>
         </div>
       </div>
+
+      <VisitAudienceBlock initialStats={visitStats} />
     </div>
   );
 }

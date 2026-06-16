@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PUBLIC_MAINTENANCE_COOKIE } from "@/lib/maintenance/constants";
 
 const ROOT_DOMAIN = "getsellia.com";
 
@@ -18,7 +19,23 @@ const RESERVED_SUBDOMAINS = new Set([
 ]);
 
 const PROTECTED_ROUTES = ["/dashboard"];
-const AUTH_ROUTES = ["/connexion", "/inscription", "/verifier-email"];
+const AUTH_ROUTES = [
+  "/connexion",
+  "/inscription",
+  "/verifier-email",
+  "/mot-de-passe-oublie",
+  "/reinitialiser-mot-de-passe",
+];
+
+/** Chemins toujours accessibles pendant la maintenance publique. */
+const MAINTENANCE_EXEMPT_PREFIXES = [
+  "/maintenance",
+  "/admin",
+  "/dashboard",
+  "/api",
+  "/_next",
+  ...AUTH_ROUTES,
+];
 
 /**
  * En-têtes de sécurité (défense en profondeur). Volontairement SANS CSP stricte
@@ -62,6 +79,58 @@ function applyShopEmbedHeaders(
   return response;
 }
 
+function forwardWithPathname(
+  req: NextRequest,
+  pathname: string,
+  hostname: string
+): NextResponse {
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+  return applyShopEmbedHeaders(response, hostname);
+}
+
+function rewriteWithPathname(
+  req: NextRequest,
+  url: URL,
+  pathname: string,
+  hostname: string
+): NextResponse {
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+  const response = NextResponse.rewrite(url, {
+    request: { headers: requestHeaders },
+  });
+  return applyShopEmbedHeaders(response, hostname);
+}
+
+/**
+ * Maintenance publique via cookie (pas de DB en edge).
+ * Fail-safe : pas de cookie → site en ligne. En-têtes G10.B conservés.
+ */
+function tryPublicMaintenanceRedirect(req: NextRequest): NextResponse | null {
+  try {
+    const maintenanceOn =
+      req.cookies.get(PUBLIC_MAINTENANCE_COOKIE)?.value === "1";
+    if (!maintenanceOn) return null;
+
+    const { pathname } = req.nextUrl;
+    if (MAINTENANCE_EXEMPT_PREFIXES.some((p) => pathname.startsWith(p))) {
+      return null;
+    }
+
+    const url = req.nextUrl.clone();
+    url.pathname = "/maintenance";
+    url.search = "";
+    const response = NextResponse.redirect(url);
+    return applyShopEmbedHeaders(response, req.headers.get("host") ?? "");
+  } catch {
+    return null;
+  }
+}
+
 function tryShopSubdomainRewrite(req: NextRequest): NextResponse | null {
   const url = req.nextUrl.clone();
   const hostname = req.headers.get("host") ?? "";
@@ -97,8 +166,7 @@ function tryShopSubdomainRewrite(req: NextRequest): NextResponse | null {
   }
 
   url.pathname = `/shop/${subdomain}${pathname === "/" ? "" : pathname}`;
-  const response = NextResponse.rewrite(url);
-  return applyShopEmbedHeaders(response, hostname);
+  return rewriteWithPathname(req, url, url.pathname, hostname);
 }
 
 export function middleware(req: NextRequest) {
@@ -133,6 +201,9 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  const maintRedirect = tryPublicMaintenanceRedirect(req);
+  if (maintRedirect) return maintRedirect;
+
   const rewritten = tryShopSubdomainRewrite(req);
   if (rewritten) return rewritten;
 
@@ -156,12 +227,7 @@ export function middleware(req: NextRequest) {
 
   const hostname = req.headers.get("host") ?? "";
   const response = NextResponse.next();
-
-  if (pathname.startsWith("/shop/")) {
-    return applyShopEmbedHeaders(response, hostname);
-  }
-
-  return applyShopEmbedHeaders(response, hostname);
+  return forwardWithPathname(req, pathname, hostname);
 }
 
 export const config = {

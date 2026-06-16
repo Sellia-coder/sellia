@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { checkAuthStatusAction } from "@/app/actions/auth-status";
+import "./landing-typography.css";
 
 const RESULT_TEMPLATES: Record<string, string[]> = {
   bijoux: [
@@ -84,7 +85,7 @@ export default function Home() {
   }
 
   return (
-    <>
+    <div className="sellia-landing">
 {/* NAV */}
 <nav className={`${scrolled ? "scrolled" : ""} ${mobileMenuOpen ? "mobile-open" : ""}`}>
   <div className="nav-inner">
@@ -890,6 +891,10 @@ export default function Home() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
             <span>Optimisation SEO de base</span>
           </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span>Système de messagerie connecté à votre boutique</span>
+          </li>
         </ul>
       </article>
 
@@ -991,6 +996,10 @@ export default function Home() {
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
             <span>Suppression du badge &quot;Propulsé par Sellia&quot;</span>
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+            <span><strong>Retrait instantané</strong> de vos gains</span>
           </li>
         </ul>
       </article>
@@ -1342,6 +1351,6 @@ export default function Home() {
     </div>
   </div>
 </footer>
-    </>
+    </div>
   );
 }

@@ -28,7 +28,7 @@
 }
 
 .dash-str-page-title {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 30px;
   font-weight: 500;
   color: #0e1116;
@@ -149,7 +149,7 @@
 }
 
 .dash-str-setup-title {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: #0e1116;
@@ -327,7 +327,7 @@
 }
 
 .dash-str-kpi-value {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 500;
   color: #0e1116;
@@ -505,7 +505,7 @@
 }
 
 .dash-str-chart-stat-value {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 17px;
   font-weight: 500;
   color: #0e1116;
@@ -774,7 +774,7 @@
 }
 
 .dash-str-donut-value {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 30px;
   font-weight: 500;
   color: #0e1116;

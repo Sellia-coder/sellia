@@ -64,7 +64,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 36px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -218,7 +218,7 @@
 }
 
 .couponDiscount {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 500;
   color: var(--sellia-ember);
@@ -358,7 +358,7 @@
 }
 
 .emptyState h3 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -446,7 +446,7 @@
 }
 
 .cellDiscount {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 15px;
   font-weight: 500;
   color: var(--sellia-ember);

@@ -7,6 +7,7 @@ import {
   TICKET_CATEGORY_LABELS,
 } from "@/lib/admin/labels";
 import AdminSupportDetailClient from "./AdminSupportDetailClient";
+import AdminShopLink from "@/components/admin/AdminShopLink";
 
 export const dynamic = "force-dynamic";
 
@@ -43,20 +44,19 @@ export default async function AdminSupportDetailPage({
         {TICKET_STATUS_LABELS[ticket.status]} · {formatAdminDate(ticket.createdAt)}
       </p>
 
-      {ticket.shopId || ticket.shopSlug ? (
+      {ticket.shopId ? (
         <p className="admin-page-sub" style={{ marginTop: -16 }}>
           Boutique :{" "}
-          {ticket.shopId ? (
-            <Link href={`/admin/boutiques/${ticket.shopId}`}>
-              {ticket.shopName ?? ticket.shopSlug ?? "Boutique"}
-            </Link>
-          ) : (
-            <Link
-              href={`/admin/boutiques?q=${encodeURIComponent(ticket.shopSlug!)}`}
-            >
-              {ticket.shopName ?? ticket.shopSlug}
-            </Link>
-          )}
+          <AdminShopLink
+            shopId={ticket.shopId}
+            name={ticket.shopName ?? ticket.shopSlug ?? "Boutique"}
+            slug={ticket.shopSlug ?? undefined}
+            className="admin-link"
+          />
+        </p>
+      ) : ticket.shopSlug ? (
+        <p className="admin-page-sub" style={{ marginTop: -16 }}>
+          Boutique : {ticket.shopName ?? ticket.shopSlug}
         </p>
       ) : null}
 

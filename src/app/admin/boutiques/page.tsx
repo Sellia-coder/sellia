@@ -12,6 +12,8 @@ import AdminShopRowActions from "@/components/admin/AdminShopRowActions";
 import AdminExportButton from "@/components/admin/AdminExportButton";
 import AdminPagination from "@/components/admin/AdminPagination";
 import AdminBoutiquesSearch from "./AdminBoutiquesSearch";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import { getBoutiquesPageKpis } from "@/lib/admin/page-stats";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,7 @@ export default async function AdminBoutiquesPage({
 }) {
   const { q = "", page: pageStr = "1", sort = "date", plan = "" } = await searchParams;
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
+  const kpis = await getBoutiquesPageKpis();
   const query = q.trim().toLowerCase();
 
   const where: Record<string, unknown> = {};
@@ -81,6 +84,8 @@ export default async function AdminBoutiquesPage({
         {total} boutique{total !== 1 ? "s" : ""} — suspendre une boutique la retire
         de la vente publique.
       </p>
+
+      <AdminKpiGrid items={kpis} />
 
       <div className="admin-retraits-toolbar">
         <AdminBoutiquesSearch initialQ={q} sort={sort} plan={plan} />

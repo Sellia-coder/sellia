@@ -21,7 +21,7 @@ export default async function MaintenancePage() {
       <div style={{ maxWidth: 480, textAlign: "center" }}>
         <h1
           style={{
-            fontFamily: "Fraunces, Georgia, serif",
+            fontFamily: "Manrope, sans-serif",
             fontSize: 32,
             marginBottom: 16,
           }}

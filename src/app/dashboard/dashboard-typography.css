@@ -8,8 +8,7 @@
   text-align: center;
 }
 
-/* G2.2.B — Typography Sellia officielle dans /dashboard
-   Fraunces (titres) + Inter (body) */
+/* Manrope (titres + chiffres) + Inter (texte) */
 
 .dashboard-wrap,
 .dashboard-wrap * {
@@ -22,13 +21,49 @@
 }
 
 .dashboard-wrap h1,
+.dashboard-wrap [class*="pageTitle"],
+.dashboard-wrap [class*="PageTitle"] {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-weight: 700;
+}
+
 .dashboard-wrap h2,
 .dashboard-wrap h3,
-.dashboard-wrap [class*="Title"],
-.dashboard-wrap [class*="title"]:not([class*="subtitle"]),
+.dashboard-wrap [class*="Title"]:not([class*="Stat"]):not([class*="stat"]),
+.dashboard-wrap [class*="title"]:not([class*="subtitle"]):not([class*="stat"]) {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-weight: 600;
+}
+
+/* Chiffres — Manrope (exhaustif dashboard) */
+.dashboard-wrap .sellia-num,
+.dashboard-wrap [class*="statValue"],
 .dashboard-wrap [class*="StatValue"],
-.dashboard-wrap [class*="statValue"] {
-  font-family: "Fraunces", "Times New Roman", serif;
+.dashboard-wrap [class*="statBlockValue"],
+.dashboard-wrap [class*="kpiValue"],
+.dashboard-wrap [class*="balanceValue"],
+.dashboard-wrap [class*="pendingValue"],
+.dashboard-wrap [class*="timelineAmount"],
+.dashboard-wrap [class*="listValue"],
+.dashboard-wrap [class*="cardStatValue"],
+.dashboard-wrap [class*="cellAmount"],
+.dashboard-wrap [class*="cellNum"],
+.dashboard-wrap [class*="price"],
+.dashboard-wrap [class*="Price"],
+.dashboard-wrap [class*="amount"],
+.dashboard-wrap [class*="Amount"],
+.dashboard-wrap [class*="commissionRate"],
+.dashboard-wrap [class*="kpiDelta"],
+.dashboard-wrap [class*="segmentValue"],
+.dashboard-wrap [class*="segmentBar"],
+.dashboard-wrap [class*="reviewAvgValue"],
+.dashboard-wrap [class*="segmentCount"],
+.dashboard-wrap [class*="analyticsNum"],
+.dashboard-wrap [class*="reviewDistPct"] {
+  font-family: var(--font-num), "Manrope", "Inter", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .dashboard-wrap [class*="eyebrow"],

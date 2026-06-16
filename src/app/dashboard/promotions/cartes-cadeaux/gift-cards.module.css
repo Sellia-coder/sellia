@@ -58,7 +58,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 36px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -94,7 +94,7 @@
 }
 
 .statValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -147,7 +147,7 @@
 }
 
 .amountValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   color: var(--sellia-ink);
 }
@@ -218,7 +218,7 @@
 }
 
 .emptyState h3 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   margin: 16px 0 8px;
 }
@@ -293,7 +293,7 @@
 }
 
 .cellDiscount {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   color: var(--sellia-ember);
 }
 

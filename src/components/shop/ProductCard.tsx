@@ -8,7 +8,7 @@ import {
   isFavorite,
   toggleFavorite,
 } from "@/lib/cart";
-import { getProductRating, getRatingAriaLabel } from "@/lib/utils/product-rating";
+import { getRatingAriaLabel } from "@/lib/utils/product-rating";
 import { useCartContext } from "./CartProvider";
 import ProductImagePlaceholder from "./ProductImagePlaceholder";
 import styles from "./ProductCard.module.css";
@@ -85,7 +85,17 @@ export default function ProductCard({
   const productPath = `/shop/${shopSlug}/produit/${segment}`;
   const currency = product.currency ?? "FCFA";
   const badge = getBadge(product);
-  const rating = getProductRating(product.id);
+  const hasRating =
+    product.reviewsCount != null &&
+    product.reviewsCount > 0 &&
+    product.rating != null;
+  const ratingLabel = hasRating
+    ? getRatingAriaLabel({
+        value: product.rating!,
+        count: product.reviewsCount!,
+        formatted: product.rating!.toFixed(1),
+      })
+    : undefined;
 
   useEffect(() => {
     setFavorited(isFavorite(shopSlug, product.id));
@@ -199,11 +209,19 @@ export default function ProductCard({
         )}
 
         <div className={styles.metaRow}>
-          <div className={styles.rating} aria-label={getRatingAriaLabel(rating)}>
-            <Star size={13} strokeWidth={0} fill="#FFB800" />
-            <span className={styles.ratingValue}>{rating.formatted}</span>
-            <span className={styles.ratingCount}>({rating.count})</span>
-          </div>
+          {hasRating ? (
+            <div className={styles.rating} aria-label={ratingLabel}>
+              <Star size={13} strokeWidth={0} fill="#FFB800" />
+              <span className={styles.ratingValue}>
+                {product.rating!.toFixed(1)}
+              </span>
+              <span className={styles.ratingCount}>
+                ({product.reviewsCount})
+              </span>
+            </div>
+          ) : (
+            <span />
+          )}
           <div className={styles.priceWrap}>
             <span className={styles.price}>{formatPrice(product.price)}</span>
             <span className={styles.currency}>{currency}</span>

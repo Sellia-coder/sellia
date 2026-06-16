@@ -225,7 +225,7 @@ function ApercuContent() {
           }}
         >
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>⚠️</div>
-          <h1 style={{ fontFamily: "Fraunces, serif", fontSize: "28px", marginBottom: "12px", color: "#0E1116" }}>
+          <h1 style={{ fontFamily: "Manrope, sans-serif", fontSize: "28px", marginBottom: "12px", color: "#0E1116" }}>
             Oups...
           </h1>
           <p style={{ fontSize: "14px", color: "#404552", marginBottom: "24px", lineHeight: 1.5 }}>

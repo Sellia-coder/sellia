@@ -70,7 +70,7 @@ export default function PlanCard({
         {plan.id === "business" && <Crown size={16} color="#7C3AED" />}
         <h3
           style={{
-            fontFamily: "Fraunces, serif",
+            fontFamily: "Manrope, sans-serif",
             fontSize: 22,
             fontWeight: 500,
             color: "#0A0E13",
@@ -84,7 +84,7 @@ export default function PlanCard({
       <div style={{ marginBottom: 18 }}>
         <span
           style={{
-            fontFamily: "Fraunces, serif",
+            fontFamily: "Manrope, sans-serif",
             fontSize: 36,
             fontWeight: 500,
             color: "#0A0E13",

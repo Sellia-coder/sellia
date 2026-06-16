@@ -42,9 +42,9 @@ const BACKGROUND_STYLES = [
 ];
 
 const FONT_STYLES = [
-  { id: "classic" as const, name: "Classique", desc: "Inter + Fraunces (lisible, premium)" },
+  { id: "classic" as const, name: "Classique", desc: "Inter + Manrope (lisible, premium)" },
   { id: "modern" as const, name: "Moderne", desc: "Inter (épuré, tech)" },
-  { id: "editorial" as const, name: "Éditorial", desc: "Fraunces (luxe, mode)" },
+  { id: "editorial" as const, name: "Éditorial", desc: "Manrope (luxe, mode)" },
 ];
 
 export default function StepAppearance({

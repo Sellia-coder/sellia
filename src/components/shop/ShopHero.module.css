@@ -63,7 +63,7 @@
 
 /* Nom en grand serif italic */
 .shopHeroName {
-  font-family: 'Fraunces', 'Playfair Display', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(48px, 6vw, 76px);
   font-weight: 500;
   color: #0A0E13;
@@ -80,7 +80,7 @@
 
 /* Tagline italic */
 .shopHeroTagline {
-  font-family: 'Fraunces', 'Playfair Display', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(16px, 1.6vw, 19px);
   font-style: italic;
   font-weight: 400;

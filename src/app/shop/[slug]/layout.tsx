@@ -11,6 +11,10 @@ import ShopFooter from "@/components/shop/ShopFooter";
 import ShopPixelScripts from "@/components/shop/ShopPixelScripts";
 import ToastProvider from "@/components/shop/ToastProvider";
 import { COOKIE_CONSENT_NAME, parseConsent } from "@/lib/cookie-consent";
+import { enforcePublicMaintenance } from "@/lib/maintenance/public";
+import { refreshMoneyConfigCache } from "@/lib/admin/money-config";
+import ShopChatWidgetLoader from "@/components/shop/ShopChatWidgetLoader";
+import ShopVisitTrackerLoader from "@/components/shop/ShopVisitTrackerLoader";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +69,8 @@ export async function generateMetadata({
 
 export default async function ShopLayout({ children, params }: Props) {
   const { slug } = await params;
+  await enforcePublicMaintenance(`/shop/${slug}`);
+  await refreshMoneyConfigCache();
   const shop = await getPublishedShopBySlug(slug);
   if (!shop) notFound();
 
@@ -76,10 +82,14 @@ export default async function ShopLayout({ children, params }: Props) {
   const allowMarketing = consent?.marketing === true;
 
   const template = getShopCategoryTemplate(shop.category);
+  const headingFont = shop.displayFont || "Manrope";
+  const bodyFont = shop.bodyFont || "Inter";
   const cssVars: React.CSSProperties = {
     ["--shop-primary" as string]: shop.primaryColor ?? "#E84B1F",
     ["--shop-secondary" as string]: shop.secondaryColor ?? "#0E1116",
     ["--shop-accent" as string]: shop.accentColor ?? "#E84B1F",
+    ["--font-display" as string]: `"${headingFont}", "Manrope", sans-serif`,
+    ["--font-sans" as string]: `"${bodyFont}", "Inter", sans-serif`,
   };
 
   const jsonLd = {
@@ -113,6 +123,13 @@ export default async function ShopLayout({ children, params }: Props) {
           <main className="shop-main">{children}</main>
           <ShopFooter shop={shop} />
           <ToastProvider />
+          <ShopChatWidgetLoader
+            shopSlug={shop.slug}
+            shopName={shop.name}
+            shopLogoUrl={shop.logoUrl}
+            primaryColor={shop.primaryColor ?? shop.accentColor}
+          />
+          <ShopVisitTrackerLoader shopSlug={shop.slug} />
         </div>
       </CartProvider>
     </>

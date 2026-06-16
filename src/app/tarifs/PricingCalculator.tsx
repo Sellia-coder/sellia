@@ -251,7 +251,7 @@ export default function PricingCalculator() {
             </div>
             <div
               style={{
-                fontFamily: "Fraunces, serif",
+                fontFamily: "Manrope, sans-serif",
                 fontSize: 38,
                 fontWeight: 500,
                 color: "#0A0E13",
@@ -268,7 +268,7 @@ export default function PricingCalculator() {
             </div>
             <div
               style={{
-                fontFamily: "Fraunces, serif",
+                fontFamily: "Manrope, sans-serif",
                 fontSize: 38,
                 fontWeight: 500,
                 color: "#16A34A",

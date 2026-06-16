@@ -4,7 +4,12 @@ export default function AdminExportButton({
   resource,
   label = "Exporter CSV",
 }: {
-  resource: "boutiques" | "transactions" | "retraits" | "utilisateurs";
+  resource:
+    | "boutiques"
+    | "transactions"
+    | "retraits"
+    | "utilisateurs"
+    | "clients";
   label?: string;
 }) {
   return (

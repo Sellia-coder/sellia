@@ -19,7 +19,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 38px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -114,7 +114,7 @@
 }
 
 .moduleTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -155,7 +155,7 @@
 }
 
 .moduleStatValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 500;
   color: var(--sellia-ink);

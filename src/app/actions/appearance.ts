@@ -91,7 +91,7 @@ export async function applyThemePresetAction(themeId: string) {
       secondaryColor: "#0A0E13",
       accentColor: "#FFEDD5",
       backgroundColor: "#FAFAF7",
-      headingFont: "Fraunces",
+      headingFont: "Manrope",
       bodyFont: "Inter",
     },
     audacieux: {

@@ -19,7 +19,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 36px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -87,7 +87,7 @@
 }
 
 .sectionTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   margin: 0 0 4px;
@@ -296,7 +296,7 @@
 }
 
 .emptyState h3 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   margin: 16px 0 8px;
 }
@@ -337,7 +337,7 @@
 }
 
 .modalTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   margin: 0;
 }

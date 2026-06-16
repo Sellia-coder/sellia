@@ -20,7 +20,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 38px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -176,7 +176,7 @@
 }
 
 .balanceValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 56px;
   font-weight: 500;
   line-height: 1;
@@ -284,7 +284,7 @@
 }
 
 .monthlyStatsHeader h2 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -317,7 +317,7 @@
 }
 
 .statBlockValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 32px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -357,7 +357,7 @@
 }
 
 .transactionsHeader h2 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 500;
   margin: 0 0 4px;
@@ -552,7 +552,7 @@
 }
 
 .netCell {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 14px;
 }
 
@@ -591,7 +591,7 @@
 }
 
 .emptyState h3 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -628,7 +628,7 @@
 }
 
 .modalTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   font-weight: 500;
   margin: 0 0 8px;
@@ -657,7 +657,7 @@
   border: 1px solid var(--sellia-border);
   border-radius: 12px;
   font-size: 22px;
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-weight: 500;
 }
 
@@ -697,7 +697,7 @@
 }
 
 .modalBreakdownLineFinal strong {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
 }
@@ -724,7 +724,7 @@
 }
 
 .modalSuccess h3 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   margin: 16px 0 8px;
 }

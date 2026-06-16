@@ -49,7 +49,7 @@ export default async function AppearancePage() {
         secondaryColor: shop.secondaryColor || "#0A0E13",
         accentColor: shop.accentColor || "#FFEDD5",
         backgroundColor: shop.bgColor || "#FAFAF7",
-        headingFont: shop.displayFont || "Fraunces",
+        headingFont: shop.displayFont || "Manrope",
         bodyFont: shop.bodyFont || "Inter",
         headerStyle: shop.headerStyle || "centered",
         productGridCols: shop.productGridCols ?? 3,

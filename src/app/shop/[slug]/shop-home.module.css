@@ -28,7 +28,7 @@
 }
 
 .heroTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(40px, 7vw, 72px);
   font-weight: 500;
   letter-spacing: -2px;
@@ -38,7 +38,7 @@
 }
 
 .heroTagline {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(22px, 3.5vw, 36px);
   font-weight: 400;
   letter-spacing: -0.6px;
@@ -131,7 +131,7 @@
 }
 
 .sectionTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(28px, 4vw, 40px);
   font-weight: 500;
   color: #0a0e13;
@@ -337,7 +337,7 @@
 }
 
 .productPrice {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 500;
   letter-spacing: -0.4px;

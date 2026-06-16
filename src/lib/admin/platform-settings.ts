@@ -10,6 +10,12 @@ export type PlatformSettingsData = {
   supportEmail: string;
   supportPhone: string;
   adminNotifyEmail: string;
+  /** Overrides money — null = constante par défaut */
+  commissionRateFree: number | null;
+  commissionRatePro: number | null;
+  commissionRateBusiness: number | null;
+  withdrawalValidationThreshold: number | null;
+  codUnlockPrice: number | null;
 };
 
 export const DEFAULT_PLATFORM_SETTINGS: PlatformSettingsData = {
@@ -23,6 +29,11 @@ export const DEFAULT_PLATFORM_SETTINGS: PlatformSettingsData = {
   supportEmail: "support@getsellia.com",
   supportPhone: "",
   adminNotifyEmail: "",
+  commissionRateFree: null,
+  commissionRatePro: null,
+  commissionRateBusiness: null,
+  withdrawalValidationThreshold: null,
+  codUnlockPrice: null,
 };
 
 const SETTINGS_ID = "default";
@@ -37,6 +48,11 @@ function rowToData(row: {
   supportEmail: string | null;
   supportPhone: string | null;
   adminNotifyEmail: string | null;
+  commissionRateFree: number | null;
+  commissionRatePro: number | null;
+  commissionRateBusiness: number | null;
+  withdrawalValidationThreshold: number | null;
+  codUnlockPrice: number | null;
 }): PlatformSettingsData {
   return {
     maintenanceMode: row.maintenanceMode,
@@ -49,6 +65,11 @@ function rowToData(row: {
     supportEmail: row.supportEmail?.trim() || DEFAULT_PLATFORM_SETTINGS.supportEmail,
     supportPhone: row.supportPhone?.trim() ?? "",
     adminNotifyEmail: row.adminNotifyEmail?.trim() ?? "",
+    commissionRateFree: row.commissionRateFree,
+    commissionRatePro: row.commissionRatePro,
+    commissionRateBusiness: row.commissionRateBusiness,
+    withdrawalValidationThreshold: row.withdrawalValidationThreshold,
+    codUnlockPrice: row.codUnlockPrice,
   };
 }
 
@@ -84,6 +105,11 @@ export async function upsertPlatformSettings(
       supportEmail: merged.supportEmail,
       supportPhone: merged.supportPhone,
       adminNotifyEmail: merged.adminNotifyEmail,
+      commissionRateFree: merged.commissionRateFree,
+      commissionRatePro: merged.commissionRatePro,
+      commissionRateBusiness: merged.commissionRateBusiness,
+      withdrawalValidationThreshold: merged.withdrawalValidationThreshold,
+      codUnlockPrice: merged.codUnlockPrice,
     },
     update: {
       maintenanceMode: merged.maintenanceMode,
@@ -95,6 +121,11 @@ export async function upsertPlatformSettings(
       supportEmail: merged.supportEmail,
       supportPhone: merged.supportPhone,
       adminNotifyEmail: merged.adminNotifyEmail,
+      commissionRateFree: merged.commissionRateFree,
+      commissionRatePro: merged.commissionRatePro,
+      commissionRateBusiness: merged.commissionRateBusiness,
+      withdrawalValidationThreshold: merged.withdrawalValidationThreshold,
+      codUnlockPrice: merged.codUnlockPrice,
     },
   });
 

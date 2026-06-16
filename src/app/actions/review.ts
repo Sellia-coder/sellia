@@ -76,6 +76,8 @@ export async function listApprovedReviewsAction(productId: string) {
         title: true,
         content: true,
         createdAt: true,
+        merchantReply: true,
+        merchantRepliedAt: true,
       },
     });
     return { ok: true as const, reviews };

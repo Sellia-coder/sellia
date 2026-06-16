@@ -79,7 +79,7 @@ model Shop {
   accentColor       String?
   bgColor           String   @default("#FAFAF7")
   textColor         String   @default("#0E1116")
-  displayFont       String   @default("Fraunces")
+  displayFont       String   @default("Manrope")
   bodyFont          String   @default("Inter")
   backgroundStyle String?  @default("ivory") // ivory | white | cream
   fontStyle       String?  @default("classic") // classic | modern | editorial
@@ -153,9 +153,11 @@ model Shop {
   loyaltyAccounts     LoyaltyAccount[]
   loyaltyConfig       LoyaltyConfig?
   shopPages           ShopPage[]
+  shopVisits          ShopVisit[]
   shopFaqs            ShopFaq[]
   featureUnlocks      ShopFeatureUnlock[]
   productReports      ProductReport[]
+  chatConversations   ChatConversation[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -449,6 +451,8 @@ model Customer {
   tags          String[]  @default([])
   notes         String?   @db.Text
 
+  chatConversations ChatConversation[]
+
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -558,6 +562,9 @@ model Payout {
   reviewedAt            DateTime? @map("reviewed_at")
   rejectionReason       String?   @map("rejection_reason") @db.Text
   manualReviewRequired  Boolean   @default(false) @map("manual_review_required")
+  adminInternalNote     String?   @map("admin_internal_note") @db.Text
+  adminVerifiedAt       DateTime? @map("admin_verified_at")
+  adminVerifiedBy       String?   @map("admin_verified_by")
 
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -647,6 +654,9 @@ model Review {
 
   status          String    @default("pending")
   rejectionReason String?
+
+  merchantReply     String?   @map("merchant_reply") @db.Text
+  merchantRepliedAt DateTime? @map("merchant_replied_at")
 
   createdAt       DateTime  @default(now())
   approvedAt      DateTime?
@@ -887,6 +897,25 @@ model ShopPage {
   @@map("shop_pages")
 }
 
+model ShopVisit {
+  id        String   @id @default(cuid())
+  shopId    String   @map("shop_id")
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  sessionId String   @map("session_id")
+  path      String?
+  country   String?
+  city      String?
+  region    String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([shopId, createdAt])
+  @@index([shopId, sessionId, createdAt])
+  @@index([shopId, country])
+  @@map("shop_visits")
+}
+
 model ShopFaq {
   id          String   @id @default(cuid())
   shopId      String   @map("shop_id")
@@ -1070,6 +1099,58 @@ model ProductReport {
   @@map("product_reports")
 }
 
+// ============================================
+// SHOP CHAT (vitrine → marchand)
+// Migration signalée : npx prisma migrate dev --name chat_messaging
+// ============================================
+
+enum ChatConversationStatus {
+  OPEN
+  CLOSED
+}
+
+enum ChatMessageSender {
+  CUSTOMER
+  MERCHANT
+  SYSTEM
+}
+
+model ChatConversation {
+  id                  String                 @id @default(cuid())
+  shopId              String                 @map("shop_id")
+  shop                Shop                   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customerId          String?                @map("customer_id")
+  customer            Customer?              @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName        String                 @map("customer_name")
+  customerEmail       String?                @map("customer_email")
+  visitorToken        String                 @unique @map("visitor_token")
+  status              ChatConversationStatus @default(OPEN)
+  unreadForMerchant   Int                    @default(0) @map("unread_for_merchant")
+  lastMessageAt       DateTime               @default(now()) @map("last_message_at")
+  lastMessagePreview  String?                @map("last_message_preview") @db.VarChar(200)
+  messages            ChatMessage[]
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @updatedAt @map("updated_at")
+
+  @@index([shopId, lastMessageAt])
+  @@index([shopId, unreadForMerchant])
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String           @map("conversation_id")
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         ChatMessageSender
+  content        String           @db.Text
+  flagged        Boolean          @default(false)
+  blockedReason  String?          @map("blocked_reason")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}
+
 /// Réglages opérationnels plateforme (une ligne id = "default").
 model PlatformSettings {
   id                    String   @id @default("default")
@@ -1084,7 +1165,33 @@ model PlatformSettings {
   supportPhone          String?  @map("support_phone")
   adminNotifyEmail      String?  @map("admin_notify_email")
 
+  /// Overrides money (null = constantes code)
+  commissionRateFree            Float? @map("commission_rate_free")
+  commissionRatePro             Float? @map("commission_rate_pro")
+  commissionRateBusiness        Float? @map("commission_rate_business")
+  withdrawalValidationThreshold Int?   @map("withdrawal_validation_threshold")
+  codUnlockPrice                Int?   @map("cod_unlock_price")
+
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   @@map("platform_settings")
+}
+
+// ============= ADMIN AUDIT =============
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  adminId    String   @map("admin_id")
+  adminEmail String   @map("admin_email")
+  action     String
+  targetType String?  @map("target_type")
+  targetId   String?  @map("target_id")
+  details    String?  @db.Text
+  ipAddress  String?  @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([adminEmail])
+  @@index([action])
+  @@index([createdAt])
+  @@map("admin_audit_logs")
 }

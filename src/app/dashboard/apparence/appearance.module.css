@@ -27,9 +27,9 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif;
   font-size: 30px;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--sellia-ink);
   letter-spacing: -0.6px;
   margin: 0 0 4px;
@@ -116,12 +116,35 @@
   min-height: 0;
 }
 
+.tabsWrap {
+  position: relative;
+  border-bottom: 1px solid var(--sellia-border);
+  flex-shrink: 0;
+}
+
+.tabsWrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, #ffffff);
+}
+
 .tabs {
   display: flex;
   gap: 2px;
   padding: 12px 12px 0;
-  border-bottom: 1px solid var(--sellia-border);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -135,14 +158,16 @@
   font-size: 12.5px;
   color: var(--sellia-muted);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   font-family: inherit;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tabActive {
   color: var(--sellia-ember);
   border-bottom-color: var(--sellia-ember);
+  font-weight: 700;
 }
 
 .configContent {
@@ -152,9 +177,9 @@
 }
 
 .sectionTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--sellia-ink);
   margin: 0 0 4px;
 }
@@ -207,7 +232,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .themeDescription {
@@ -229,7 +254,7 @@
 
 .colorFieldLabel {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   display: block;
   margin-bottom: 4px;
 }
@@ -320,7 +345,7 @@
   align-items: center;
   gap: 4px;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .fontComboMeta {
@@ -334,7 +359,7 @@
 
 .fieldLabel {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   display: block;
   margin-bottom: 6px;
 }
@@ -555,8 +580,9 @@
 }
 
 .iframeError h3 {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif;
   font-size: 20px;
+  font-weight: 700;
   margin: 0;
   color: var(--sellia-ink);
 }

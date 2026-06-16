@@ -38,6 +38,9 @@ import { sendWithdrawalEmail } from "@/lib/email/transactional";
 import { safeLogger } from "@/lib/security/redact";
 
 /** Seuil (FCFA) au-delà duquel un retrait passe par validation agent. */
+import { getWithdrawalValidationThreshold, refreshMoneyConfigCache } from "@/lib/admin/money-config";
+
+/** @deprecated Utiliser getWithdrawalValidationThreshold() — conservé pour compat. */
 export const WITHDRAWAL_AUTO_THRESHOLD = 50_000;
 
 /** Délai avant drapeau « vérification manuelle » si pas de cartevoTxId ou 404. */
@@ -470,6 +473,9 @@ export async function createMerchantWithdrawal(
   | CreateWithdrawalResult
   | { ok: false; error: string; status: number }
 > {
+  await refreshMoneyConfigCache();
+  const withdrawalThreshold = getWithdrawalValidationThreshold();
+
   const payoutPhone = shop.payoutPhone || shop.phone;
   if (!payoutPhone) {
     return {
@@ -514,8 +520,8 @@ export async function createMerchantWithdrawal(
     currency,
   };
 
-  // ── CAS A : > 50k → REQUESTED (validation agent) ──
-  if (amount > WITHDRAWAL_AUTO_THRESHOLD) {
+  // ── CAS A : > seuil → REQUESTED (validation agent) ──
+  if (amount > withdrawalThreshold) {
     try {
       await db.$transaction(async (tx) => {
         const res = await tx.payout.updateMany({

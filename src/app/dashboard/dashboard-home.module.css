@@ -23,7 +23,7 @@
 }
 
 .greeting {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 40px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -173,7 +173,7 @@
 }
 
 .kpiValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 34px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -263,7 +263,7 @@
 }
 
 .pendingValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 500;
   letter-spacing: -0.8px;
@@ -357,7 +357,7 @@
 }
 
 .balanceValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 30px;
   font-weight: 500;
   letter-spacing: -0.8px;
@@ -420,7 +420,7 @@
 }
 
 .sectionTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 19px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -502,7 +502,7 @@
 }
 
 .listRank {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 500;
   color: var(--sellia-subtle);
@@ -571,7 +571,7 @@
 }
 
 .listValue {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 15px;
   font-weight: 500;
   color: var(--sellia-ink);
@@ -658,7 +658,7 @@
 }
 
 .timelineAmount {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 14px;
   font-weight: 500;
   color: var(--sellia-success);

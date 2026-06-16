@@ -7,6 +7,9 @@ import AdminPagination from "@/components/admin/AdminPagination";
 import AdminTransactionRowActions from "@/components/admin/AdminTransactionRowActions";
 import AdminExportButton from "@/components/admin/AdminExportButton";
 import TransactionsFilters from "./TransactionsFilters";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import { getTransactionsPageKpis } from "@/lib/admin/page-stats";
+import AdminShopLink from "@/components/admin/AdminShopLink";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +23,7 @@ export default async function AdminTransactionsPage({
   const { q = "", status = "", page: pageStr = "1" } = await searchParams;
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
   const query = q.trim();
+  const kpis = await getTransactionsPageKpis();
 
   const where: {
     paymentStatus?: string;
@@ -69,6 +73,8 @@ export default async function AdminTransactionsPage({
         des paiements Mobile Money.
       </p>
 
+      <AdminKpiGrid items={kpis} />
+
       <div className="admin-retraits-toolbar">
         <TransactionsFilters initialQ={q} initialStatus={status} />
         <AdminExportButton resource="transactions" />
@@ -102,9 +108,11 @@ export default async function AdminTransactionsPage({
                     <tr key={o.orderNumber}>
                       <td className="admin-mono">{o.orderNumber}</td>
                       <td>
-                        <Link href={`/admin/boutiques/${o.shop.id}`}>
-                          {o.shop.slug}
-                        </Link>
+                        <AdminShopLink
+                          shopId={o.shop.id}
+                          name={o.shop.name}
+                          slug={o.shop.slug}
+                        />
                       </td>
                       <td>{o.customerName}</td>
                       <td className="admin-td-right">{formatAdminMoney(o.total)}</td>

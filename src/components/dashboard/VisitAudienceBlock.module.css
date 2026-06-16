@@ -1,0 +1,207 @@
+.section {
+  margin-top: 32px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid var(--sellia-border, #ece9e2);
+  border-radius: 16px;
+}
+
+.sectionHeader {
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--sellia-ember, #e84b1f);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--sellia-ink, #0a0e13);
+  margin: 0 0 6px;
+  letter-spacing: -0.4px;
+}
+
+.sectionSubtitle {
+  font-size: 13px;
+  color: var(--sellia-muted, #6b6e76);
+  margin: 0;
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.kpiCard {
+  padding: 18px 16px;
+  background: var(--sellia-ivory, #fafaf7);
+  border: 1px solid var(--sellia-border, #ece9e2);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpiCardLive {
+  border-color: rgba(232, 75, 31, 0.25);
+  background: linear-gradient(135deg, #fffaf8 0%, #fafaf7 100%);
+}
+
+.kpiIcon {
+  color: var(--sellia-ember, #e84b1f);
+  margin-bottom: 4px;
+}
+
+.kpiLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--sellia-muted, #6b6e76);
+}
+
+.kpiValue {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--sellia-ink, #0a0e13);
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kpiHint {
+  font-size: 12px;
+  color: var(--sellia-muted, #6b6e76);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+.liveDotPulse {
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+}
+
+.geoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.geoPanel {
+  padding: 18px;
+  background: var(--sellia-ivory, #fafaf7);
+  border: 1px solid var(--sellia-border, #ece9e2);
+  border-radius: 12px;
+}
+
+.geoPanelHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--sellia-ink, #0a0e13);
+}
+
+.geoPanelHead h3 {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.geoEmpty {
+  font-size: 13px;
+  color: var(--sellia-muted, #6b6e76);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.geoList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.geoRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.geoLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sellia-ink, #0a0e13);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.geoLabel small {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--sellia-muted, #6b6e76);
+}
+
+.geoBarWrap {
+  height: 6px;
+  background: #ece9e2;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.geoBar {
+  height: 100%;
+  background: var(--sellia-ember, #e84b1f);
+  border-radius: 99px;
+  min-width: 4px;
+  transition: width 0.35s ease;
+}
+
+.geoCount {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--sellia-ink, #0a0e13);
+  min-width: 24px;
+  text-align: right;
+}
+
+@media (max-width: 1100px) {
+  .kpiRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .kpiRow,
+  .geoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 20px 16px;
+  }
+}

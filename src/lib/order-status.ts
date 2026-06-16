@@ -159,3 +159,6 @@ export const STATUS_CONFIG: Record<
 export function formatPrice(n: number): string {
   return n.toLocaleString("fr-FR");
 }
+
+/** Afficher avec <span className="sellia-num">{formatPrice(n)}</span> pour Manrope. */
+export { SELLIA_NUM_CLASS } from "@/lib/format-num";

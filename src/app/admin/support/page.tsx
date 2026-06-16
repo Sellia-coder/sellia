@@ -6,6 +6,9 @@ import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminSupportRowActions from "@/components/admin/AdminSupportRowActions";
 import AdminExportButton from "@/components/admin/AdminExportButton";
 import type { AdminBadgeVariant } from "@/lib/admin/status-badges";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import AdminShopLink from "@/components/admin/AdminShopLink";
+import { getSupportPageKpis } from "@/lib/admin/page-stats";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +27,16 @@ async function resolveShopLink(ticket: {
   shopName: string | null;
   shopSlug: string | null;
   userId: string;
-}) {
+}): Promise<{
+  shopId: string;
+  name: string;
+  slug?: string;
+} | null> {
   if (ticket.shopId) {
     return {
-      label: ticket.shopName ?? ticket.shopSlug ?? "Boutique",
-      adminUrl: `/admin/boutiques/${ticket.shopId}`,
+      shopId: ticket.shopId,
+      name: ticket.shopName ?? ticket.shopSlug ?? "Boutique",
+      slug: ticket.shopSlug ?? undefined,
     };
   }
   if (ticket.shopSlug) {
@@ -38,11 +46,12 @@ async function resolveShopLink(ticket: {
     });
     if (shop) {
       return {
-        label: ticket.shopName ?? shop.name,
-        adminUrl: `/admin/boutiques/${shop.id}`,
+        shopId: shop.id,
+        name: ticket.shopName ?? shop.name,
+        slug: ticket.shopSlug ?? undefined,
       };
     }
-    return { label: ticket.shopName ?? ticket.shopSlug, adminUrl: null };
+    return null;
   }
   const shop = await db.shop.findFirst({
     where: { ownerId: ticket.userId },
@@ -50,17 +59,20 @@ async function resolveShopLink(ticket: {
     select: { id: true, name: true, slug: true },
   });
   if (!shop) return null;
-  return { label: shop.name, adminUrl: `/admin/boutiques/${shop.id}` };
+  return { shopId: shop.id, name: shop.name, slug: shop.slug };
 }
 
 export default async function AdminSupportPage() {
-  const tickets = await db.supportTicket.findMany({
+  const [kpis, tickets] = await Promise.all([
+    getSupportPageKpis(),
+    db.supportTicket.findMany({
     orderBy: { lastMessageAt: "desc" },
     take: 100,
     include: {
       user: { select: { email: true, firstName: true, lastName: true } },
     },
-  });
+  }),
+  ]);
 
   const shopLinks = await Promise.all(
     tickets.map((t) => resolveShopLink(t))
@@ -73,6 +85,8 @@ export default async function AdminSupportPage() {
         {tickets.length} demande{tickets.length !== 1 ? "s" : ""} de support
         marchands.
       </p>
+
+      <AdminKpiGrid items={kpis} />
 
       <div className="admin-retraits-toolbar">
         <span />
@@ -114,10 +128,12 @@ export default async function AdminSupportPage() {
                       </td>
                       <td>{merchantName}</td>
                       <td>
-                        {shop?.adminUrl ? (
-                          <Link href={shop.adminUrl}>{shop.label}</Link>
-                        ) : shop ? (
-                          shop.label
+                        {shop ? (
+                          <AdminShopLink
+                            shopId={shop.shopId}
+                            name={shop.name}
+                            slug={shop.slug}
+                          />
                         ) : (
                           "—"
                         )}
@@ -138,7 +154,9 @@ export default async function AdminSupportPage() {
                         <AdminSupportRowActions
                           ticketId={t.id}
                           isClosed={t.status === "CLOSED"}
-                          shopAdminUrl={shop?.adminUrl ?? null}
+                          shopAdminUrl={
+                            shop ? `/admin/boutiques/${shop.shopId}` : null
+                          }
                         />
                       </td>
                     </tr>

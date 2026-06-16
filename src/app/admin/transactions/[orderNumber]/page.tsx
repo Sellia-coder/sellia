@@ -6,6 +6,7 @@ import { paymentStatusBadge } from "@/lib/admin/status-badges";
 import { payoutStatusLabel } from "@/lib/admin/labels";
 import AdminStatusBadge from "@/components/admin/AdminStatusBadge";
 import AdminTransactionRowActions from "@/components/admin/AdminTransactionRowActions";
+import AdminShopLink from "@/components/admin/AdminShopLink";
 import type { OrderItem } from "@/lib/order-status";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +95,12 @@ export default async function AdminTransactionDetailPage({
             <div className="admin-detail-row">
               <dt>Boutique</dt>
               <dd>
-                <Link href={shopUrl}>{order.shop.name}</Link>
+                <AdminShopLink
+                  shopId={order.shop.id}
+                  name={order.shop.name}
+                  slug={order.shop.slug}
+                  className="admin-link"
+                />
               </dd>
             </div>
           </dl>

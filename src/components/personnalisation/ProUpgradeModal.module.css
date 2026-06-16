@@ -90,7 +90,7 @@
 }
 
 .headerTitle {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   font-weight: 600;
   color: #0A0E13;
@@ -117,7 +117,7 @@
 }
 
 .priceAmount {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 32px;
   font-weight: 700;
   color: #422006;
@@ -172,7 +172,7 @@
 }
 
 .headerSimpleTitle {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 600;
   color: #0A0E13;
@@ -297,7 +297,7 @@
 }
 
 .summaryTotalAmount {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 700;
   color: #422006;
@@ -494,7 +494,7 @@
 }
 
 .successTitle {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 26px;
   font-weight: 600;
   color: #0A0E13;

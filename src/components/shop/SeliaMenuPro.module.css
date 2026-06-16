@@ -78,7 +78,7 @@
 }
 
 .logo span {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-weight: 800;
   font-size: 20px;
   color: #FFFFFF;
@@ -94,7 +94,7 @@
 }
 
 .brandName {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 17px;
   font-weight: 700;
   color: #0A0E13;
@@ -252,7 +252,7 @@
 }
 
 .drawerTitle {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 600;
   color: #0A0E13;

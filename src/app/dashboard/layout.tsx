@@ -6,11 +6,13 @@ import { getSidebarCounts, type SidebarCounts } from "@/lib/sidebar-counts";
 import DashboardLayoutClient from "./DashboardLayoutClient";
 import MerchantBanner from "@/components/dashboard/MerchantBanner";
 import { getPlatformSettings } from "@/lib/admin/platform-settings";
+import { refreshMoneyConfigCache } from "@/lib/admin/money-config";
 import "./dashboard-typography.css";
 
 const emptySidebarCounts: SidebarCounts = {
   products: { lowStock: 0, total: 0 },
   orders: { pending: 0, toDeliver: 0, actionRequired: 0 },
+  chat: { unread: 0 },
 };
 
 export default async function DashboardLayout({
@@ -24,6 +26,7 @@ export default async function DashboardLayout({
   }
 
   const settings = await getPlatformSettings();
+  await refreshMoneyConfigCache();
   if (settings.maintenanceMode && !isAdminRole(user.role)) {
     redirect("/maintenance");
   }

@@ -74,7 +74,7 @@
 }
 
 .placeholder span {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 88px;
   font-weight: 700;
   color: #CCC8BE;
@@ -161,7 +161,7 @@
 }
 
 .name {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 600;
   color: #0A0E13;
@@ -235,11 +235,13 @@
 }
 
 .price {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-family: var(--font-num), "Manrope", "Inter", sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: #0A0E13;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
   line-height: 1;
 }
 

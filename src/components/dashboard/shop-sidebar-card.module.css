@@ -59,7 +59,7 @@
 }
 
 .name {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 14px;
   font-weight: 500;
   color: var(--sellia-ink, #0a0e13);

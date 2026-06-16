@@ -78,7 +78,7 @@ export default async function PersonnaliserMaBoutiquePage() {
           </div>
           <h1
             style={{
-              fontFamily: "Fraunces, serif",
+              fontFamily: "Manrope, sans-serif",
               fontSize: "26px",
               marginBottom: "10px",
               color: "#0E1116",

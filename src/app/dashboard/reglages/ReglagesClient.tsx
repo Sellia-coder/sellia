@@ -351,8 +351,10 @@ function BoutiqueTab({ shop: initialShop }: { shop: ReglagesShop }) {
   const [shop, setShop] = useState(initialShop);
   const [isPending, startTransition] = useTransition();
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   const handleSave = () => {
+    setNameError(null);
     startTransition(async () => {
       const res = await updateShopBasicsAction({
         name: shop.name,
@@ -370,7 +372,7 @@ function BoutiqueTab({ shop: initialShop }: { shop: ReglagesShop }) {
         setTimeout(() => setSavedAt(null), 2500);
         router.refresh();
       } else {
-        alert(res.error || "Erreur");
+        setNameError(res.error || "Erreur");
       }
     });
   };
@@ -386,7 +388,18 @@ function BoutiqueTab({ shop: initialShop }: { shop: ReglagesShop }) {
         </div>
         <div className="dash-form-row">
           <label className="dash-form-label">Nom de la boutique</label>
-          <input type="text" className="dash-form-input" value={shop.name} onChange={(e) => setShop({ ...shop, name: e.target.value })} />
+          <input
+            type="text"
+            className="dash-form-input"
+            value={shop.name}
+            onChange={(e) => {
+              setNameError(null);
+              setShop({ ...shop, name: e.target.value });
+            }}
+          />
+          {nameError && (
+            <p style={{ fontSize: "12px", color: "#dc2626", marginTop: "6px" }}>{nameError}</p>
+          )}
         </div>
         <div className="dash-form-row">
           <label className="dash-form-label">Slug (URL)</label>

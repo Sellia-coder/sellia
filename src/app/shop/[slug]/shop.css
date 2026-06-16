@@ -16,6 +16,33 @@
   flex-direction: column;
 }
 
+.shop-root h1,
+.shop-root .shop-hero-title {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-weight: 700;
+}
+
+.shop-root h2,
+.shop-root h3,
+.shop-root [class*="Title"]:not([class*="subtitle"]),
+.shop-root [class*="title"]:not([class*="subtitle"]):not([class*="stat"]) {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-weight: 600;
+}
+
+.shop-root .sellia-num,
+.shop-root [class*="price"],
+.shop-root [class*="Price"],
+.shop-root [class*="total"],
+.shop-root [class*="Total"],
+.shop-root [class*="amount"],
+.shop-root [class*="Amount"] {
+  font-family: var(--font-num), "Manrope", "Inter", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
 .shop-root * {
   box-sizing: border-box;
 }
@@ -101,7 +128,7 @@
 }
 
 .shop-header-logo span {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-weight: 500;
   font-size: 18px;
 }
@@ -114,7 +141,7 @@
 }
 
 .shop-header-name {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 17px;
   font-weight: 500;
   color: var(--shop-text);
@@ -243,7 +270,7 @@
 }
 
 .shop-hero-title {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: clamp(36px, 6vw, 56px);
   font-weight: 400;
   line-height: 1.05;
@@ -300,7 +327,7 @@
 }
 
 .shop-products-title {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 28px;
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -409,7 +436,7 @@
 }
 
 .shop-product-card-name {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 16px;
   font-weight: 500;
   margin: 0 0 6px;
@@ -441,7 +468,7 @@
 }
 
 .shop-product-card-price {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 17px;
   font-weight: 600;
   color: var(--shop-text);
@@ -582,7 +609,7 @@
 }
 
 .shop-product-name {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: clamp(28px, 4vw, 38px);
   font-weight: 500;
   letter-spacing: -1px;
@@ -606,7 +633,7 @@
 }
 
 .shop-product-price {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 28px;
   font-weight: 600;
   color: var(--shop-text);
@@ -663,7 +690,7 @@
 
 .shop-product-description-content h2,
 .shop-product-description-content h3 {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-weight: 500;
   margin: 16px 0 8px;
   color: var(--shop-text);
@@ -816,7 +843,7 @@
 }
 
 .shop-related-title {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 24px;
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -851,7 +878,7 @@
 }
 
 .shop-order-title {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 30px;
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -1077,7 +1104,7 @@
 }
 
 .shop-order-summary-line-total {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--shop-text);
@@ -1124,7 +1151,7 @@
 }
 
 .checkoutTotal {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), 'Manrope', sans-serif;
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.3px;
@@ -1191,7 +1218,7 @@
 }
 
 .shop-confirmation-title {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: clamp(30px, 5vw, 42px);
   font-weight: 500;
   letter-spacing: -1px;
@@ -1281,7 +1308,7 @@
 }
 
 .shop-page-h2 {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 22px;
   font-weight: 500;
   margin: 28px 0 12px;
@@ -1303,13 +1330,25 @@
 }
 
 .shop-page-title {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: clamp(32px, 5vw, 44px);
   font-weight: 500;
   letter-spacing: -1px;
   line-height: 1.1;
   margin: 0 0 14px;
   color: var(--shop-text);
+}
+
+.shop-page-legal-disclaimer {
+  font-size: 13px;
+  color: var(--shop-text-soft);
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0 0 24px;
+  padding: 10px 14px;
+  background: var(--shop-bg-soft, #fafaf7);
+  border-left: 3px solid var(--shop-primary);
+  border-radius: 0 8px 8px 0;
 }
 
 .shop-page-tagline {
@@ -1453,7 +1492,7 @@
 }
 
 .shop-notfound-title {
-  font-family: var(--font-display), Fraunces, serif;
+  font-family: var(--font-display), Manrope, sans-serif;
   font-size: 32px;
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -1691,7 +1730,7 @@
 }
 
 .shop-header-name {
-  font-family: Fraunces, var(--font-display), serif;
+  font-family: Manrope, var(--font-display), sans-serif;
   font-size: 18px;
   font-weight: 500;
   color: var(--shop-text);
@@ -2138,7 +2177,7 @@
 }
 
 .shop-sticky-cta-price {
-  font-family: Fraunces, var(--font-display), serif;
+  font-family: Manrope, var(--font-display), sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--shop-text);
@@ -2149,7 +2188,7 @@
 }
 
 .shop-related-title {
-  font-family: Fraunces, var(--font-display), serif;
+  font-family: Manrope, var(--font-display), sans-serif;
   font-size: 28px;
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -2166,7 +2205,7 @@
 }
 
 .shop-product-price {
-  font-family: Fraunces, var(--font-display), serif;
+  font-family: Manrope, var(--font-display), sans-serif;
   font-size: 32px;
   font-weight: 600;
   color: var(--shop-text);
@@ -2241,13 +2280,13 @@
 }
 
 .shop-footer-logo span {
-  font-family: Fraunces, var(--font-display), serif;
+  font-family: Manrope, var(--font-display), sans-serif;
   font-weight: 500;
   font-size: 19px;
 }
 
 .shop-footer-brand-name {
-  font-family: Fraunces, var(--font-display), serif;
+  font-family: Manrope, var(--font-display), sans-serif;
   font-size: 18px;
   font-weight: 500;
   color: var(--shop-text);
@@ -2456,7 +2495,7 @@
 }
 
 .shop-header-logo span {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-weight: 600;
   font-size: 19px;
   color: #FFFFFF;
@@ -2464,7 +2503,7 @@
 }
 
 .shop-header-name {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 18px;
   font-weight: 600;
   color: #0E1116;
@@ -2714,7 +2753,7 @@
 }
 
 .shop-search-overlay .shop-search-item-price {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: var(--shop-text);
@@ -2942,7 +2981,7 @@
   border-radius: 50%;
   background: var(--shop-primary);
   color: #FFFFFF;
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-weight: 600;
   font-size: 15px;
   display: flex;
@@ -2982,6 +3021,31 @@
   margin: 0;
 }
 
+.shop-review-merchant-reply {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--shop-surface-soft, #fafaf7);
+  border-radius: 12px;
+  border-left: 3px solid var(--shop-accent, #e84b1f);
+}
+
+.shop-review-merchant-reply strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--shop-accent, #e84b1f);
+  margin-bottom: 6px;
+}
+
+.shop-review-merchant-reply p {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--shop-text);
+  margin: 0;
+}
+
 .shop-review-form {
   margin-top: 20px;
   padding: 20px;
@@ -2991,7 +3055,7 @@
 }
 
 .shop-review-form-title {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 18px;
   font-weight: 500;
   margin: 0 0 16px;
@@ -3024,7 +3088,7 @@
 }
 
 .shop-cart-title {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: clamp(28px, 4vw, 36px);
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -3080,7 +3144,7 @@
 }
 
 .shop-cart-item-name {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 16px;
   font-weight: 500;
   color: var(--shop-text);
@@ -3127,7 +3191,7 @@
 }
 
 .shop-cart-item-line-total {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--shop-text);
@@ -3164,7 +3228,7 @@
 
 .shop-cart-empty h1,
 .shop-cart-empty h2 {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 26px;
   font-weight: 500;
   margin: 0 0 8px;
@@ -3262,7 +3326,7 @@
 }
 
 .shop-prefooter-trust .shop-prefooter-trust-title {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: clamp(28px, 4vw, 38px);
   font-weight: 500;
   letter-spacing: -1px;
@@ -3375,7 +3439,7 @@
 }
 
 .shop-prefooter-trust-card-title {
-  font-family: "Fraunces", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 17px;
   font-weight: 500;
   color: var(--shop-text);
@@ -3624,7 +3688,7 @@
 .shop-template-tech .shop-header-logo span,
 .shop-template-alimentation .shop-header-logo span,
 .shop-template-artisanat .shop-header-logo span {
-  font-family: 'Fraunces', Georgia, serif !important;
+  font-family: var(--font-display), 'Manrope', sans-serif !important;
   font-weight: 600 !important;
   font-size: 19px !important;
   color: #FFFFFF !important;
@@ -3640,7 +3704,7 @@
 .shop-template-tech .shop-header-name,
 .shop-template-alimentation .shop-header-name,
 .shop-template-artisanat .shop-header-name {
-  font-family: 'Fraunces', Georgia, serif !important;
+  font-family: var(--font-display), 'Manrope', sans-serif !important;
   font-size: 18px !important;
   font-weight: 600 !important;
   color: #0E1116 !important;
@@ -3826,7 +3890,7 @@
   font-style: normal;
 }
 
-/* Override spécifique : les .shop-template-mode mettent du Fraunces italique
+/* Override spécifique : les .shop-template-mode mettent du Manrope italique
    PARTOUT, ce qui rend le nom italic et plus pâle visuellement */
 .shop-template-mode .shop-header-name {
   font-style: normal !important;

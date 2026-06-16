@@ -5,8 +5,9 @@
   --color-ink: #0E1116;
   --color-ivory: #FAFAF7;
   --color-ember: #E84B1F;
-  --font-display: "Fraunces", Georgia, serif;
+  --font-display: var(--font-manrope), "Manrope", sans-serif;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-num: var(--font-manrope), "Manrope", sans-serif;
 }
 
 :root{
@@ -20,7 +21,19 @@
   --shadow:0 1px 3px rgba(14,17,22,0.05),0 8px 24px rgba(14,17,22,0.06);
   --shadow-lg:0 2px 4px rgba(14,17,22,0.06),0 16px 48px rgba(14,17,22,0.10);
   --shadow-xl:0 4px 8px rgba(14,17,22,0.08),0 24px 80px rgba(14,17,22,0.16);
+  --font-num: var(--font-manrope, "Manrope"), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
+.sellia-num{
+  font-family:var(--font-num);
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+}
+h1,h2,h3,h4{
+  font-family:var(--font-display,"Manrope"),sans-serif;
+  font-weight:600;
+}
+h1{font-weight:700}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
@@ -137,7 +150,7 @@ nav.scrolled{
 }
 
 .hero h1{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:clamp(44px,7vw,96px);
   line-height:0.96;
   font-weight:300;
@@ -351,7 +364,7 @@ nav.scrolled{
 }
 .hero-stat{text-align:center}
 .hero-stat-num{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:36px;
   font-weight:400;
   letter-spacing:-0.02em;
@@ -421,7 +434,7 @@ section.block:nth-of-type(even){background:var(--ivory-warm)}
   font-weight:600;
 }
 .section-title{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:clamp(32px,5vw,52px);
   font-weight:300;
   letter-spacing:-0.03em;
@@ -462,7 +475,7 @@ section.block:nth-of-type(even) .problem-card{background:var(--ivory)}
 }
 .problem-icon svg{width:20px;height:20px;color:var(--ivory)}
 .problem-card h4{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:22px;
   font-weight:500;
   letter-spacing:-0.01em;
@@ -499,7 +512,7 @@ section.block:nth-of-type(even) .step{background:var(--ivory)}
   margin-bottom:14px;
 }
 .step h4{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:24px;
   font-weight:500;
   letter-spacing:-0.01em;
@@ -563,12 +576,12 @@ section.block:nth-of-type(even) .step-illus{background:var(--ivory-warm)}
   background:var(--ember);
   color:var(--ivory);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:20px;
   font-weight:500;
 }
 .persona-name{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:20px;
   font-weight:500;
   letter-spacing:-0.01em;
@@ -583,7 +596,7 @@ section.block:nth-of-type(even) .step-illus{background:var(--ivory-warm)}
   margin-top:2px;
 }
 .persona-quote{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:16px;
   font-style:italic;
   font-weight:300;
@@ -644,7 +657,7 @@ section.block:nth-of-type(even) .feature{background:var(--ivory)}
 }
 .feature-icon svg{width:18px;height:18px;color:var(--ember)}
 .feature-text h4{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:19px;
   font-weight:500;
   letter-spacing:-0.01em;
@@ -697,7 +710,7 @@ section.block:nth-of-type(even) .plan{background:var(--ivory)}
   font-weight:600;
 }
 .plan-name{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:22px;
   font-weight:500;
   letter-spacing:-0.01em;
@@ -712,7 +725,7 @@ section.block:nth-of-type(even) .plan{background:var(--ivory)}
 }
 .plan.featured .plan-tagline{color:var(--ember-soft)}
 .plan-amount{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:36px;
   font-weight:400;
   letter-spacing:-0.02em;
@@ -790,7 +803,7 @@ section.block:nth-of-type(even) .plan{background:var(--ivory)}
 section.block:nth-of-type(even) .testimonial{background:var(--ivory)}
 .testimonial:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
 .testimonial-quote{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:17px;
   line-height:1.5;
   font-weight:300;
@@ -805,7 +818,7 @@ section.block:nth-of-type(even) .testimonial{background:var(--ivory)}
   line-height:0;
   margin-right:4px;
   vertical-align:-12px;
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   opacity:0.4;
 }
 .testimonial-author{
@@ -819,7 +832,7 @@ section.block:nth-of-type(even) .testimonial{background:var(--ivory)}
   background:var(--ember);
   color:var(--ivory);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:16px;
   font-weight:500;
   flex-shrink:0;
@@ -917,7 +930,7 @@ section.block:nth-of-type(even) .faq-question:hover{background:var(--ivory-warm)
 }
 .cta-final-content{position:relative;z-index:2;text-align:center}
 .cta-final h2{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:clamp(40px,7vw,88px);
   font-weight:300;
   letter-spacing:-0.04em;
@@ -982,7 +995,7 @@ footer{
   margin-bottom:48px;
 }
 .footer-brand h3{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:22px;
   font-weight:400;
   letter-spacing:-0.02em;
@@ -1385,7 +1398,7 @@ footer{
   border: 1.5px solid rgba(14, 17, 22, 0.08);
   border-radius: 12px;
   outline: none;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 19px;
   font-style: italic;
   font-weight: 400;
@@ -1724,7 +1737,7 @@ footer{
 }
 
 .pricing-v2-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(32px, 5vw, 52px);
   line-height: 1.05;
   font-weight: 400;
@@ -1909,7 +1922,7 @@ footer{
 }
 
 .pricing-v2-plan-name h3 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 26px;
   font-weight: 500;
   margin: 0;
@@ -1957,7 +1970,7 @@ footer{
 }
 
 .pricing-v2-price-amount {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 48px;
   font-weight: 400;
   letter-spacing: -2px;
@@ -2025,7 +2038,7 @@ footer{
 }
 
 .pricing-v2-commission-num {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: #0E1116;
@@ -2456,7 +2469,7 @@ footer{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:'Fraunces',Georgia,serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:22px;
   font-weight:600;
   color:var(--ivory);
@@ -2716,7 +2729,7 @@ footer{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:'Fraunces',Georgia,serif;
+  font-family:var(--font-display,"Manrope"),sans-serif;font-weight:600;
   font-size:23px;
   font-weight:600;
   color:var(--ivory);
@@ -2933,7 +2946,7 @@ footer{
      margin-bottom: 24px;
    }
    .legal-title {
-     font-family: 'Fraunces', serif;
+     font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
      font-size: clamp(40px, 6vw, 64px);
      font-weight: 400;
      line-height: 1.05;
@@ -3040,7 +3053,7 @@ footer{
      border-radius: 0 8px 8px 0;
    }
    .legal-preamble h2 {
-     font-family: 'Fraunces', serif;
+     font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
      font-size: 28px;
      font-weight: 400;
      letter-spacing: -0.8px;
@@ -3060,7 +3073,7 @@ footer{
      scroll-margin-top: 100px;
    }
    .legal-content h2 {
-     font-family: 'Fraunces', serif;
+     font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
      font-size: 32px;
      font-weight: 400;
      letter-spacing: -1px;
@@ -3406,7 +3419,7 @@ footer{
 }
 
 .auth-editorial-headline {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(28px, 3.2vw, 44px);
   line-height: 1.1;
   font-weight: 400;
@@ -3486,7 +3499,7 @@ footer{
 }
 
 .auth-mockup-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 400;
   color: var(--ivory);
@@ -3631,7 +3644,7 @@ footer{
 }
 
 .auth-stat-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   font-weight: 400;
   color: var(--ivory);
@@ -3797,7 +3810,7 @@ footer{
 }
 
 .auth-lock-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   color: var(--ivory);
   letter-spacing: -0.4px;
@@ -3962,7 +3975,7 @@ footer{
 }
 
 .auth-form-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(28px, 3.5vw, 38px);
   line-height: 1.1;
   font-weight: 400;
@@ -4387,7 +4400,7 @@ footer{
 }
 
 .auth-success-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 400;
   color: var(--ink);
@@ -4553,7 +4566,7 @@ footer{
 }
 
 .auth-transition-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 32px;
   font-weight: 500;
   color: #0A0E13;
@@ -4727,7 +4740,7 @@ footer{
 }
 
 .generation-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(32px, 4vw, 44px);
   line-height: 1.1;
   font-weight: 400;
@@ -4761,7 +4774,7 @@ footer{
 }
 
 .generation-prompt-text {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-style: italic;
   color: var(--ivory);
@@ -5263,7 +5276,7 @@ footer{
 }
 
 .apercu-shop-brand {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 500;
   color: var(--ink);
@@ -5335,7 +5348,7 @@ footer{
 }
 
 .apercu-shop-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 36px;
   line-height: 1.05;
   font-weight: 400;
@@ -5459,7 +5472,7 @@ footer{
 }
 
 .apercu-shop-products-header h3 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 400;
   color: var(--ink);
@@ -5507,7 +5520,7 @@ footer{
 }
 
 .apercu-shop-product-info h4 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 500;
   color: var(--ink);
@@ -5575,7 +5588,7 @@ footer{
 }
 
 .apercu-sidebar-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   font-weight: 400;
   color: var(--ink);
@@ -6114,7 +6127,7 @@ footer{
 }
 
 .generation-headline-v2 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(36px, 5vw, 56px);
   line-height: 1.05;
   font-weight: 400;
@@ -6162,7 +6175,7 @@ footer{
 }
 
 .generation-prompt-text-v2 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 14px;
   font-style: italic;
   color: var(--ivory);
@@ -6473,7 +6486,7 @@ footer{
 }
 
 .generation-preview-brand {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 24px;
   font-weight: 400;
   color: var(--ivory);
@@ -6484,7 +6497,7 @@ footer{
 }
 
 .generation-preview-tagline {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 14px;
   font-style: italic;
   color: rgba(250, 250, 247, 0.85);
@@ -6845,7 +6858,7 @@ footer{
 }
 
 .apercu-v2-hero-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(36px, 5vw, 56px);
   line-height: 1.05;
   font-weight: 400;
@@ -6891,7 +6904,7 @@ footer{
 }
 
 .apercu-v2-stat-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 400;
   color: var(--ink);
@@ -7138,7 +7151,7 @@ footer{
 }
 
 .apercu-v2-shop-brand {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: var(--ink);
@@ -7235,7 +7248,7 @@ footer{
 }
 
 .apercu-v2-shop-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 40px;
   line-height: 1.05;
   font-weight: 400;
@@ -7415,7 +7428,7 @@ footer{
 }
 
 .apercu-v2-shop-products-header h3 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 32px;
   font-weight: 400;
   color: var(--ink);
@@ -7511,7 +7524,7 @@ footer{
 }
 
 .apercu-v2-shop-product-info h4 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 17px;
   font-weight: 500;
   color: var(--ink);
@@ -7534,7 +7547,7 @@ footer{
 }
 
 .apercu-v2-shop-product-price {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 500;
   color: var(--ink);
@@ -7578,7 +7591,7 @@ footer{
 }
 
 .apercu-v2-shop-footer-tagline {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 12px;
   font-style: italic;
   color: rgba(250, 250, 247, 0.5);
@@ -7685,7 +7698,7 @@ footer{
 }
 
 .apercu-v2-sidebar-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 26px;
   font-weight: 400;
   color: var(--ink);
@@ -7982,7 +7995,7 @@ footer{
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 500;
   color: white;
@@ -8002,7 +8015,7 @@ footer{
 }
 
 .apercu-v2-testimonial-text em {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-style: italic;
 }
 
@@ -8057,7 +8070,7 @@ footer{
 }
 
 .apercu-v2-after-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(28px, 4vw, 42px);
   font-weight: 400;
   color: var(--ink);
@@ -8108,7 +8121,7 @@ footer{
 }
 
 .apercu-v2-after-card h3 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 500;
   color: var(--ink);
@@ -8360,7 +8373,7 @@ footer{
   border: 1px solid rgba(14, 17, 22, 0.12);
   border-radius: 10px;
   background: rgba(250, 250, 247, 0.6);
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-style: italic;
   color: var(--ink);
@@ -8627,7 +8640,7 @@ footer{
 
 /* Nom de la boutique - GÉANT */
 .cinema-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(56px, 12vw, 160px);
   font-weight: 300;
   font-style: italic;
@@ -8679,7 +8692,7 @@ footer{
 
 /* Subtitle */
 .cinema-subtitle {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(14px, 1.6vw, 18px);
   font-style: italic;
   color: rgba(250, 250, 247, 0.6);
@@ -8962,7 +8975,7 @@ footer{
 /* Floating words */
 .cinema-floating-word {
   position: absolute;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-style: italic;
   color: rgba(232, 75, 31, 0.4);
   pointer-events: none;
@@ -9261,7 +9274,7 @@ footer{
 }
 
 .payments-mono-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(28px, 4vw, 40px);
   line-height: 1.15;
   font-weight: 400;
@@ -9400,7 +9413,7 @@ footer{
 }
 
 .payments-mono-stat-num {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: #0E1116;
@@ -10207,7 +10220,7 @@ footer{
 }
 
 .gen-light-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(32px, 5vw, 48px);
   line-height: 1.1;
   font-weight: 400;
@@ -10289,7 +10302,7 @@ footer{
 }
 
 .gen-light-progress-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 500;
   color: #E84B1F;
@@ -11047,7 +11060,7 @@ footer {
 }
 .dash-shop-selector { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--dash-border); border-radius: var(--dash-radius-md); margin-bottom: 10px; cursor: pointer; transition: all 0.15s; background: transparent; width: 100%; }
 .dash-shop-selector:hover { background: var(--dash-bg-hover); border-color: var(--dash-border-strong); }
-.dash-shop-avatar { width: 26px; height: 26px; border-radius: var(--dash-radius-sm); background: linear-gradient(135deg, var(--dash-ember), #ff7849); display: flex; align-items: center; justify-content: center; color: white; font-family: 'Fraunces', serif; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.dash-shop-avatar { width: 26px; height: 26px; border-radius: var(--dash-radius-sm); background: linear-gradient(135deg, var(--dash-ember), #ff7849); display: flex; align-items: center; justify-content: center; color: white; font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 13px; font-weight: 500; flex-shrink: 0; }
 .dash-shop-info { flex: 1; min-width: 0; text-align: left; }
 .dash-shop-name { font-size: 12.5px; font-weight: 600; color: var(--dash-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
 .dash-shop-domain { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dash-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; margin-top: 1px; }
@@ -11088,7 +11101,7 @@ footer {
 .dash-sidebar-bottom { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--dash-border); }
 .dash-user-card { display: flex; align-items: center; gap: 9px; padding: 6px 8px; border-radius: var(--dash-radius-md); cursor: pointer; transition: background 0.15s; }
 .dash-user-card:hover { background: var(--dash-bg-hover); }
-.dash-user-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #6B5B47, #8B6F47); display: flex; align-items: center; justify-content: center; color: white; font-family: 'Fraunces', serif; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.dash-user-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #6B5B47, #8B6F47); display: flex; align-items: center; justify-content: center; color: white; font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 13px; font-weight: 500; flex-shrink: 0; }
 .dash-user-info { flex: 1; min-width: 0; }
 .dash-user-name { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
 .dash-user-plan { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--dash-text-tertiary); letter-spacing: 0.3px; text-transform: uppercase; line-height: 1.2; margin-top: 1px; }
@@ -11119,7 +11132,7 @@ footer {
 .dash-page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
 .dash-page-header-left { flex: 1; min-width: 0; }
 .dash-page-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dash-ember); font-weight: 600; margin-bottom: 8px; }
-.dash-page-title { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 400; line-height: 1.1; letter-spacing: -1px; color: var(--dash-text-primary); margin: 0 0 8px; }
+.dash-page-title { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 32px; font-weight: 400; line-height: 1.1; letter-spacing: -1px; color: var(--dash-text-primary); margin: 0 0 8px; }
 .dash-page-subtitle { font-size: 14px; color: var(--dash-text-secondary); line-height: 1.5; max-width: 580px; margin: 0; }
 .dash-shop-url { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 7px 12px; background: rgba(232, 75, 31, 0.06); border: 1px solid rgba(232, 75, 31, 0.2); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #E84B1F; text-decoration: none; transition: all 0.15s; }
 .dash-shop-url:hover { background: rgba(232, 75, 31, 0.1); border-color: rgba(232, 75, 31, 0.35); }
@@ -11145,7 +11158,7 @@ footer {
 .dash-checklist-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dash-ember); font-weight: 600; margin-bottom: 6px; }
 .dash-checklist-eyebrow-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--dash-ember); box-shadow: 0 0 8px var(--dash-ember); animation: dashPulse 1.6s ease-in-out infinite; }
 @keyframes dashPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
-.dash-checklist-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; letter-spacing: -0.6px; margin: 0 0 4px; }
+.dash-checklist-title { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 22px; font-weight: 400; letter-spacing: -0.6px; margin: 0 0 4px; }
 .dash-checklist-title em { font-style: italic; color: var(--dash-ember); }
 .dash-checklist-subtitle { font-size: 13px; color: var(--dash-text-secondary); margin: 0; }
 .dash-checklist-progress-circle { width: 56px; height: 56px; flex-shrink: 0; position: relative; }
@@ -11171,7 +11184,7 @@ footer {
 .dash-stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .dash-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dash-text-tertiary); font-weight: 600; }
 .dash-stat-period { font-size: 11px; color: var(--dash-text-tertiary); }
-.dash-stat-value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 400; letter-spacing: -1.2px; line-height: 1; margin-bottom: 8px; }
+.dash-stat-value { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 32px; font-weight: 400; letter-spacing: -1.2px; line-height: 1; margin-bottom: 8px; }
 .dash-stat-unit { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; color: var(--dash-text-tertiary); margin-left: 2px; }
 .dash-stat-trend { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; font-family: 'JetBrains Mono', monospace; padding: 3px 8px; border-radius: 4px; }
 .dash-stat-trend-up { background: var(--dash-success-bg); color: var(--dash-success); }
@@ -11183,7 +11196,7 @@ footer {
 .dash-grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
 .dash-card { background: var(--dash-bg-elevated); border: 1px solid var(--dash-border); border-radius: var(--dash-radius-xl); overflow: hidden; }
 .dash-card-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--dash-border); gap: 12px; flex-wrap: wrap; }
-.dash-card-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; letter-spacing: -0.4px; }
+.dash-card-title { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 18px; font-weight: 500; letter-spacing: -0.4px; }
 .dash-card-subtitle { font-size: 11.5px; color: var(--dash-text-tertiary); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
 .dash-card-tabs { display: flex; gap: 4px; padding: 4px; background: var(--dash-bg-subtle); border-radius: var(--dash-radius-md); }
 .dash-card-tab { padding: 5px 10px; font-size: 11.5px; font-weight: 500; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px; color: var(--dash-text-secondary); border-radius: var(--dash-radius-sm); cursor: pointer; transition: all 0.15s; }
@@ -11204,7 +11217,7 @@ footer {
 .dash-activity-text { font-size: 13px; color: var(--dash-text-primary); line-height: 1.4; margin-bottom: 2px; }
 .dash-activity-text strong { font-weight: 600; }
 .dash-activity-meta { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--dash-text-tertiary); letter-spacing: 0.3px; }
-.dash-activity-amount { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 500; flex-shrink: 0; letter-spacing: -0.2px; }
+.dash-activity-amount { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 14px; font-weight: 500; flex-shrink: 0; letter-spacing: -0.2px; }
 .dash-activity-amount.is-positive { color: var(--dash-success); }
 
 /* STATS PAGE — Period selector */
@@ -11225,7 +11238,7 @@ footer {
 .dash-kpi-icon-avg { background: var(--dash-bg-active); color: var(--dash-ember); }
 .dash-kpi-icon-conversion { background: rgba(168, 85, 247, 0.1); color: rgb(126, 34, 206); }
 .dash-kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dash-text-tertiary); font-weight: 600; margin-bottom: 6px; }
-.dash-kpi-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
+.dash-kpi-value { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 28px; font-weight: 400; letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
 .dash-kpi-unit { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--dash-text-tertiary); margin-left: 2px; }
 .dash-kpi-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--dash-border); }
 .dash-kpi-compare { font-size: 11px; color: var(--dash-text-tertiary); font-family: 'JetBrains Mono', monospace; }
@@ -11240,7 +11253,7 @@ footer {
 .dash-chart-summary { display: flex; align-items: baseline; gap: 24px; padding: 20px 24px 0; flex-wrap: wrap; }
 .dash-chart-summary-item { display: flex; flex-direction: column; gap: 2px; }
 .dash-chart-summary-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--dash-text-tertiary); font-weight: 600; }
-.dash-chart-summary-value { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; letter-spacing: -0.8px; line-height: 1.1; color: var(--dash-text-primary); }
+.dash-chart-summary-value { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 26px; font-weight: 400; letter-spacing: -0.8px; line-height: 1.1; color: var(--dash-text-primary); }
 
 /* Split grids */
 .dash-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
@@ -11255,11 +11268,11 @@ footer {
 .dash-top-rank.is-2 { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); color: white; }
 .dash-top-rank.is-3 { background: linear-gradient(135deg, #CD7F32, #8B4513); color: white; }
 .dash-top-thumb { width: 36px; height: 36px; border-radius: var(--dash-radius-md); flex-shrink: 0; }
-.dash-top-customer-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Fraunces', serif; font-size: 14px; font-weight: 500; }
+.dash-top-customer-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 14px; font-weight: 500; }
 .dash-top-info { flex: 1; min-width: 0; }
 .dash-top-name { font-size: 13px; font-weight: 600; color: var(--dash-text-primary); margin-bottom: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dash-top-meta { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--dash-text-tertiary); letter-spacing: 0.3px; }
-.dash-top-amount { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 500; letter-spacing: -0.2px; flex-shrink: 0; text-align: right; }
+.dash-top-amount { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 14px; font-weight: 500; letter-spacing: -0.2px; flex-shrink: 0; text-align: right; }
 .dash-top-bar-wrap { width: 60px; height: 4px; background: var(--dash-bg-subtle); border-radius: var(--dash-radius-full); margin-top: 4px; }
 .dash-top-bar-fill { height: 100%; background: var(--dash-ember); border-radius: var(--dash-radius-full); }
 
@@ -11268,7 +11281,7 @@ footer {
 .dash-donut-svg { transform: rotate(-90deg); }
 .dash-donut-center { position: relative; }
 .dash-donut-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.dash-donut-total { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 400; letter-spacing: -0.6px; }
+.dash-donut-total { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 24px; font-weight: 400; letter-spacing: -0.6px; }
 .dash-donut-total-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dash-text-tertiary); letter-spacing: 0.8px; text-transform: uppercase; margin-top: 2px; }
 .dash-donut-legend { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--dash-border); }
 .dash-donut-legend-item { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
@@ -11285,14 +11298,14 @@ footer {
 .dash-geo-bar { width: 100%; height: 4px; background: var(--dash-bg-subtle); border-radius: var(--dash-radius-full); margin-top: 4px; }
 .dash-geo-bar-fill { height: 100%; background: linear-gradient(90deg, var(--dash-ember), #ff7849); border-radius: var(--dash-radius-full); }
 .dash-geo-stats { text-align: right; flex-shrink: 0; }
-.dash-geo-amount { font-family: 'Fraunces', serif; font-size: 13px; font-weight: 500; letter-spacing: -0.2px; }
+.dash-geo-amount { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 13px; font-weight: 500; letter-spacing: -0.2px; }
 .dash-geo-percent { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dash-text-tertiary); }
 
 /* Additional stats */
 .dash-additional-stat { padding: 14px 0; border-bottom: 1px solid var(--dash-border); }
 .dash-additional-stat:last-child { border-bottom: none; }
 .dash-additional-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--dash-text-tertiary); margin-bottom: 4px; }
-.dash-additional-value { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; letter-spacing: -0.6px; }
+.dash-additional-value { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 22px; font-weight: 400; letter-spacing: -0.6px; }
 .dash-additional-unit { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--dash-text-tertiary); }
 .dash-additional-change { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--dash-text-secondary); }
 
@@ -11420,7 +11433,7 @@ footer {
   border-radius: 10px;
   background: white;
   text-align: center;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 26px;
   font-weight: 500;
   color: #0E1116;
@@ -11574,10 +11587,10 @@ footer {
 .dash-cell-product-img::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%); }
 .dash-cell-product-name { font-weight: 600; font-size: 13px; margin-bottom: 1px; }
 .dash-cell-product-sku { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dash-text-tertiary); }
-.dash-cell-price { font-family: 'Fraunces', serif; font-weight: 500; font-size: 14px; letter-spacing: -0.2px; white-space: nowrap; }
+.dash-cell-price { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-weight: 500; font-size: 14px; letter-spacing: -0.2px; white-space: nowrap; }
 .dash-cell-mono { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--dash-text-secondary); white-space: nowrap; }
 .dash-cell-customer { display: flex; align-items: center; gap: 8px; }
-.dash-cell-customer-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Fraunces', serif; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.dash-cell-customer-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 11px; font-weight: 500; flex-shrink: 0; }
 
 .dash-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: var(--dash-radius-sm); font-size: 10.5px; font-weight: 600; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
 .dash-badge-success { background: var(--dash-success-bg); color: rgb(21, 128, 61); }
@@ -11651,7 +11664,7 @@ footer {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.85); }
 }
-.dash-ai-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 400; letter-spacing: -0.4px; margin: 0 0 4px; }
+.dash-ai-title { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 20px; font-weight: 400; letter-spacing: -0.4px; margin: 0 0 4px; }
 .dash-ai-title em { font-style: italic; color: var(--dash-ember); }
 .dash-ai-subtitle { font-size: 13px; color: var(--dash-text-secondary); line-height: 1.5; margin: 0; }
 
@@ -11798,7 +11811,7 @@ footer {
 }
 .dash-form-section { padding: 24px; }
 .dash-form-section-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 500;
   letter-spacing: -0.4px;
@@ -11888,7 +11901,7 @@ footer {
   justify-content: center;
   margin-bottom: 14px;
 }
-.dash-upload-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+.dash-upload-title { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 16px; font-weight: 500; margin-bottom: 4px; }
 .dash-upload-subtitle { font-size: 12px; color: var(--dash-text-tertiary); }
 
 /* SEO Preview */
@@ -11953,7 +11966,7 @@ footer {
   margin-bottom: 6px;
 }
 .dash-drawer-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 26px;
   font-weight: 400;
   letter-spacing: -0.6px;
@@ -12041,7 +12054,7 @@ footer {
   margin-bottom: 4px;
   font-weight: 600;
 }
-.dash-customer-stat-value { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 400; letter-spacing: -0.6px; }
+.dash-customer-stat-value { font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600; font-size: 24px; font-weight: 400; letter-spacing: -0.6px; }
 .dash-customer-info { display: flex; flex-direction: column; gap: 10px; }
 .dash-customer-info-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dash-text-primary); }
 .dash-customer-info-row svg { color: var(--dash-text-tertiary); flex-shrink: 0; }
@@ -12185,7 +12198,7 @@ footer {
   margin-bottom: 4px;
 }
 .dash-product-type-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 400;
   letter-spacing: -0.5px;
@@ -12448,7 +12461,7 @@ footer {
   margin-bottom: 6px;
 }
 .dash-settings-card-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 19px;
   font-weight: 500;
   letter-spacing: -0.4px;
@@ -12479,7 +12492,7 @@ footer {
   align-items: center;
   justify-content: center;
   color: white;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 13px;
   font-weight: 700;
   flex-shrink: 0;
@@ -12572,7 +12585,7 @@ footer {
   gap: 2px;
 }
 .dash-rule-stat-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.3px;
@@ -12614,7 +12627,7 @@ footer {
   animation: dashAIPulse 1.6s ease-in-out infinite;
 }
 .dash-campaign-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 400;
   letter-spacing: -0.5px;
@@ -12636,7 +12649,7 @@ footer {
   margin-bottom: 4px;
 }
 .dash-campaign-countdown-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -12659,7 +12672,7 @@ footer {
   margin-bottom: 4px;
 }
 .dash-campaign-stat-value {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   letter-spacing: -0.5px;
@@ -12676,7 +12689,7 @@ footer {
   border: 1.5px solid var(--dash-border);
   border-radius: var(--dash-radius-md);
   padding: 14px 12px;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 500;
   letter-spacing: -0.4px;
@@ -12731,7 +12744,7 @@ footer {
 }
 .dash-tier-info { flex: 1; min-width: 0; }
 .dash-tier-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.3px;
@@ -13044,7 +13057,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 14px;
   font-weight: 700;
   flex-shrink: 0;
@@ -13248,14 +13261,14 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 32px;
   font-weight: 500;
   flex-shrink: 0;
 }
 .dash-profile-info { flex: 1; min-width: 0; }
 .dash-profile-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 26px;
   font-weight: 400;
   letter-spacing: -0.6px;
@@ -13352,7 +13365,7 @@ footer {
 }
 .dash-help-category-icon { font-size: 28px; margin-bottom: 10px; }
 .dash-help-category-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.3px;
@@ -13681,7 +13694,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-weight: 700;
   font-size: 22px;
   flex-shrink: 0;
@@ -13689,7 +13702,7 @@ footer {
 }
 
 .apercu-pro-shop-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.4px;
@@ -13806,7 +13819,7 @@ footer {
 }
 
 .apercu-pro-hero-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(36px, 5vw, 56px);
   font-weight: 400;
   line-height: 1.05;
@@ -13948,7 +13961,7 @@ footer {
 }
 
 .apercu-pro-products-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 32px;
   font-weight: 500;
   letter-spacing: -0.8px;
@@ -14082,7 +14095,7 @@ footer {
 }
 
 .apercu-pro-product-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 16px;
   font-weight: 600;
   color: #0E1116;
@@ -14135,7 +14148,7 @@ footer {
 }
 
 .apercu-pro-product-price {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 600;
   color: #0E1116;
@@ -14266,7 +14279,7 @@ footer {
 }
 
 .apercu-pro-final-cta-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: clamp(28px, 4vw, 44px);
   font-weight: 400;
   line-height: 1.1;
@@ -14344,7 +14357,7 @@ footer {
 }
 
 .apercu-pro-footer-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 4px;
@@ -14483,7 +14496,7 @@ footer {
 
 /* ARTISANAT — touches typewriter, accents bois */
 .apercu-pro-template-artisanat .apercu-pro-product-name {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-style: italic;
 }
 
@@ -14596,7 +14609,7 @@ footer {
 }
 
 .shop-root .shop-products-title {
-  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-family: var(--font-display), "Manrope", sans-serif;
   font-size: 32px;
   font-weight: 600;
   color: #0A0E13;

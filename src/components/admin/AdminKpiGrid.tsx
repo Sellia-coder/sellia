@@ -7,15 +7,11 @@ import {
   ChartLineUp,
   Clock,
   Receipt,
+  UserCircle,
+  Star,
+  Prohibit,
 } from "@phosphor-icons/react";
-
-type KpiItem = {
-  label: string;
-  value: string;
-  hint?: string;
-  icon: "shops" | "users" | "gmv" | "revenue" | "withdrawals" | "orders";
-  ember?: boolean;
-};
+import type { PageKpiItem } from "@/lib/admin/page-stats";
 
 const ICONS = {
   shops: Storefront,
@@ -24,9 +20,12 @@ const ICONS = {
   revenue: ChartLineUp,
   withdrawals: Clock,
   orders: Receipt,
+  clients: UserCircle,
+  reviews: Star,
+  blocked: Prohibit,
 } as const;
 
-export default function AdminKpiGrid({ items }: { items: KpiItem[] }) {
+export default function AdminKpiGrid({ items }: { items: PageKpiItem[] }) {
   return (
     <div className="admin-kpi-grid">
       {items.map((item) => {
@@ -34,10 +33,7 @@ export default function AdminKpiGrid({ items }: { items: KpiItem[] }) {
         const wrapClass = item.ember
           ? "admin-kpi-icon-wrap admin-kpi-icon-wrap--ember"
           : "admin-kpi-icon-wrap admin-kpi-icon-wrap--neutral";
-        const valueClass =
-          item.icon === "shops" || item.icon === "users" || item.icon === "withdrawals" || item.icon === "orders"
-            ? "admin-kpi-value admin-kpi-value--inter"
-            : "admin-kpi-value";
+        const valueClass = "admin-kpi-value sellia-num";
 
         return (
           <div key={item.label} className="admin-kpi">

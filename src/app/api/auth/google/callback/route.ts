@@ -6,6 +6,9 @@ import { createSession } from "@/lib/auth/session";
 import { isDeviceTrusted, trustCurrentDevice, parseDevice } from "@/lib/auth/trustedDevice";
 import { sendWelcomeEmail, sendLoginAlertEmail } from "@/lib/email/send";
 import { claimDraftShop } from "@/lib/draftShop/claim";
+import { adminRequiresOtpAtLogin } from "@/lib/auth/admin";
+import { createOTP } from "@/lib/auth/otp";
+import { sendOTPEmail } from "@/lib/email/send";
 
 export async function GET(req: NextRequest) {
   const appUrl = process.env.APP_URL || "http://localhost:3000";
@@ -108,6 +111,22 @@ export async function GET(req: NextRequest) {
 
   if (isUserBlocked(user)) {
     return NextResponse.redirect(`${appUrl}/connexion?error=account_suspended`);
+  }
+
+  // Admin : OTP obligatoire (pas de session directe via Google — fail-safe via email OTP).
+  if (adminRequiresOtpAtLogin(user)) {
+    const code = await createOTP(email, "LOGIN");
+    await sendOTPEmail(email, code, {
+      firstName: user.firstName || undefined,
+    }).catch(() => {});
+    const otpUrl = new URL(`${appUrl}/verifier-email`);
+    otpUrl.searchParams.set("email", email);
+    otpUrl.searchParams.set("flow", "login");
+    const otpResponse = NextResponse.redirect(otpUrl.toString());
+    if (draftShopIdFromCookie) {
+      otpResponse.cookies.delete("sellia_draft_shop_id");
+    }
+    return otpResponse;
   }
 
   // Détecte si l'appareil était déjà reconnu AVANT de le trust (pour l'alerte).

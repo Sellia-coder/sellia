@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdminRole } from "@/lib/auth/admin";
+import { isAdminRole, isSuperAdmin } from "@/lib/auth/admin";
 import AdminLayoutClient from "./AdminLayoutClient";
 import AdminTodoBanner from "@/components/admin/AdminTodoBanner";
 import { getAdminTodoCounts } from "@/lib/admin/todo-counts";
+import { ensurePublicMaintenanceCookieSynced } from "@/lib/maintenance/public";
+import { refreshMoneyConfigCache } from "@/lib/admin/money-config";
 import "./admin.css";
 
 export default async function AdminLayout({
@@ -14,6 +16,9 @@ export default async function AdminLayout({
   const user = await getCurrentUser();
   if (!user) redirect("/connexion");
   if (!isAdminRole(user.role)) redirect("/dashboard");
+
+  await ensurePublicMaintenanceCookieSynced();
+  await refreshMoneyConfigCache();
 
   const todoCounts = await getAdminTodoCounts();
 
@@ -32,6 +37,7 @@ export default async function AdminLayout({
         initial,
         email: user.email,
       }}
+      isSuperAdmin={isSuperAdmin(user)}
     >
       <AdminTodoBanner counts={todoCounts} />
       {children}

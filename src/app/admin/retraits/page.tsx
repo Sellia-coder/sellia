@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { PayoutStatus } from "@prisma/client";
+import { PayoutStatus, type Prisma } from "@prisma/client";
 import { formatAdminDate, formatAdminMoney } from "@/lib/admin/constants";
 import { payoutStatusBadge } from "@/lib/admin/status-badges";
 import { payoutTypeLabel } from "@/lib/admin/labels";
@@ -14,25 +14,101 @@ import {
   listWithdrawalGroups,
   backfillLegacyWithdrawalGroups,
 } from "@/lib/payouts/withdrawal";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import AdminShopLink from "@/components/admin/AdminShopLink";
+import { getRetraitsPageKpis } from "@/lib/admin/page-stats";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 30;
 
+function parseDateEnd(iso: string): Date | undefined {
+  if (!iso) return undefined;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return undefined;
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+function parseDateStart(iso: string): Date | undefined {
+  if (!iso) return undefined;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return undefined;
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 export default async function AdminRetraitsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; page?: string; filter?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    page?: string;
+    filter?: string;
+    minAmount?: string;
+    maxAmount?: string;
+    from?: string;
+    to?: string;
+  }>;
 }) {
-  const { status = "", page: pageStr = "1", filter = "" } = await searchParams;
+  const {
+    status = "",
+    page: pageStr = "1",
+    filter = "",
+    minAmount = "",
+    maxAmount = "",
+    from = "",
+    to = "",
+  } = await searchParams;
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
+  const minAmt = minAmount ? parseFloat(minAmount) : undefined;
+  const maxAmt = maxAmount ? parseFloat(maxAmount) : undefined;
+  const fromDate = parseDateStart(from);
+  const toDate = parseDateEnd(to);
 
-  const legacyBackfill = await backfillLegacyWithdrawalGroups();
-  const pendingGroups = await listWithdrawalGroups();
+  const [kpis, legacyBackfill] = await Promise.all([
+    getRetraitsPageKpis(),
+    backfillLegacyWithdrawalGroups(),
+  ]);
+  let pendingGroups = await listWithdrawalGroups();
 
-  const where = status
-    ? { status: status as PayoutStatus }
-    : {};
+  if (filter === "manual") {
+    pendingGroups = pendingGroups.filter((g) => g.manualReviewRequired);
+  }
+  if (minAmt != null && !Number.isNaN(minAmt)) {
+    pendingGroups = pendingGroups.filter((g) => g.grossAmount >= minAmt);
+  }
+  if (maxAmt != null && !Number.isNaN(maxAmt)) {
+    pendingGroups = pendingGroups.filter((g) => g.grossAmount <= maxAmt);
+  }
+  if (fromDate) {
+    pendingGroups = pendingGroups.filter((g) => g.requestedAt >= fromDate);
+  }
+  if (toDate) {
+    pendingGroups = pendingGroups.filter((g) => g.requestedAt <= toDate);
+  }
+
+  const where: Prisma.PayoutWhereInput = {};
+  if (filter === "manual") {
+    where.manualReviewRequired = true;
+  } else if (status) {
+    where.status = status as PayoutStatus;
+  }
+  if (
+    (minAmt != null && !Number.isNaN(minAmt)) ||
+    (maxAmt != null && !Number.isNaN(maxAmt))
+  ) {
+    where.netAmount = {
+      ...(minAmt != null && !Number.isNaN(minAmt) ? { gte: minAmt } : {}),
+      ...(maxAmt != null && !Number.isNaN(maxAmt) ? { lte: maxAmt } : {}),
+    };
+  }
+  if (fromDate || toDate) {
+    where.createdAt = {
+      ...(fromDate ? { gte: fromDate } : {}),
+      ...(toDate ? { lte: toDate } : {}),
+    };
+  }
 
   const [total, payouts] = await Promise.all([
     db.payout.count({ where }),
@@ -59,7 +135,14 @@ export default async function AdminRetraitsPage({
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const base = "/admin/retraits";
-  const statusParam = status ? `&status=${encodeURIComponent(status)}` : "";
+  const queryParts: string[] = [];
+  if (filter === "manual") queryParts.push(`filter=${encodeURIComponent(filter)}`);
+  else if (status) queryParts.push(`status=${encodeURIComponent(status)}`);
+  if (minAmount) queryParts.push(`minAmount=${encodeURIComponent(minAmount)}`);
+  if (maxAmount) queryParts.push(`maxAmount=${encodeURIComponent(maxAmount)}`);
+  if (from) queryParts.push(`from=${encodeURIComponent(from)}`);
+  if (to) queryParts.push(`to=${encodeURIComponent(to)}`);
+  const querySuffix = queryParts.length ? `&${queryParts.join("&")}` : "";
 
   return (
     <div>
@@ -77,8 +160,17 @@ export default async function AdminRetraitsPage({
         ) : null}
       </p>
 
+      <AdminKpiGrid items={kpis} />
+
       <div className="admin-retraits-toolbar">
-        <RetraitsFilters initialStatus={status} initialFilter={filter} />
+        <RetraitsFilters
+          initialStatus={status}
+          initialFilter={filter}
+          initialMinAmount={minAmount}
+          initialMaxAmount={maxAmount}
+          initialFrom={from}
+          initialTo={to}
+        />
         <div className="admin-reconcile-toolbar">
           <AdminReconcilePayoutsButton />
           <AdminExportButton resource="retraits" />
@@ -115,9 +207,10 @@ export default async function AdminRetraitsPage({
                       className={isPending ? "admin-row-highlight" : undefined}
                     >
                       <td>
-                        <Link href={`/admin/boutiques/${g.shopId}`}>
-                          {g.shopName}
-                        </Link>
+                        <AdminShopLink
+                          shopId={g.shopId}
+                          name={g.shopName}
+                        />
                       </td>
                       <td className="admin-td-right">
                         {formatAdminMoney(g.grossAmount)}
@@ -229,9 +322,13 @@ export default async function AdminRetraitsPage({
       <AdminPagination
         page={page}
         totalPages={totalPages}
-        prevHref={page > 1 ? `${base}?page=${page - 1}${statusParam}` : undefined}
+        prevHref={
+          page > 1 ? `${base}?page=${page - 1}${querySuffix}` : undefined
+        }
         nextHref={
-          page < totalPages ? `${base}?page=${page + 1}${statusParam}` : undefined
+          page < totalPages
+            ? `${base}?page=${page + 1}${querySuffix}`
+            : undefined
         }
       />
     </div>

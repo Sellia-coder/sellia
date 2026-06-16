@@ -61,7 +61,7 @@ export default function EmptyTransactions({ size = 180 }: { size?: number }) {
         y="54"
         textAnchor="middle"
         fontSize="9"
-        fontFamily="Fraunces, serif"
+        fontFamily="Manrope, sans-serif"
         fontWeight="600"
         fill="#92400E"
       >
@@ -73,7 +73,7 @@ export default function EmptyTransactions({ size = 180 }: { size?: number }) {
         y="45"
         textAnchor="middle"
         fontSize="10"
-        fontFamily="Fraunces, serif"
+        fontFamily="Manrope, sans-serif"
         fontWeight="600"
         fill="#92400E"
       >

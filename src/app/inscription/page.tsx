@@ -279,7 +279,7 @@ function InscriptionContent() {
                 </div>
                 <div
                   style={{
-                    fontFamily: "'Fraunces', serif",
+                    fontFamily: "'Manrope', sans-serif",
                     fontSize: "16px",
                     fontWeight: 600,
                     color: "#0E1116",

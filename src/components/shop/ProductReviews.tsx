@@ -12,6 +12,11 @@ interface Props {
   productId: string;
   /** Bloc léger sans liste (liste gérée ailleurs, ex. onglet fiche produit) */
   embedded?: boolean;
+  /** Ouvre le formulaire depuis le parent (CTA fiche produit) */
+  forceOpen?: boolean;
+  onFormClose?: () => void;
+  /** Masque le bouton interne (CTA géré par le parent) */
+  hideTrigger?: boolean;
 }
 
 interface ReviewRow {
@@ -21,12 +26,17 @@ interface ReviewRow {
   title: string | null;
   content: string;
   createdAt: Date | string;
+  merchantReply?: string | null;
+  merchantRepliedAt?: Date | string | null;
 }
 
 export default function ProductReviews({
   shopId,
   productId,
   embedded = false,
+  forceOpen = false,
+  onFormClose,
+  hideTrigger = false,
 }: Props) {
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +51,12 @@ export default function ProductReviews({
   const [hoverRating, setHoverRating] = useState(0);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+
+  useEffect(() => {
+    if (embedded && forceOpen) {
+      setShowForm(true);
+    }
+  }, [embedded, forceOpen]);
 
   useEffect(() => {
     if (embedded) {
@@ -113,17 +129,18 @@ export default function ProductReviews({
             Merci pour ton avis ! Il sera publié après validation.
           </div>
         )}
-        {!showForm ? (
+        {!showForm && !hideTrigger ? (
           <button
             type="button"
-            className="shop-btn shop-btn-secondary"
+            className="shop-btn shop-btn-secondary shop-review-cta-embedded"
             onClick={() => setShowForm(true)}
           >
-            Laisser un avis
+            <MessageSquare size={16} strokeWidth={2.2} />
+            Laisser un avis sur ce produit
           </button>
         ) : (
-          <div className="shop-review-form">
-            <h3 className="shop-review-form-title">Ton avis</h3>
+          <div className="shop-review-form shop-review-form-embedded">
+            <h3 className="shop-review-form-title">Partagez votre expérience</h3>
             <div className="shop-form-row">
               <label className="shop-form-label">Note *</label>
               <div className="shop-review-rating-input">
@@ -212,6 +229,7 @@ export default function ProductReviews({
                 onClick={() => {
                   setShowForm(false);
                   setError(null);
+                  onFormClose?.();
                 }}
               >
                 Annuler
@@ -308,6 +326,12 @@ export default function ProductReviews({
                 </div>
                 {r.title && <div className="shop-review-title">{r.title}</div>}
                 <p className="shop-review-content">{r.content}</p>
+                {r.merchantReply ? (
+                  <div className="shop-review-merchant-reply">
+                    <strong>Réponse du vendeur</strong>
+                    <p>{r.merchantReply}</p>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/admin";
+import { logAdminAction } from "@/lib/admin/audit-log";
 import {
   approveWithdrawalGroup,
   rejectWithdrawalGroup,
@@ -18,6 +19,14 @@ export async function adminApproveWithdrawalAction(withdrawalGroupId: string) {
 
   revalidatePath("/admin/retraits");
   revalidatePath("/admin");
+
+  await logAdminAction({
+    admin,
+    action: "withdrawal.approve",
+    targetType: "withdrawal_group",
+    targetId: withdrawalGroupId,
+  });
+
   return { ok: true as const };
 }
 
@@ -37,6 +46,15 @@ export async function adminRejectWithdrawalAction(
 
   revalidatePath("/admin/retraits");
   revalidatePath("/admin");
+
+  await logAdminAction({
+    admin,
+    action: "withdrawal.reject",
+    targetType: "withdrawal_group",
+    targetId: withdrawalGroupId,
+    details: reason ? { motif: reason.slice(0, 200) } : undefined,
+  });
+
   return { ok: true as const };
 }
 
@@ -51,6 +69,15 @@ export async function adminReconcileWithdrawalGroupAction(
 
   revalidatePath("/admin/retraits");
   revalidatePath(`/admin/retraits/${withdrawalGroupId}`);
+
+  await logAdminAction({
+    admin,
+    action: "withdrawal.reconcile",
+    targetType: "withdrawal_group",
+    targetId: withdrawalGroupId,
+    details: { outcome: result.outcome },
+  });
+
   return { ok: true as const, outcome: result.outcome };
 }
 
@@ -61,5 +88,13 @@ export async function adminReconcilePayoutsAction() {
   const stats = await reconcileProcessingWithdrawals();
 
   revalidatePath("/admin/retraits");
+
+  await logAdminAction({
+    admin,
+    action: "withdrawal.reconcile",
+    targetType: "batch",
+    details: stats,
+  });
+
   return { ok: true as const, stats };
 }

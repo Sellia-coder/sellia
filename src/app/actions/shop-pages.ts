@@ -3,7 +3,10 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";
-import { generateLegalPagesForShop } from "@/lib/shop/legal-pages";
+import {
+  generateLegalPagesForShop,
+} from "@/lib/shop/legal-pages";
+import { buildReturnsContent } from "@/lib/shop/legal-templates";
 
 export interface PageInput {
   slug: string;
@@ -18,7 +21,13 @@ export interface PageInput {
 
 const TEMPLATES: Record<
   string,
-  { slug: string; title: string; content: string; metaDescription: string }
+  {
+    slug: string;
+    title: string;
+    content: string;
+    metaDescription: string;
+    dynamic?: boolean;
+  }
 > = {
   about: {
     slug: "a-propos",
@@ -58,21 +67,10 @@ Les frais de livraison sont calculés en fonction de votre zone.`,
   },
   returns: {
     slug: "retours",
-    title: "Politique de retour",
-    content: `## Délai de rétractation
-
-Vous disposez de **14 jours** à compter de la réception de votre commande pour exercer votre droit de rétractation.
-
-## Conditions de retour
-
-Le produit doit être dans son emballage d'origine, non utilisé et non endommagé.
-
-## Procédure
-
-1. Contactez notre service client
-2. Renvoyez le colis dans les 14 jours
-3. Recevez votre remboursement sous 7 jours ouvrés`,
-    metaDescription: "Tout savoir sur nos retours et remboursements.",
+    title: "Politique de retour et remboursement",
+    content: "",
+    metaDescription: "Conditions de retour et remboursement.",
+    dynamic: true,
   },
 };
 
@@ -83,7 +81,19 @@ export async function createPageFromTemplateAction(templateKey: string) {
 
     const shop = await db.shop.findFirst({
       where: { ownerId: user.id },
-      select: { id: true },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        contactEmail: true,
+        email: true,
+        phone: true,
+        whatsappNumber: true,
+        address: true,
+        city: true,
+        country: true,
+        currency: true,
+      },
     });
     if (!shop) return { ok: false, error: "Boutique introuvable" };
 
@@ -95,12 +105,17 @@ export async function createPageFromTemplateAction(templateKey: string) {
     });
     if (existing) return { ok: false, error: "Cette page existe déjà" };
 
+    const content =
+      template.dynamic && templateKey === "returns"
+        ? buildReturnsContent(shop)
+        : template.content;
+
     const page = await db.shopPage.create({
       data: {
         shopId: shop.id,
         slug: template.slug,
         title: template.title,
-        content: template.content,
+        content,
         metaDescription: template.metaDescription,
         templateKey,
         isPublished: false,

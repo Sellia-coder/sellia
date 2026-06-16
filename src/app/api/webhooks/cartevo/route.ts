@@ -24,6 +24,10 @@ import {
   computeNextRetryAt,
   WEBHOOK_ERROR_STATUS,
 } from "@/lib/cartevo/webhook-retry";
+import {
+  isCodUnlockTransaction,
+  finalizeCodUnlockInTransaction,
+} from "@/lib/cartevo/cod-unlock";
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request.headers);
@@ -255,6 +259,16 @@ export async function POST(request: NextRequest) {
             },
           });
         }
+      } else if (
+        isCodUnlockTransaction(cartevoTx.rawRequest) &&
+        verified.status === "SUCCESS" &&
+        cartevoTx.shopId
+      ) {
+        await finalizeCodUnlockInTransaction(tx, {
+          shopId: cartevoTx.shopId,
+          cartevoTxId: cartevoTx.cartevoTxId,
+          paidAmount: Math.round(Number(cartevoTx.amount)),
+        });
       }
 
       await tx.cartevoWebhookLog.update({

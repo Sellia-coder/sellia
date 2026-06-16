@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { requireAdmin, ADMIN_ROLE } from "@/lib/auth/admin";
+import {
+  requireAdmin,
+  ADMIN_ROLE,
+  isProtectedSuperAdmin,
+} from "@/lib/auth/admin";
+import { logAdminAction } from "@/lib/admin/audit-log";
 import type { ReportStatus } from "@prisma/client";
 import { SELLIA_PLANS, type SelliaPlan } from "@/lib/cartevo/pricing";
 
@@ -28,12 +33,21 @@ export async function adminToggleShopVisibilityAction(shopId: string) {
   revalidatePath("/admin/boutiques");
   if (shop.slug) revalidatePath(`/shop/${shop.slug}`);
 
+  await logAdminAction({
+    admin,
+    action: willSuspend ? "shop.suspend" : "shop.reactivate",
+    targetType: "shop",
+    targetId: shopId,
+    details: { slug: shop.slug },
+  });
+
   return { ok: true as const, isPublished: !willSuspend };
 }
 
 export async function adminToggleUserBlockAction(
   userId: string,
-  block: boolean
+  block: boolean,
+  reason?: string
 ) {
   const admin = await requireAdmin();
   if (!admin) return { ok: false as const, error: "Non autorisé" };
@@ -47,9 +61,16 @@ export async function adminToggleUserBlockAction(
 
   const target = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, role: true },
+    select: { id: true, email: true, role: true },
   });
   if (!target) return { ok: false as const, error: "Utilisateur introuvable" };
+
+  if (isProtectedSuperAdmin(target)) {
+    return {
+      ok: false as const,
+      error: "Le super administrateur ne peut pas être bloqué.",
+    };
+  }
 
   if (target.role === ADMIN_ROLE) {
     return {
@@ -71,6 +92,19 @@ export async function adminToggleUserBlockAction(
 
   revalidatePath("/admin/utilisateurs");
   revalidatePath(`/admin/utilisateurs/${userId}`);
+
+  const trimmedReason = reason?.trim().slice(0, 500);
+  await logAdminAction({
+    admin,
+    action: block ? "user.block" : "user.unblock",
+    targetType: "user",
+    targetId: userId,
+    details: {
+      email: target.email,
+      ...(trimmedReason ? { motif: trimmedReason } : {}),
+    },
+  });
+
   return { ok: true as const, isBlocked: block };
 }
 
@@ -220,6 +254,14 @@ export async function adminChangeShopPlanAction(
   revalidatePath("/admin/boutiques");
   revalidatePath(`/admin/boutiques/${shopId}`);
   if (shop.slug) revalidatePath(`/shop/${shop.slug}`);
+
+  await logAdminAction({
+    admin,
+    action: "shop.change_plan",
+    targetType: "shop",
+    targetId: shopId,
+    details: { from: shop.plan, to: plan },
+  });
 
   return {
     ok: true as const,

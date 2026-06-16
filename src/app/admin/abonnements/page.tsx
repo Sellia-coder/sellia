@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { getAdminAbonnementsData } from "@/lib/admin/abonnements";
 import { formatAdminMoney } from "@/lib/admin/constants";
+import AdminKpiGrid from "@/components/admin/AdminKpiGrid";
+import { getAbonnementsPageKpis } from "@/lib/admin/page-stats";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminAbonnementsPage() {
-  const data = await getAdminAbonnementsData();
+  const [kpis, data] = await Promise.all([
+    getAbonnementsPageKpis(),
+    getAdminAbonnementsData(),
+  ]);
   const revenue = data.totalRevenue;
 
   return (
@@ -14,6 +19,8 @@ export default async function AdminAbonnementsPage() {
       <p className="admin-page-sub">
         Répartition des plans et commissions Sellia — lecture seule.
       </p>
+
+      <AdminKpiGrid items={kpis} />
 
       <div className="admin-detail-grid">
         <div className="admin-detail-card">

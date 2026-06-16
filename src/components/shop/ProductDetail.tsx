@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useTransition } from "react";
+import { useState, useEffect, useMemo, useTransition, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -12,6 +12,7 @@ import {
   RefreshCw,
   MessageCircle,
   Check,
+  ShoppingBag,
 } from "lucide-react";
 import { Flag, X } from "@phosphor-icons/react";
 import { createReportAction } from "@/app/actions/report";
@@ -19,7 +20,7 @@ import { addToCart } from "@/lib/cart";
 import { usePixelTracking } from "@/lib/use-pixel-tracking";
 import { useCartContext } from "./CartProvider";
 import { buildProductGalleryImages } from "@/lib/shop-data";
-import { getProductRating, getRatingAriaLabel } from "@/lib/utils/product-rating";
+import { computeProductRating, computeStarDistribution, getRatingAriaLabel } from "@/lib/utils/product-rating";
 import ProductReviews from "./ProductReviews";
 import PromoCountdown from "./PromoCountdown";
 import styles from "./ProductDetail.module.css";
@@ -63,6 +64,8 @@ interface ReviewVM {
   rating: number;
   comment: string;
   createdAt: string | Date;
+  merchantReply?: string | null;
+  merchantRepliedAt?: string | Date | null;
 }
 
 interface Props {
@@ -110,7 +113,11 @@ interface Props {
     rating: number;
     content: string;
     createdAt: Date;
+    merchantReply?: string | null;
+    merchantRepliedAt?: Date | null;
   }>;
+  salesCount?: number;
+  shippingEta?: string | null;
 }
 
 export default function ProductDetail({
@@ -118,6 +125,8 @@ export default function ProductDetail({
   product,
   related,
   reviews: reviewsProp,
+  salesCount = 0,
+  shippingEta = null,
 }: Props) {
   const router = useRouter();
   const { refresh } = useCartContext();
@@ -170,6 +179,8 @@ export default function ProductDetail({
   const [activeTab, setActiveTab] = useState<"description" | "reviews">(
     "description"
   );
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const reviewsSectionRef = useRef<HTMLElement>(null);
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -234,21 +245,12 @@ export default function ProductDetail({
     rating: r.rating,
     comment: r.content,
     createdAt: r.createdAt,
+    merchantReply: r.merchantReply,
+    merchantRepliedAt: r.merchantRepliedAt,
   }));
 
-  const syntheticRating = getProductRating(product.id);
-  const ratingValue =
-    reviews.length > 0
-      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-      : syntheticRating.value;
-  const reviewsCountDisplay =
-    reviews.length > 0 ? reviews.length : syntheticRating.count;
-  const ratingFormatted =
-    reviews.length > 0 ? ratingValue.toFixed(1) : syntheticRating.formatted;
-  const ratingAria =
-    reviews.length > 0
-      ? `Note moyenne : ${ratingFormatted} étoiles sur 5 (${reviewsCountDisplay} avis)`
-      : getRatingAriaLabel(syntheticRating);
+  const productRating = computeProductRating(reviews);
+  const starDistribution = computeStarDistribution(reviews);
 
   const unlimited = product.unlimitedStock ?? true;
   const rawStock = hasVariants ? effectiveStock : (product.stock ?? 0);
@@ -256,6 +258,29 @@ export default function ProductDetail({
   const isOutOfStock = hasVariants
     ? effectiveStock <= 0
     : (!unlimited && product.stock !== null && product.stock <= 0);
+
+  const ratingValue = productRating?.value ?? 0;
+  const reviewsCountDisplay = productRating?.count ?? 0;
+  const ratingFormatted = productRating?.formatted ?? null;
+  const ratingAria = productRating
+    ? getRatingAriaLabel(productRating)
+    : "Aucun avis pour ce produit";
+
+  const scrollToReviews = (openForm = false) => {
+    setActiveTab("reviews");
+    if (openForm) setShowReviewForm(true);
+    requestAnimationFrame(() => {
+      reviewsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const isPhysical = (product.type ?? "physical") === "physical";
+  const lowStock =
+    !unlimited &&
+    !hasVariants &&
+    product.stock != null &&
+    product.stock > 0 &&
+    product.stock <= 5;
 
   const showOnlineEscrow = Boolean(shop.paymentOnlineEscrow);
   const showCashOnDelivery = Boolean(shop.paymentCashOnDelivery);
@@ -347,45 +372,73 @@ export default function ProductDetail({
               <h1 className={styles.name}>{product.name}</h1>
 
               <div className={styles.ratingRow}>
-                <div
-                  className="shop-product-detail-rating"
-                  aria-label={ratingAria}
-                >
-                  <div className="shop-product-detail-stars">
-                    {[1, 2, 3, 4, 5].map((star) => {
-                      const filled = star <= Math.floor(ratingValue);
-                      const halfFilled =
-                        !filled &&
-                        star === Math.ceil(ratingValue) &&
-                        ratingValue % 1 >= 0.3;
-                      return (
-                        <svg
-                          key={star}
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill={filled || halfFilled ? "#FBBF24" : "none"}
-                          stroke="#FBBF24"
-                          strokeWidth="1.5"
-                          aria-hidden
-                        >
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                      );
-                    })}
-                  </div>
-                  <span className="shop-product-detail-rating-value">
-                    {ratingFormatted}/5
-                  </span>
-                  <span className="shop-product-detail-rating-count">
-                    ({reviewsCountDisplay} avis)
-                  </span>
-                </div>
+                {productRating ? (
+                  <button
+                    type="button"
+                    className={styles.ratingLink}
+                    onClick={() => scrollToReviews()}
+                    aria-label={ratingAria}
+                  >
+                    <div className="shop-product-detail-rating">
+                      <div className="shop-product-detail-stars">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const filled = star <= Math.floor(ratingValue);
+                          const halfFilled =
+                            !filled &&
+                            star === Math.ceil(ratingValue) &&
+                            ratingValue % 1 >= 0.3;
+                          return (
+                            <svg
+                              key={star}
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill={filled || halfFilled ? "#FBBF24" : "none"}
+                              stroke="#FBBF24"
+                              strokeWidth="1.5"
+                              aria-hidden
+                            >
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                          );
+                        })}
+                      </div>
+                      <span className="shop-product-detail-rating-value">
+                        {ratingFormatted}/5
+                      </span>
+                      <span className="shop-product-detail-rating-count">
+                        ({reviewsCountDisplay} avis)
+                      </span>
+                    </div>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.ratingLinkMuted}
+                    onClick={() => scrollToReviews(true)}
+                  >
+                    Soyez le premier à laisser un avis
+                  </button>
+                )}
                 <div className={styles.securePay}>
                   <ShieldCheck size={13} strokeWidth={2.4} />
                   <span>Paiement sécurisé</span>
                 </div>
               </div>
+
+              <div className={styles.reassuranceBanner}>
+                <ShieldCheck size={16} strokeWidth={2.2} style={{ color: primaryColor, flexShrink: 0 }} />
+                <span>
+                  Commande et paiement 100% sur le site — sécurisé et couvert par Sellia.
+                </span>
+              </div>
+
+              {salesCount > 0 && (
+                <p className={styles.socialProof}>
+                  <ShoppingBag size={14} strokeWidth={2.2} />
+                  {salesCount} vente{salesCount > 1 ? "s" : ""} confirmée{salesCount > 1 ? "s" : ""}
+                </p>
+              )}
 
               {product.shortDescription && (
                 <p className={styles.shortDesc}>{product.shortDescription}</p>
@@ -458,16 +511,18 @@ export default function ProductDetail({
               ))}
 
               <div className={styles.quantityBlock}>
-                <span className={styles.variantLabel}>
-                  Quantité{" "}
-                  <span className={styles.stockNote}>
-                    (
-                    {unlimited && !hasVariants
-                      ? "En stock"
-                      : `${rawStock} disponible${rawStock !== 1 ? "s" : ""}`}
-                    )
+                  <span className={styles.variantLabel}>
+                    Quantité{" "}
+                    <span className={styles.stockNote}>
+                      {isOutOfStock
+                        ? "(Rupture de stock)"
+                        : lowStock
+                          ? `(Plus que ${rawStock} en stock)`
+                          : unlimited && !hasVariants
+                            ? "(En stock)"
+                            : `(${rawStock} disponible${rawStock !== 1 ? "s" : ""})`}
+                    </span>
                   </span>
-                </span>
                 <div className={styles.quantityControl}>
                   <button
                     type="button"
@@ -587,9 +642,13 @@ export default function ProductDetail({
                     <Truck size={18} strokeWidth={2} />
                   </div>
                   <div className={styles.trustText}>
-                    <span className={styles.trustTitle}>Livraison rapide</span>
+                    <span className={styles.trustTitle}>Livraison</span>
                     <span className={styles.trustDesc}>
-                      24-48h dans votre région
+                      {isPhysical
+                        ? shippingEta
+                          ? `Délai indicatif : ${shippingEta}`
+                          : "Selon votre zone de livraison"
+                        : "Produit numérique — accès immédiat"}
                     </span>
                   </div>
                 </div>
@@ -639,10 +698,19 @@ export default function ProductDetail({
               >
                 <Flag size={14} weight="regular" /> Signaler ce produit
               </button>
+              <button
+                type="button"
+                className={styles.leaveReviewCta}
+                style={{ borderColor: primaryColor, color: primaryColor }}
+                onClick={() => scrollToReviews(true)}
+              >
+                <MessageCircle size={16} strokeWidth={2.2} />
+                Laisser un avis
+              </button>
             </div>
           </div>
 
-          <section className={styles.tabsSection}>
+          <section ref={reviewsSectionRef} className={styles.tabsSection}>
             <div className={styles.tabsHeader}>
               <button
                 type="button"
@@ -696,6 +764,63 @@ export default function ProductDetail({
 
               {activeTab === "reviews" && (
                 <>
+                  {productRating && starDistribution.length > 0 && (
+                    <div className={styles.reviewsSummary}>
+                      <div className={styles.reviewsSummaryScore}>
+                        <span className={styles.reviewsSummaryValue}>
+                          {ratingFormatted}
+                        </span>
+                        <div className={styles.reviewStarsLarge}>
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Star
+                              key={i}
+                              size={16}
+                              strokeWidth={0}
+                              fill={
+                                i <= Math.round(ratingValue) ? "#FFB800" : "#E5E2DA"
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className={styles.reviewsSummaryCount}>
+                          {reviewsCountDisplay} avis vérifiés
+                        </span>
+                      </div>
+                      <div className={styles.starDistribution}>
+                        {starDistribution.map((d) => (
+                          <div key={d.star} className={styles.starDistRow}>
+                            <span>{d.star}★</span>
+                            <div className={styles.starDistBar}>
+                              <div
+                                className={styles.starDistFill}
+                                style={{
+                                  width: `${d.pct}%`,
+                                  background: primaryColor,
+                                }}
+                              />
+                            </div>
+                            <span>{d.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={styles.reviewsSectionHead}>
+                    <h3 className={styles.reviewsSectionTitle}>
+                      Avis clients
+                    </h3>
+                    <button
+                      type="button"
+                      className={styles.leaveReviewCtaPrimary}
+                      style={{ background: primaryColor }}
+                      onClick={() => setShowReviewForm(true)}
+                    >
+                      <MessageCircle size={16} strokeWidth={2.2} />
+                      Laisser un avis
+                    </button>
+                  </div>
+
                   <div className={styles.reviewsList}>
                     {reviews.length === 0 ? (
                       <p className={styles.reviewsEmpty}>
@@ -708,22 +833,31 @@ export default function ProductDetail({
                             <span className={styles.reviewAuthor}>
                               {review.authorName}
                             </span>
-                            <div className={styles.reviewStars}>
+                            <div className={styles.reviewStars} aria-label={`${review.rating} sur 5`}>
                               {[1, 2, 3, 4, 5].map((i) => (
                                 <Star
                                   key={i}
-                                  size={12}
+                                  size={14}
                                   strokeWidth={0}
                                   fill={
                                     i <= review.rating ? "#FFB800" : "#E5E2DA"
                                   }
                                 />
                               ))}
+                              <span className={styles.reviewRatingLabel}>
+                                {review.rating}/5
+                              </span>
                             </div>
                           </div>
                           <p className={styles.reviewComment}>
                             {review.comment}
                           </p>
+                          {review.merchantReply ? (
+                            <div className={styles.merchantReply}>
+                              <strong>Réponse du vendeur</strong>
+                              <p>{review.merchantReply}</p>
+                            </div>
+                          ) : null}
                         </div>
                       ))
                     )}
@@ -733,6 +867,9 @@ export default function ProductDetail({
                       shopId={shop.id}
                       productId={product.id}
                       embedded
+                      hideTrigger
+                      forceOpen={showReviewForm}
+                      onFormClose={() => setShowReviewForm(false)}
                     />
                   </div>
                 </>

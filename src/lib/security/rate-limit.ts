@@ -84,6 +84,11 @@ export const RATE_LIMITS = {
   PAYOUT_PER_DAY_PER_SHOP: { limit: 20, windowMs: 86_400_000 },
   CHECKOUT_PER_IP: { limit: 20, windowMs: 60_000 },
   AUTH_PER_IP: { limit: 10, windowMs: 60_000 },
+  CHAT_SEND_PER_IP: { limit: 30, windowMs: 60_000 },
+  CHAT_SEND_PER_CONV: { limit: 15, windowMs: 60_000 },
+  CHAT_START_PER_IP: { limit: 10, windowMs: 60_000 },
+  CHAT_POLL_PER_IP: { limit: 120, windowMs: 60_000 },
+  VISIT_TRACK_PER_IP: { limit: 60, windowMs: 60_000 },
 };
 
 export function getClientIp(headers: Headers): string {

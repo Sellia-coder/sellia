@@ -148,6 +148,73 @@ export async function getApprovedProductReviews(productId: string) {
       rating: true,
       content: true,
       createdAt: true,
+      merchantReply: true,
+      merchantRepliedAt: true,
     },
   });
+}
+
+/** Stats d'avis réels par produit (boutique). */
+export async function getProductReviewStatsForShop(shopId: string) {
+  const rows = await db.review.groupBy({
+    by: ["productId"],
+    where: {
+      shopId,
+      status: "approved",
+      productId: { not: null },
+    },
+    _avg: { rating: true },
+    _count: { id: true },
+  });
+
+  const map = new Map<
+    string,
+    { avg: number; count: number }
+  >();
+
+  for (const row of rows) {
+    if (!row.productId) continue;
+    map.set(row.productId, {
+      avg: Math.round((row._avg.rating ?? 0) * 10) / 10,
+      count: row._count.id,
+    });
+  }
+
+  return map;
+}
+
+const PAID_SALES_STATUSES = [
+  "paid_escrow",
+  "paid_offline",
+  "paid_released",
+  "delivered",
+] as const;
+
+/** Ventes réelles (commandes payées) pour un produit. */
+export async function getProductPaidSalesCount(
+  productId: string,
+  shopId: string
+): Promise<number> {
+  const orders = await db.order.findMany({
+    where: {
+      shopId,
+      paymentStatus: { in: [...PAID_SALES_STATUSES] },
+      status: { not: "cancelled" },
+    },
+    select: { items: true },
+  });
+
+  let total = 0;
+  for (const order of orders) {
+    if (!Array.isArray(order.items)) continue;
+    for (const item of order.items as Array<{
+      productId?: string;
+      quantity?: number;
+    }>) {
+      if (item.productId === productId) {
+        total += Math.max(1, item.quantity ?? 1);
+      }
+    }
+  }
+  return total;
 }

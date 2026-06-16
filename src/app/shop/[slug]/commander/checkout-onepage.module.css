@@ -49,7 +49,7 @@
 }
 
 .pageTitle {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 500;
   color: #0A0E13;
@@ -570,7 +570,7 @@
 }
 
 .summaryTotal strong {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 22px;
   font-weight: 500;
   color: #0a0e13;

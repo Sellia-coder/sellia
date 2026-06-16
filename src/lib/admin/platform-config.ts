@@ -1,23 +1,39 @@
 import {
-  SELLIA_PLANS,
   CARTEVO_FEES,
   PAYOUT_OPERATORS_BY_COUNTRY,
   PAYOUT_OPERATOR_LABELS,
   getMerchantWithdrawalFeeRate,
+  SELLIA_PLANS,
+  type SelliaPlan,
 } from "@/lib/cartevo/pricing";
+import {
+  refreshMoneyConfigCache,
+  getEffectiveMoneyConfigSync,
+  MONEY_DEFAULTS,
+} from "@/lib/admin/money-config";
 
-/** Miroir lecture seule du seuil dans payouts/request (pas d'édition ici). */
-export const WITHDRAWAL_VALIDATION_THRESHOLD_FCFA = 50_000;
+const PLAN_LABELS: Record<SelliaPlan, string> = {
+  free: "Découverte",
+  pro: "Pro",
+  business: "Business",
+};
 
-/** Prix déblocage paiement à la livraison (feature-unlock.ts). */
-export const COD_UNLOCK_PRICE_FCFA = 1_900;
+/** Config plateforme pour l'admin (taux effectifs = overrides ou constantes). */
+export async function getAdminPlatformConfig() {
+  await refreshMoneyConfigCache();
+  const money = getEffectiveMoneyConfigSync();
 
-export function getAdminPlatformConfig() {
-  const plans = Object.values(SELLIA_PLANS).map((p) => ({
-    id: p.id,
-    name: p.name,
-    commissionRate: p.commissionRate,
-    monthlyFee: p.monthlyFee,
+  const plans = (["free", "pro", "business"] as const).map((id) => ({
+    id,
+    name: PLAN_LABELS[id],
+    commissionRate: money.commissionRates[id],
+    monthlyFee: SELLIA_PLANS[id].monthlyFee,
+    defaultCommissionRate: MONEY_DEFAULTS.commissionRates[id],
+    hasOverride:
+      (id === "free" && money.commissionRates.free !== MONEY_DEFAULTS.commissionRates.free) ||
+      (id === "pro" && money.commissionRates.pro !== MONEY_DEFAULTS.commissionRates.pro) ||
+      (id === "business" &&
+        money.commissionRates.business !== MONEY_DEFAULTS.commissionRates.business),
   }));
 
   const countries = Object.entries(CARTEVO_FEES).map(([code, fees]) => ({
@@ -34,7 +50,10 @@ export function getAdminPlatformConfig() {
   return {
     plans,
     countries,
-    withdrawalValidationThreshold: WITHDRAWAL_VALIDATION_THRESHOLD_FCFA,
-    codUnlockPrice: COD_UNLOCK_PRICE_FCFA,
+    withdrawalValidationThreshold: money.withdrawalValidationThreshold,
+    codUnlockPrice: money.codUnlockPrice,
+    defaultWithdrawalThreshold: MONEY_DEFAULTS.withdrawalValidationThreshold,
+    defaultCodUnlockPrice: MONEY_DEFAULTS.codUnlockPrice,
+    moneyHasOverrides: money.hasOverrides,
   };
 }

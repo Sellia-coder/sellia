@@ -281,7 +281,7 @@ export default function OrderConfirmationClient({
               <h3
                 style={{
                   margin: 0,
-                  fontFamily: "'Fraunces', serif",
+                  fontFamily: "'Manrope', sans-serif",
                   fontSize: "20px",
                   color: "#0E1116",
                 }}

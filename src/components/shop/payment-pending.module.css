@@ -56,7 +56,7 @@
 }
 
 .title {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 26px;
   font-weight: 500;
   color: #0a0e13;
@@ -282,7 +282,7 @@
 }
 
 .redirectTitle {
-  font-family: "Fraunces", serif;
+  font-family: var(--font-display), "Manrope", sans-serif; font-weight: 600;
   font-size: 28px;
   font-weight: 500;
   color: #0a0e13;

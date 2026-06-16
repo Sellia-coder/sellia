@@ -134,6 +134,7 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
       "QR code de livraison",
       "Email automatique de confirmation",
       "Tableau de bord marchand",
+      "Système de messagerie connecté à votre boutique",
     ],
   },
   pro: {
@@ -152,6 +153,8 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
       "Statistiques avancées",
       "Support prioritaire",
       "Promotions et codes promo",
+      "Retrait instantané de vos gains",
+      "Système de messagerie connecté à votre boutique",
     ],
   },
   business: {
@@ -169,6 +172,8 @@ export const SELLIA_PLANS: Record<SelliaPlan, SelliaPlanConfig> = {
       "Multi-utilisateurs (équipe)",
       "Rapports comptables exportables",
       "Webhooks personnalisés",
+      "Retrait instantané de vos gains",
+      "Système de messagerie connecté à votre boutique",
     ],
   },
 };
@@ -238,8 +243,10 @@ export function getCartevoPayoutRate(country: string, operator: string): number 
   return opOverride?.payout ?? c.defaultPayout;
 }
 
+import { getSelliaCommissionRate } from "@/lib/admin/money-config";
+
 export function getSelliaRate(plan: SelliaPlan): number {
-  return SELLIA_PLANS[plan]?.commissionRate ?? SELLIA_PLANS.free.commissionRate;
+  return getSelliaCommissionRate(plan);
 }
 
 export function computeCollectFees(params: {
