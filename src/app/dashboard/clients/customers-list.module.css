@@ -770,6 +770,13 @@
   display: block;
   font-size: 10px;
   opacity: 0.65;
+}
+
+.chatBubbleMeta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
   margin-top: 4px;
 }
 

@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChatCircle, PaperPlaneTilt, ShieldWarning } from "@phosphor-icons/react";
 import {
   markChatConversationReadAction,
+  pollMerchantChatAction,
   sendMerchantChatMessageAction,
 } from "@/app/actions/shop-chat";
+import { CHAT_POLL_INTERVAL_MS } from "@/lib/chat/constants";
+import MessageReceiptTicks from "@/components/chat/MessageReceiptTicks";
 import styles from "./customers-list.module.css";
 
 export type ChatConversationRow = {
@@ -26,6 +29,8 @@ export type ChatMessageRow = {
   content: string;
   flagged: boolean;
   blockedReason: string | null;
+  deliveredAt?: string | null;
+  readAt?: string | null;
   createdAt: string;
 };
 
@@ -48,14 +53,54 @@ function formatDate(iso: string) {
   });
 }
 
+function mergeMessages(
+  prev: ChatMessageRow[],
+  incoming: ChatMessageRow[]
+): ChatMessageRow[] {
+  const map = new Map(prev.map((m) => [m.id, m]));
+  for (const m of incoming) {
+    map.set(m.id, { ...map.get(m.id), ...m });
+  }
+  return [...map.values()].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+}
+
+function applyReceipts(
+  prev: ChatMessageRow[],
+  receipts: Array<{
+    id: string;
+    deliveredAt: string | null;
+    readAt: string | null;
+  }>
+): ChatMessageRow[] {
+  if (!receipts.length) return prev;
+  return prev.map((m) => {
+    const patch = receipts.find((r) => r.id === m.id);
+    if (!patch) return m;
+    return {
+      ...m,
+      deliveredAt: patch.deliveredAt,
+      readAt: patch.readAt,
+    };
+  });
+}
+
 export default function ShopMessagesClient({ conversations }: Props) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(
     conversations[0]?.id ?? null
   );
+  const [liveMessages, setLiveMessages] = useState<Record<string, ChatMessageRow[]>>(
+    () =>
+      Object.fromEntries(
+        conversations.map((c) => [c.id, c.messages])
+      )
+  );
   const [reply, setReply] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const lastPollRef = useRef<Record<string, string | null>>({});
 
   const sorted = useMemo(
     () =>
@@ -68,6 +113,50 @@ export default function ShopMessagesClient({ conversations }: Props) {
   );
 
   const selected = sorted.find((c) => c.id === selectedId) ?? null;
+  const threadMessages = selected
+    ? liveMessages[selected.id] ?? selected.messages
+    : [];
+
+  const pollThread = useCallback(async (conversationId: string) => {
+    const since = lastPollRef.current[conversationId] ?? null;
+    const res = await pollMerchantChatAction(conversationId, since);
+    if (!res.ok) return;
+
+    if (res.messages.length > 0) {
+      setLiveMessages((prev) => ({
+        ...prev,
+        [conversationId]: mergeMessages(
+          prev[conversationId] ?? [],
+          res.messages
+        ),
+      }));
+      const last = res.messages[res.messages.length - 1];
+      lastPollRef.current[conversationId] = last.createdAt;
+    }
+
+    if (res.receipts.length > 0) {
+      setLiveMessages((prev) => ({
+        ...prev,
+        [conversationId]: applyReceipts(
+          prev[conversationId] ?? [],
+          res.receipts
+        ),
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    pollThread(selectedId);
+    const id = setInterval(() => pollThread(selectedId), CHAT_POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [selectedId, pollThread]);
+
+  useEffect(() => {
+    setLiveMessages(
+      Object.fromEntries(conversations.map((c) => [c.id, c.messages]))
+    );
+  }, [conversations]);
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
@@ -79,6 +168,7 @@ export default function ShopMessagesClient({ conversations }: Props) {
         router.refresh();
       });
     }
+    pollThread(id);
   };
 
   const handleSend = () => {
@@ -89,6 +179,24 @@ export default function ShopMessagesClient({ conversations }: Props) {
       if (!res.ok) {
         setError(res.error);
         return;
+      }
+      if (res.message) {
+        setLiveMessages((prev) => ({
+          ...prev,
+          [selectedId]: mergeMessages(prev[selectedId] ?? [], [
+            {
+              id: res.message.id,
+              sender: "merchant",
+              content: res.message.content,
+              flagged: false,
+              blockedReason: null,
+              deliveredAt: res.message.deliveredAt,
+              readAt: res.message.readAt,
+              createdAt: res.message.createdAt,
+            },
+          ]),
+        }));
+        lastPollRef.current[selectedId] = res.message.createdAt;
       }
       setReply("");
       router.refresh();
@@ -151,7 +259,7 @@ export default function ShopMessagesClient({ conversations }: Props) {
             </div>
 
             <div className={styles.chatMessages}>
-              {selected.messages.map((m) => (
+              {threadMessages.map((m) => (
                 <div
                   key={m.id}
                   className={`${styles.chatBubble} ${
@@ -173,8 +281,16 @@ export default function ShopMessagesClient({ conversations }: Props) {
                   ) : (
                     m.content
                   )}
-                  <span className={styles.chatBubbleTime}>
-                    {formatDate(m.createdAt)}
+                  <span className={styles.chatBubbleMeta}>
+                    <span className={styles.chatBubbleTime}>
+                      {formatDate(m.createdAt)}
+                    </span>
+                    {m.sender === "merchant" && !m.flagged && (
+                      <MessageReceiptTicks
+                        deliveredAt={m.deliveredAt}
+                        readAt={m.readAt}
+                      />
+                    )}
                   </span>
                 </div>
               ))}

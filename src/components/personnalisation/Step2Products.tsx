@@ -147,6 +147,7 @@ export default function Step2Products({ value, onChange, onNext, onBack, shopCon
           key={editing.id}
           product={editing}
           shopContext={shopContext}
+          codUnlockContext="onboarding"
           onSave={(next) => {
             replaceProduct(editing.id, next);
             setEditingId(null);

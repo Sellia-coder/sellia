@@ -229,6 +229,20 @@ export async function publishShopAction(input: PublishShopInput) {
     );
     const bgHex = bgHexFromAppearanceStyle(appearance.backgroundStyle);
 
+    const ownerShop = await db.shop.findFirst({
+      where: { ownerId: userId },
+      select: { id: true },
+    });
+    const codUnlock = ownerShop
+      ? await db.shopFeatureUnlock.findUnique({
+          where: { shopId_feature: { shopId: ownerShop.id, feature: "COD" } },
+          select: { id: true },
+        })
+      : null;
+    const codUnlocked = Boolean(codUnlock);
+    const enableCodAtCheckout =
+      codUnlocked && (data.step35?.paymentCashOnDelivery ?? false);
+
     const shop = await db.$transaction(async (tx) => {
       const createdShop = await tx.shop.create({
         data: {
@@ -259,8 +273,9 @@ export async function publishShopAction(input: PublishShopInput) {
           shippingZones: data.step35?.shippingZones
             ? (data.step35.shippingZones as any)
             : null,
-          paymentCashOnDelivery: data.step35?.paymentCashOnDelivery ?? true,
+          paymentCashOnDelivery: enableCodAtCheckout,
           paymentOnlineEscrow: data.step35?.paymentOnlineEscrow ?? true,
+          codEnabled: enableCodAtCheckout,
           currency: "XAF",
           status: "published",
           isPublished: true,
@@ -322,7 +337,8 @@ export async function publishShopAction(input: PublishShopInput) {
                   }
                 : undefined,
               feeMode: p.feeMode ?? "merchant_absorbs",
-              codAvailable: p.codAvailable ?? false,
+              codAvailable:
+                p.type === "physical" ? (p.codAvailable ?? false) : false,
               status: "active",
               position: i,
             },

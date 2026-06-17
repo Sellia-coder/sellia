@@ -11,3 +11,8 @@ export const CHAT_MAX_MESSAGE_LENGTH = 2000;
 export const CHAT_MIN_MESSAGE_LENGTH = 1;
 export const CHAT_POLL_INTERVAL_MS = 4000;
 export const CHAT_STORAGE_KEY_PREFIX = "sellia_chat_";
+
+export const LANDING_SUPPORT_STORAGE_KEY = "sellia_landing_support";
+export const LANDING_SUPPORT_POLL_INTERVAL_MS = 4000;
+export const LANDING_SUPPORT_SECURITY_BANNER =
+  "Support Sellia — nous ne demandons jamais vos identifiants de paiement par chat.";

@@ -41,10 +41,15 @@ import RichTextEditor from "./RichTextEditor";
 import AiDescriptionGenerator from "./AiDescriptionGenerator";
 import ProductGallery from "./ProductGallery";
 import ProductVariantsEditor from "./ProductVariantsEditor";
+import ProUpgradeModal from "./ProUpgradeModal";
 
 interface Props {
   product: ProductEditInput;
   shopContext?: { name: string | null; category: string | null };
+  /** COD boutique débloqué (1900 FCFA) — requis pour activer le COD par produit */
+  codUnlocked?: boolean;
+  /** dashboard = bouton paiement ; onboarding = renvoi vers l'étape livraison */
+  codUnlockContext?: "dashboard" | "onboarding";
   onSave: (p: ProductEditInput) => void;
   onDelete: () => void;
   onClose: () => void;
@@ -176,6 +181,8 @@ function CategorySelect({ value, onChange }: CategorySelectProps) {
 export default function ProductEditorModal({
   product,
   shopContext,
+  codUnlocked = false,
+  codUnlockContext = "dashboard",
   onSave,
   onDelete,
   onClose,
@@ -185,12 +192,18 @@ export default function ProductEditorModal({
   const [error, setError] = useState<string | null>(null);
   const [digitalFieldError, setDigitalFieldError] = useState(false);
   const [tagInput, setTagInput] = useState("");
+  const [showCodUnlockModal, setShowCodUnlockModal] = useState(false);
+  const [localCodUnlocked, setLocalCodUnlocked] = useState(codUnlocked);
 
   useEffect(() => {
     setDraft(product);
     setError(null);
     setTagInput("");
   }, [product]);
+
+  useEffect(() => {
+    setLocalCodUnlocked(codUnlocked);
+  }, [codUnlocked]);
 
   useEffect(() => {
     if (embedded) return;
@@ -284,6 +297,9 @@ export default function ProductEditorModal({
                         update("hasVariants", false);
                         update("variantAxes", []);
                         update("variants", []);
+                      }
+                      if (t.code !== "physical") {
+                        update("codAvailable", false);
                       }
                       update("type", t.code);
                     }}
@@ -746,31 +762,65 @@ export default function ProductEditorModal({
             </div>
           </div>
 
-          <div className="perso-form-section">
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 10,
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={draft.codAvailable ?? false}
-                onChange={(e) => update("codAvailable", e.target.checked)}
-                style={{ marginTop: 2 }}
-              />
-              <span>
-                <strong style={{ display: "block", fontSize: 13.5 }}>
-                  Paiement à la livraison
-                </strong>
-                <span style={{ fontSize: 11.5, color: "#6B6E76" }}>
-                  Le client peut commander sans payer en ligne.
-                </span>
-              </span>
-            </label>
-          </div>
+          {draft.type === "physical" && (
+            <div className="perso-form-section">
+              {localCodUnlocked ? (
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 10,
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={draft.codAvailable ?? false}
+                    onChange={(e) => update("codAvailable", e.target.checked)}
+                    style={{ marginTop: 2 }}
+                  />
+                  <span>
+                    <strong style={{ display: "block", fontSize: 13.5 }}>
+                      Paiement à la livraison
+                    </strong>
+                    <span style={{ fontSize: 11.5, color: "#6B6E76" }}>
+                      Le client peut commander sans payer en ligne.
+                    </span>
+                  </span>
+                </label>
+              ) : codUnlockContext === "dashboard" ? (
+                <div
+                  style={{
+                    padding: "14px 16px",
+                    borderRadius: 12,
+                    border: "1px solid #ECE9E2",
+                    background: "#FAFAF7",
+                  }}
+                >
+                  <strong style={{ display: "block", fontSize: 13.5, marginBottom: 4 }}>
+                    Paiement à la livraison
+                  </strong>
+                  <p style={{ fontSize: 12, color: "#6B6E76", margin: "0 0 12px", lineHeight: 1.5 }}>
+                    Activez cette option pour votre boutique (1 900 FCFA, une seule fois) afin de
+                    proposer le paiement à la livraison sur vos produits physiques.
+                  </p>
+                  <button
+                    type="button"
+                    className="perso-btn perso-btn-primary"
+                    style={{ fontSize: 12.5, padding: "8px 14px" }}
+                    onClick={() => setShowCodUnlockModal(true)}
+                  >
+                    Activer le paiement à la livraison · 1 900 FCFA
+                  </button>
+                </div>
+              ) : (
+                <p style={{ fontSize: 12, color: "#6B6E76", margin: 0, lineHeight: 1.5 }}>
+                  Le paiement à la livraison pourra être activé à l&apos;étape{" "}
+                  <strong>Livraison &amp; paiement</strong> (1 900 FCFA, activation unique).
+                </p>
+              )}
+            </div>
+          )}
 
           {error && <div className="perso-alert-error perso-alert-error-inline">{error}</div>}
         </div>
@@ -797,7 +847,21 @@ export default function ProductEditorModal({
   );
 
   if (embedded) {
-    return modal;
+    return (
+      <>
+        {modal}
+        {showCodUnlockModal && (
+          <ProUpgradeModal
+            open={showCodUnlockModal}
+            onClose={() => setShowCodUnlockModal(false)}
+            onUnlocked={() => {
+              setLocalCodUnlocked(true);
+              setShowCodUnlockModal(false);
+            }}
+          />
+        )}
+      </>
+    );
   }
 
   return (
@@ -807,6 +871,16 @@ export default function ProductEditorModal({
       role="presentation"
     >
       {modal}
+      {showCodUnlockModal && (
+        <ProUpgradeModal
+          open={showCodUnlockModal}
+          onClose={() => setShowCodUnlockModal(false)}
+          onUnlocked={() => {
+            setLocalCodUnlocked(true);
+            setShowCodUnlockModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -88,6 +88,10 @@ export const RATE_LIMITS = {
   CHAT_SEND_PER_CONV: { limit: 15, windowMs: 60_000 },
   CHAT_START_PER_IP: { limit: 10, windowMs: 60_000 },
   CHAT_POLL_PER_IP: { limit: 120, windowMs: 60_000 },
+  LANDING_SUPPORT_SEND_PER_IP: { limit: 20, windowMs: 60_000 },
+  LANDING_SUPPORT_SEND_PER_CONV: { limit: 12, windowMs: 60_000 },
+  LANDING_SUPPORT_START_PER_IP: { limit: 8, windowMs: 60_000 },
+  LANDING_SUPPORT_POLL_PER_IP: { limit: 120, windowMs: 60_000 },
   VISIT_TRACK_PER_IP: { limit: 60, windowMs: 60_000 },
 };
 

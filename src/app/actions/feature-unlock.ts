@@ -162,6 +162,7 @@ export async function pollCodUnlockPaymentAction(cartevoTransactionId: string) {
     if (result.unlocked) {
       revalidatePath("/personnaliser-ma-boutique");
       revalidatePath("/dashboard");
+      revalidatePath("/dashboard/produits/livraisons");
     }
 
     return {

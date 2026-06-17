@@ -5,6 +5,11 @@ import {
   getPublishedShopIdBySlug,
   verifyVisitorConversation,
 } from "@/lib/chat/shop-access";
+import {
+  getChatOutboundReceipts,
+  markChatInboundDelivered,
+  markChatInboundRead,
+} from "@/lib/chat/receipts";
 
 export async function GET(
   request: NextRequest,
@@ -29,6 +34,7 @@ export async function GET(
   const conversationId = request.nextUrl.searchParams.get("conversationId");
   const visitorToken = request.nextUrl.searchParams.get("visitorToken");
   const since = request.nextUrl.searchParams.get("since");
+  const markRead = request.nextUrl.searchParams.get("markRead") === "1";
 
   if (!conversationId || !visitorToken) {
     return NextResponse.json({ error: "Paramètres manquants" }, { status: 400 });
@@ -43,24 +49,34 @@ export async function GET(
     return NextResponse.json({ error: "Conversation introuvable" }, { status: 403 });
   }
 
+  await markChatInboundDelivered(conversationId, "CUSTOMER");
+  if (markRead) {
+    await markChatInboundRead(conversationId, "CUSTOMER");
+  }
+
   const sinceDate = since ? new Date(since) : null;
   const where =
     sinceDate && !Number.isNaN(sinceDate.getTime())
       ? { conversationId, createdAt: { gt: sinceDate } }
       : { conversationId };
 
-  const messages = await db.chatMessage.findMany({
-    where,
-    orderBy: { createdAt: "asc" },
-    take: 100,
-    select: {
-      id: true,
-      sender: true,
-      content: true,
-      flagged: true,
-      createdAt: true,
-    },
-  });
+  const [messages, receipts] = await Promise.all([
+    db.chatMessage.findMany({
+      where,
+      orderBy: { createdAt: "asc" },
+      take: 100,
+      select: {
+        id: true,
+        sender: true,
+        content: true,
+        flagged: true,
+        deliveredAt: true,
+        readAt: true,
+        createdAt: true,
+      },
+    }),
+    getChatOutboundReceipts(conversationId, "CUSTOMER"),
+  ]);
 
   return NextResponse.json({
     ok: true,
@@ -77,7 +93,14 @@ export async function GET(
           ? "Message non délivré (règles de sécurité)"
           : m.content,
       flagged: m.flagged,
+      deliveredAt: m.deliveredAt?.toISOString() ?? null,
+      readAt: m.readAt?.toISOString() ?? null,
       createdAt: m.createdAt.toISOString(),
+    })),
+    receipts: receipts.map((r) => ({
+      id: r.id,
+      deliveredAt: r.deliveredAt?.toISOString() ?? null,
+      readAt: r.readAt?.toISOString() ?? null,
     })),
   });
 }

@@ -4,6 +4,10 @@ import {
   type OrderEmailData,
 } from "@/lib/email/templates/order-confirmation";
 import { safeLogger } from "@/lib/security/redact";
+import {
+  getOrderTypeKind,
+  type OrderItem,
+} from "@/lib/order-status";
 
 type OrderWithShop = {
   id: string;
@@ -28,7 +32,7 @@ type OrderWithShop = {
 
 function parseOrderItems(
   items: unknown
-): Array<{ name: string; quantity: number; price: number }> {
+): Array<{ name: string; quantity: number; price: number; type?: string }> {
   if (!Array.isArray(items)) return [];
   return items
     .map((row) => {
@@ -37,6 +41,7 @@ function parseOrderItems(
         name: String(r.name ?? "Article"),
         quantity: Number(r.quantity ?? 1),
         price: Number(r.price ?? 0),
+        type: typeof r.type === "string" ? r.type : "physical",
       };
     })
     .filter((i) => i.name);
@@ -59,15 +64,30 @@ export async function sendOrderConfirmationEmail(
 
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? "https://getsellia.com";
-  const qrUrl = buildDeliveryQrUrl({
-    baseUrl,
-    shopSlug: order.shop.slug,
-    orderNumber: order.orderNumber,
-  });
-  const orderViewUrl = `${baseUrl}/shop/${order.shop.slug}/commande/${encodeURIComponent(order.orderNumber)}`;
+  const parsedItems = parseOrderItems(order.items);
+  const orderKind = getOrderTypeKind(
+    parsedItems.map((i) => ({
+      type: i.type,
+      name: i.name,
+      price: i.price,
+      quantity: i.quantity,
+    })) as OrderItem[]
+  );
+  const showDeliveryQr = orderKind === "physical" || orderKind === "mixed";
 
-  // G2.1.D V2 — URL absolue PNG (Gmail/Outlook téléchargent à l'affichage)
-  const qrImageUrl = `${baseUrl}/api/shop/${order.shop.slug}/orders/${encodeURIComponent(order.orderNumber)}/qr?format=png`;
+  const qrUrl = showDeliveryQr
+    ? buildDeliveryQrUrl({
+        baseUrl,
+        shopSlug: order.shop.slug,
+        orderNumber: order.orderNumber,
+      })
+    : undefined;
+  const orderViewUrl = `${baseUrl}/shop/${order.shop.slug}/commande/${encodeURIComponent(order.orderNumber)}`;
+  const shopUrl = `${baseUrl}/shop/${order.shop.slug}`;
+
+  const qrImageUrl = showDeliveryQr
+    ? `${baseUrl}/api/shop/${order.shop.slug}/orders/${encodeURIComponent(order.orderNumber)}/qr?format=png`
+    : undefined;
 
   const subTotal = order.subtotal;
   const feesAdded = Math.max(0, order.total - subTotal);
@@ -87,10 +107,12 @@ export async function sendOrderConfirmationEmail(
     refundDeadline:
       order.refundDeadline ??
       new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
-    items: parseOrderItems(order.items),
+    items: parsedItems,
     qrUrl,
     qrImageUrl,
     orderViewUrl,
+    shopUrl,
+    showDeliveryQr,
     merchantPhone: order.shop.phone ?? order.shop.whatsappNumber,
     primaryColor: order.shop.primaryColor ?? undefined,
   };

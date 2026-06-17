@@ -41,6 +41,7 @@ type DraftShop = {
 interface Props {
   draft: DraftShop;
   userEmail: string;
+  initialCodUnlocked?: boolean;
 }
 
 type DraftProductRow = {
@@ -95,7 +96,11 @@ function plainDraftDescriptionToRichHtml(raw: string): string {
     .join("");
 }
 
-export default function PersonnalisationWizard({ draft, userEmail }: Props) {
+export default function PersonnalisationWizard({
+  draft,
+  userEmail,
+  initialCodUnlocked = false,
+}: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [currentStep, setCurrentStep] = useState(1);
@@ -171,7 +176,11 @@ export default function PersonnalisationWizard({ draft, userEmail }: Props) {
   const [step4, setStep4] = useState<Step4Input>({
     description: draft.description ?? "",
   });
-  const [codUnlocked, setCodUnlocked] = useState(false);
+  const [codUnlocked, setCodUnlocked] = useState(initialCodUnlocked);
+
+  useEffect(() => {
+    setCodUnlocked(initialCodUnlocked);
+  }, [initialCodUnlocked]);
 
   const hasPhysicalProducts = step2.products.some(
     (p) => p.included && p.type === "physical"

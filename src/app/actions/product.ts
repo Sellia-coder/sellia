@@ -88,7 +88,8 @@ function mapInputToPrismaData(input: ProductEditInput, shopId: string) {
     hasVariants: safeHasVariants,
     variantAxes: safeHasVariants ? input.variantAxes : undefined,
     feeMode: input.feeMode ?? "merchant_absorbs",
-    codAvailable: input.codAvailable ?? false,
+    codAvailable:
+      input.type === "physical" ? (input.codAvailable ?? false) : false,
   };
 }
 

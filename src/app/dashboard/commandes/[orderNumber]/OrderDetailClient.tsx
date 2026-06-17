@@ -143,6 +143,72 @@ export default function OrderDetailClient({
         </span>
       </div>
 
+      {awaitingDeliveryConfirmation && (
+        <aside className={styles.payoutBanner} role="note">
+          <div className={styles.payoutBannerIcon}>
+            <ShieldCheck size={22} weight="duotone" />
+          </div>
+          <div className={styles.payoutBannerContent}>
+            <h2 className={styles.payoutBannerTitle}>
+              {order.paymentMethod === "cash_on_delivery"
+                ? "Comment vous serez payé (à la livraison)"
+                : "Comment vous serez payé"}
+            </h2>
+            {order.paymentMethod === "cash_on_delivery" ? (
+              <>
+                <p className={styles.payoutBannerLead}>
+                  Cette commande est en <strong>paiement à la livraison</strong>.
+                  Vous encaissez directement auprès du client lors de la remise du
+                  colis.
+                </p>
+                <ol className={styles.payoutSteps}>
+                  <li>Préparez et expédiez la commande au client.</li>
+                  <li>
+                    À la réception, le client vous règle en espèces ou Mobile Money
+                    (selon votre accord).
+                  </li>
+                  <li>
+                    Marquez la commande comme traitée dans votre suivi — aucun
+                    reversement Sellia n&apos;est nécessaire pour ce mode.
+                  </li>
+                </ol>
+              </>
+            ) : (
+              <>
+                <p className={styles.payoutBannerLead}>
+                  Le client a payé en ligne. Les fonds sont{" "}
+                  <strong>sécurisés par Sellia</strong> (escrow) jusqu&apos;à
+                  confirmation de la livraison — vous n&apos;avez rien à déclencher
+                  manuellement.
+                </p>
+                <ol className={styles.payoutSteps}>
+                  <li>Préparez et remettez la commande au client.</li>
+                  <li>
+                    À la réception, le client confirme avec son{" "}
+                    <strong>code à 6 chiffres</strong> (reçu avec sa commande).
+                  </li>
+                  <li>
+                    Dès cette confirmation, Sellia libère automatiquement votre
+                    part vers votre <strong>solde disponible</strong>.
+                  </li>
+                </ol>
+                {order.refundDeadline && !order.refundedAt && (
+                  <p className={styles.payoutNote}>
+                    Protection acheteur active jusqu&apos;au{" "}
+                    {new Date(order.refundDeadline).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}{" "}
+                    — livrez dans ce délai pour une expérience sereine.
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        </aside>
+      )}
+
       <div className={styles.grid}>
         <div className={styles.mainCol}>
           <section className={styles.section}>
@@ -300,51 +366,6 @@ export default function OrderDetailClient({
                   </div>
                 )}
               </div>
-
-              {awaitingDeliveryConfirmation && (
-                <div
-                  style={{
-                    marginTop: 16,
-                    padding: "14px 16px",
-                    background: "rgba(29, 78, 216, 0.05)",
-                    border: "1px solid rgba(29, 78, 216, 0.18)",
-                    borderRadius: 12,
-                    display: "flex",
-                    gap: 12,
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <ShieldCheck
-                    size={20}
-                    weight="duotone"
-                    style={{ color: "#1D4ED8", flexShrink: 0, marginTop: 1 }}
-                  />
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 13.5,
-                        fontWeight: 600,
-                        color: "var(--sellia-ink)",
-                        marginBottom: 2,
-                      }}
-                    >
-                      Confirmation par le client
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 12.5,
-                        color: "var(--sellia-muted)",
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      La livraison est confirmée par le client via son code à 6
-                      chiffres lors de la réception. Les fonds sont
-                      automatiquement libérés à ce moment — aucune action
-                      manuelle de votre part n&apos;est requise.
-                    </div>
-                  </div>
-                </div>
-              )}
             </section>
           )}
         </div>

@@ -28,6 +28,7 @@ interface Props {
   shopCategory: string | null;
   shopPrimaryColor: string;
   isActive: boolean;
+  codUnlocked?: boolean;
 }
 
 export default function ProductEditClient(props: Props) {
@@ -123,6 +124,7 @@ export default function ProductEditClient(props: Props) {
           embedded
           product={props.initialProduct}
           shopContext={{ name: props.shopName, category: props.shopCategory }}
+          codUnlocked={props.codUnlocked}
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={handleClose}

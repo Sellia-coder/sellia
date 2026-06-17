@@ -1,0 +1,49 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  vertical-align: middle;
+  position: relative;
+  width: 16px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.tick {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #9ca3af;
+}
+
+.tickSecond {
+  position: absolute;
+  left: 5px;
+  top: 0;
+  color: #9ca3af;
+}
+
+.onDark .tick,
+.onDark .tickSecond {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.delivered .tick,
+.delivered .tickSecond {
+  color: #9ca3af;
+}
+
+.onDark.delivered .tick,
+.onDark.delivered .tickSecond {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.read .tick,
+.read .tickSecond {
+  color: #3b82f6;
+}
+
+.onDark.read .tick,
+.onDark.read .tickSecond {
+  color: #93c5fd;
+}

@@ -12,9 +12,12 @@ interface OrderEmailData {
   paidAt: Date;
   refundDeadline: Date;
   items: Array<{ name: string; quantity: number; price: number }>;
-  qrUrl: string;
-  qrImageUrl: string;
+  qrUrl?: string;
+  qrImageUrl?: string;
   orderViewUrl: string;
+  shopUrl: string;
+  /** QR de livraison uniquement pour commandes avec produits physiques */
+  showDeliveryQr: boolean;
   merchantPhone?: string | null;
   primaryColor?: string;
 }
@@ -52,6 +55,31 @@ export function renderOrderConfirmationEmail(data: OrderEmailData): {
     )
     .join("");
 
+  const introHtml = data.showDeliveryQr
+    ? `<p style="margin:0 0 24px;font-size:14px;color:#6B6E76;line-height:1.6;">Votre paiement a été confirmé. Vos fonds sont protégés par Sellia jusqu'à la livraison.</p>`
+    : `<p style="margin:0 0 24px;font-size:14px;color:#6B6E76;line-height:1.6;">Votre paiement a été confirmé. Votre commande est enregistrée chez ${data.shopName}.</p>`;
+
+  const qrBlockHtml = data.showDeliveryQr
+    ? `<div style="text-align:center;margin-bottom:24px;">
+              <p style="font-size:13px;color:#6B6E76;margin:0 0 12px;">Présentez ce QR code au marchand à la livraison</p>
+              <img src="${data.qrImageUrl}" alt="QR livraison" width="200" height="200" style="border:1px solid #ECE9E2;border-radius:12px;"/>
+            </div>`
+    : `<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px 18px;margin-bottom:24px;">
+              <p style="margin:0;font-size:13px;color:#334155;line-height:1.6;">
+                <strong>Une réclamation ?</strong> Connectez-vous à votre espace sur la boutique
+                (<a href="${data.shopUrl}" style="color:${color};text-decoration:none;font-weight:600;">${data.shopUrl}</a>)
+                et ouvrez un litige depuis « Mes achats ».
+              </p>
+            </div>`;
+
+  const protectionHtml = data.showDeliveryQr
+    ? `<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+              <p style="margin:0;font-size:13px;color:#15803D;line-height:1.55;">
+                <strong>Protection acheteur</strong> — Remboursement automatique si non livré avant le ${formatDate(data.refundDeadline)}.
+              </p>
+            </div>`
+    : "";
+
   const html = `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width"/></head>
@@ -68,7 +96,7 @@ export function renderOrderConfirmationEmail(data: OrderEmailData): {
         <tr>
           <td style="padding:32px;">
             <p style="margin:0 0 8px;font-size:15px;color:#0A0E13;">Bonjour <strong>${data.customerName}</strong>,</p>
-            <p style="margin:0 0 24px;font-size:14px;color:#6B6E76;line-height:1.6;">Votre paiement a été confirmé. Vos fonds sont protégés par Sellia jusqu'à la livraison.</p>
+            ${introHtml}
 
             <div style="background:#FAFAF7;border:1px solid #ECE9E2;border-radius:12px;padding:16px 20px;margin-bottom:24px;text-align:center;">
               <div style="font-size:11px;color:#6B6E76;letter-spacing:0.5px;margin-bottom:4px;">N° DE COMMANDE</div>
@@ -96,16 +124,8 @@ export function renderOrderConfirmationEmail(data: OrderEmailData): {
               </tr>
             </table>
 
-            <div style="text-align:center;margin-bottom:24px;">
-              <p style="font-size:13px;color:#6B6E76;margin:0 0 12px;">Présentez ce QR code au marchand à la livraison</p>
-              <img src="${data.qrImageUrl}" alt="QR livraison" width="200" height="200" style="border:1px solid #ECE9E2;border-radius:12px;"/>
-            </div>
-
-            <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
-              <p style="margin:0;font-size:13px;color:#15803D;line-height:1.55;">
-                <strong>Protection acheteur</strong> — Remboursement automatique si non livré avant le ${formatDate(data.refundDeadline)}.
-              </p>
-            </div>
+            ${qrBlockHtml}
+            ${protectionHtml}
 
             <div style="text-align:center;">
               <a href="${data.orderViewUrl}" style="display:inline-block;padding:12px 28px;background:${color};color:#FFFFFF;text-decoration:none;border-radius:10px;font-size:14px;font-weight:600;">Voir ma commande</a>
@@ -123,18 +143,23 @@ export function renderOrderConfirmationEmail(data: OrderEmailData): {
 </body>
 </html>`;
 
+  const textIntro = data.showDeliveryQr
+    ? `Vos fonds sont protégés jusqu'à la livraison.`
+    : `Pour toute réclamation, connectez-vous à votre espace sur la boutique (${data.shopUrl}) et ouvrez un litige.`;
+
+  const textQr = data.showDeliveryQr
+    ? `\nQR livraison : ${data.qrUrl}\n\nProtection : remboursement automatique si non livré avant ${formatDate(data.refundDeadline)}.`
+    : "";
+
   const text = `Commande confirmée — ${data.orderNumber}
 
 Bonjour ${data.customerName},
 
 Votre paiement de ${formatPrice(data.total, data.currency)} a été confirmé chez ${data.shopName}.
-Vos fonds sont protégés jusqu'à la livraison.
+${textIntro}
 
 Commande : ${data.orderNumber}
-Voir : ${data.orderViewUrl}
-QR livraison : ${data.qrUrl}
-
-Protection : remboursement automatique si non livré avant ${formatDate(data.refundDeadline)}.
+Voir : ${data.orderViewUrl}${textQr}
 `;
 
   return { subject, html, text };

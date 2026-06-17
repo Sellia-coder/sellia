@@ -34,6 +34,13 @@ export default function AdminTodoBanner({ counts }: { counts: AdminTodoCounts })
       count: counts.openTickets,
     });
   }
+  if (counts.newLandingSupport > 0) {
+    items.push({
+      label: "Chat landing",
+      href: "/admin/support-landing",
+      count: counts.newLandingSupport,
+    });
+  }
   if (counts.newMerchantFeedbacks > 0) {
     items.push({
       label: "Feedback marchands",

@@ -7,6 +7,7 @@ import {
   CHAT_SECURITY_BANNER,
   CHAT_STORAGE_KEY_PREFIX,
 } from "@/lib/chat/constants";
+import MessageReceiptTicks from "@/components/chat/MessageReceiptTicks";
 import styles from "./shop-chat-widget.module.css";
 
 type ChatMessage = {
@@ -14,6 +15,8 @@ type ChatMessage = {
   sender: "customer" | "merchant" | "system";
   content: string;
   flagged?: boolean;
+  deliveredAt?: string | null;
+  readAt?: string | null;
   createdAt: string;
 };
 
@@ -85,6 +88,7 @@ export default function ShopChatWidget({
     const params = new URLSearchParams({
       conversationId: session.conversationId,
       visitorToken: session.visitorToken,
+      markRead: "1",
     });
     if (lastPollRef.current) {
       params.set("since", lastPollRef.current);
@@ -113,6 +117,26 @@ export default function ShopChatWidget({
         const last = data.messages[data.messages.length - 1] as ChatMessage;
         lastPollRef.current = last.createdAt;
         scrollToBottom();
+      }
+
+      if (Array.isArray(data.receipts) && data.receipts.length > 0) {
+        setMessages((prev) =>
+          prev.map((m) => {
+            const patch = (
+              data.receipts as Array<{
+                id: string;
+                deliveredAt: string | null;
+                readAt: string | null;
+              }>
+            ).find((r) => r.id === m.id);
+            if (!patch) return m;
+            return {
+              ...m,
+              deliveredAt: patch.deliveredAt,
+              readAt: patch.readAt,
+            };
+          })
+        );
       }
     } catch {
       // silent poll failure
@@ -319,8 +343,17 @@ export default function ShopChatWidget({
                       }
                     >
                       {m.content}
-                      <div className={styles.bubbleTime}>
-                        {formatTime(m.createdAt)}
+                      <div className={styles.bubbleMeta}>
+                        <span className={styles.bubbleTime}>
+                          {formatTime(m.createdAt)}
+                        </span>
+                        {m.sender === "customer" && (
+                          <MessageReceiptTicks
+                            deliveredAt={m.deliveredAt}
+                            readAt={m.readAt}
+                            onDark
+                          />
+                        )}
                       </div>
                     </div>
                   ))

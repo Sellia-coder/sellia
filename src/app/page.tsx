@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { checkAuthStatusAction } from "@/app/actions/auth-status";
+import LandingSupportWidget from "@/components/landing/LandingSupportWidget";
 import "./landing-typography.css";
 
 const RESULT_TEMPLATES: Record<string, string[]> = {
@@ -1351,6 +1352,8 @@ export default function Home() {
     </div>
   </div>
 </footer>
+
+      <LandingSupportWidget />
     </div>
   );
 }

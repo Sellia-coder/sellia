@@ -208,6 +208,10 @@ export const productEditSchema = z
     message: "Les variantes sont uniquement disponibles pour les produits physiques",
     path: ["hasVariants"],
   })
+  .refine((p) => p.type === "physical" || !p.codAvailable, {
+    message: "Le paiement à la livraison est réservé aux produits physiques",
+    path: ["codAvailable"],
+  })
   .refine(
     (p) => {
       if (p.type !== "digital") return true;

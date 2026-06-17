@@ -39,6 +39,7 @@ export default async function AdminLayout({
       }}
       isSuperAdmin={isSuperAdmin(user)}
       newMerchantFeedbacks={todoCounts.newMerchantFeedbacks}
+      newLandingSupport={todoCounts.newLandingSupport}
     >
       <AdminTodoBanner counts={todoCounts} />
       {children}

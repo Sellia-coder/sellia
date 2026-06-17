@@ -16,6 +16,14 @@ export default async function PersonnaliserMaBoutiquePage() {
   const user = await getCurrentUser();
   if (!user?.id) redirect("/connexion");
 
+  const ownerShop = await db.shop.findFirst({
+    where: { ownerId: user.id },
+    select: {
+      featureUnlocks: { where: { feature: "COD" }, select: { id: true } },
+    },
+  });
+  const initialCodUnlocked = (ownerShop?.featureUnlocks.length ?? 0) > 0;
+
   const existingShop = await db.shop.findFirst({
     where: {
       ownerId: user.id,
@@ -117,5 +125,11 @@ export default async function PersonnaliserMaBoutiquePage() {
     );
   }
 
-  return <PersonnalisationWizard draft={result.draft} userEmail={user.email ?? ""} />;
+  return (
+    <PersonnalisationWizard
+      draft={result.draft}
+      userEmail={user.email ?? ""}
+      initialCodUnlocked={initialCodUnlocked}
+    />
+  );
 }

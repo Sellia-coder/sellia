@@ -201,6 +201,15 @@ const SYSTEM_LINKS_BASE: NavItem[] = [
     ),
   },
   {
+    href: "/admin/support-landing",
+    label: "Chat landing",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+      </svg>
+    ),
+  },
+  {
     href: "/admin/parametres",
     label: "Paramètres",
     icon: (
@@ -266,11 +275,13 @@ export default function AdminLayoutClient({
   userHeader,
   isSuperAdmin = false,
   newMerchantFeedbacks = 0,
+  newLandingSupport = 0,
 }: {
   children: React.ReactNode;
   userHeader: { name: string; initial: string; email: string };
   isSuperAdmin?: boolean;
   newMerchantFeedbacks?: number;
+  newLandingSupport?: number;
 }) {
   const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -325,11 +336,15 @@ export default function AdminLayoutClient({
               isSuperAdmin
                 ? [SUPER_ADMIN_LINK, ...SYSTEM_LINKS_BASE]
                 : SYSTEM_LINKS_BASE
-            ).map((l) =>
-              l.href === "/admin/feedback"
-                ? { ...l, badgeCount: newMerchantFeedbacks }
-                : l
-            )
+            ).map((l) => {
+              if (l.href === "/admin/feedback") {
+                return { ...l, badgeCount: newMerchantFeedbacks };
+              }
+              if (l.href === "/admin/support-landing") {
+                return { ...l, badgeCount: newLandingSupport };
+              }
+              return l;
+            })
           }
           pathname={pathname}
         />

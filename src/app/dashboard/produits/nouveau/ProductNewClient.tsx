@@ -17,6 +17,7 @@ interface Props {
   shopName: string;
   shopCategory: string | null;
   shopPrimaryColor: string;
+  codUnlocked?: boolean;
 }
 
 const EMPTY_PRODUCT: ProductEditInput = {
@@ -99,6 +100,7 @@ export default function ProductNewClient(props: Props) {
           embedded
           product={EMPTY_PRODUCT}
           shopContext={{ name: props.shopName, category: props.shopCategory }}
+          codUnlocked={props.codUnlocked}
           onSave={handleSave}
           onDelete={handleClose}
           onClose={handleClose}

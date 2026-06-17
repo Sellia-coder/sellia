@@ -115,6 +115,8 @@ export async function POST(
         content: true,
         sender: true,
         flagged: true,
+        deliveredAt: true,
+        readAt: true,
         createdAt: true,
       },
     });
@@ -136,6 +138,8 @@ export async function POST(
       content: message.content,
       sender: "customer",
       flagged: message.flagged,
+      deliveredAt: message.deliveredAt?.toISOString() ?? null,
+      readAt: message.readAt?.toISOString() ?? null,
       createdAt: message.createdAt.toISOString(),
     },
   });

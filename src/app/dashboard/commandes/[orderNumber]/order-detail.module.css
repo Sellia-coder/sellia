@@ -427,6 +427,101 @@
   justify-content: flex-end;
 }
 
+.payoutBanner {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px 22px;
+  margin-bottom: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(250, 250, 247, 0.98) 0%,
+    rgba(255, 255, 255, 1) 55%,
+    rgba(232, 75, 31, 0.04) 100%
+  );
+  border: 1px solid rgba(14, 17, 22, 0.08);
+  border-left: 3px solid var(--sellia-ember);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(14, 17, 22, 0.04);
+}
+
+.payoutBannerIcon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(232, 75, 31, 0.1);
+  color: var(--sellia-ember);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payoutBannerContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.payoutBannerTitle {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--sellia-ink);
+  margin: 0 0 8px;
+  letter-spacing: -0.2px;
+}
+
+.payoutBannerLead {
+  font-size: 13.5px;
+  color: #4b5563;
+  line-height: 1.55;
+  margin: 0 0 12px;
+}
+
+.payoutBannerLead strong {
+  color: var(--sellia-ink);
+  font-weight: 600;
+}
+
+.payoutSteps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.payoutSteps li::marker {
+  color: var(--sellia-ember);
+  font-weight: 700;
+}
+
+.payoutNote {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  background: rgba(14, 17, 22, 0.03);
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .payoutBanner {
+    flex-direction: column;
+    padding: 18px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payoutBanner {
+    animation: none;
+  }
+}
+
 @media (max-width: 900px) {
   .wrap {
     padding: 20px;

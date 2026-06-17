@@ -34,6 +34,12 @@ export interface OrderForStatus {
   items: OrderItem[];
 }
 
+export function orderHasPhysicalItems(items: OrderItem[]): boolean {
+  if (!items.length) return false;
+  const kind = getOrderTypeKind(items);
+  return kind === "physical" || kind === "mixed";
+}
+
 export function getOrderTypeKind(
   items: OrderItem[]
 ): "physical" | "digital" | "service" | "mixed" {

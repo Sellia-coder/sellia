@@ -21,14 +21,44 @@ interface Props {
   onCancel: () => void;
 }
 
+const AGGRESSIVE_WINDOW_MS = 90_000;
+const LONG_WAIT_MS = 180_000;
+
+function isPaidStatus(status: string): boolean {
+  return (
+    status === "paid_escrow" ||
+    status === "paid_released" ||
+    status === "delivered"
+  );
+}
+
 function getNextDelayMs(pollCount: number, aggressive: boolean): number {
-  if (aggressive) return 2000;
-  if (pollCount < 5) return 2000;
-  if (pollCount < 12) return 5000;
+  if (aggressive) return 2500;
+  if (pollCount < 8) return 3000;
+  if (pollCount < 20) return 5000;
   return 10000;
 }
 
 type FeedbackKind = "idle" | "checking" | "pending" | "success" | "failed";
+
+const REASSURING_WAIT =
+  "Paiement en cours de confirmation… cela peut prendre quelques instants. Ne fermez pas cette page.";
+
+const LONG_WAIT_MESSAGE =
+  "Votre paiement est en cours de traitement. Nous continuons à vérifier automatiquement auprès de l'opérateur.";
+
+/** GET /status — verify-on-pull côté serveur (cartevoTx.cartevoTxId). */
+async function fetchOrderStatus(
+  shopSlug: string,
+  orderNumber: string
+): Promise<{ paymentStatus: string } | null> {
+  const res = await fetch(
+    `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/status`,
+    { cache: "no-store" }
+  );
+  if (!res.ok) return null;
+  return res.json();
+}
 
 export default function PaymentPendingPolling({
   shopSlug,
@@ -47,33 +77,39 @@ export default function PaymentPendingPolling({
   const [redirecting, setRedirecting] = useState(false);
   const [pollCount, setPollCount] = useState(0);
   const [isManualChecking, setIsManualChecking] = useState(false);
-  const [forcedAggressive, setForcedAggressive] = useState(false);
-  const [feedback, setFeedback] = useState<FeedbackKind>("idle");
-  const [feedbackText, setFeedbackText] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FeedbackKind>("pending");
+  const [feedbackText, setFeedbackText] = useState<string>(REASSURING_WAIT);
   const cancelledRef = useRef(false);
-  const aggressiveUntilRef = useRef(0);
+  const aggressiveUntilRef = useRef(Date.now() + AGGRESSIVE_WINDOW_MS);
+  const forcedAggressiveRef = useRef(false);
+  const mountedAtRef = useRef(Date.now());
+  const pollIterationRef = useRef(0);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const operator = getOperatorInfo(countryCode, operatorCode);
   const operatorName = operator?.name ?? "Mobile Money";
-  const ussd = operator?.ussd;
+
+  const successHandledRef = useRef(false);
 
   const completeSuccess = useCallback(() => {
+    if (successHandledRef.current) return;
+    successHandledRef.current = true;
     cancelledRef.current = true;
     setFeedback("success");
-    setFeedbackText("Paiement confirmé ! Redirection...");
+    setFeedbackText("Paiement confirmé !");
     setRedirecting(true);
     onSuccess();
-    setTimeout(() => {
-      if (autoRedirect) {
+
+    if (autoRedirect) {
+      setTimeout(() => {
         router.push(
           `/shop/${shopSlug}/commande/${encodeURIComponent(orderNumber)}`
         );
-      } else {
-        router.refresh();
-        setRedirecting(false);
-      }
-    }, 800);
+      }, 800);
+    } else {
+      // Ne pas masquer l'overlay succès : le parent démonte le polling après refresh.
+      setTimeout(() => router.refresh(), 400);
+    }
   }, [autoRedirect, onSuccess, orderNumber, router, shopSlug]);
 
   const showFeedback = useCallback(
@@ -100,8 +136,9 @@ export default function PaymentPendingPolling({
         feedbackTimeoutRef.current = setTimeout(() => {
           setFeedback((f) => (f === mapped ? "pending" : f));
           if (mapped !== "success" && mapped !== "failed") {
+            const elapsed = Date.now() - mountedAtRef.current;
             setFeedbackText(
-              "Nous vérifions automatiquement votre paiement Mobile Money."
+              elapsed >= LONG_WAIT_MS ? LONG_WAIT_MESSAGE : REASSURING_WAIT
             );
           }
         }, durationMs);
@@ -109,6 +146,29 @@ export default function PaymentPendingPolling({
     },
     []
   );
+
+  const resolveFromStatus = useCallback(
+    (paymentStatus: string): "success" | "failed" | "pending" => {
+      if (isPaidStatus(paymentStatus)) return "success";
+      if (paymentStatus === "failed" || paymentStatus === "cancelled") {
+        return "failed";
+      }
+      return "pending";
+    },
+    []
+  );
+
+  const performVerifyOnPull = useCallback(async (): Promise<
+    "success" | "failed" | "pending"
+  > => {
+    try {
+      const data = await fetchOrderStatus(shopSlug, orderNumber);
+      if (!data) return "pending";
+      return resolveFromStatus(data.paymentStatus);
+    } catch {
+      return "pending";
+    }
+  }, [shopSlug, orderNumber, resolveFromStatus]);
 
   const performBalanceMatch = useCallback(async (): Promise<
     "success" | "failed" | "pending"
@@ -120,12 +180,12 @@ export default function PaymentPendingPolling({
       );
       if (!res.ok) return "pending";
       const data = await res.json();
-      if (data.matched && data.new_payment_status === "paid_escrow") {
+      if (data.matched && isPaidStatus(data.new_payment_status)) {
         return "success";
       }
       if (
         data.already_finalized &&
-        data.new_payment_status === "paid_escrow"
+        isPaidStatus(data.new_payment_status)
       ) {
         return "success";
       }
@@ -145,33 +205,44 @@ export default function PaymentPendingPolling({
   const performPoll = useCallback(async (): Promise<
     "success" | "failed" | "pending"
   > => {
+    pollIterationRef.current += 1;
+    const n = pollIterationRef.current;
     const aggressive =
-      forcedAggressive || Date.now() < aggressiveUntilRef.current;
+      forcedAggressiveRef.current ||
+      Date.now() < aggressiveUntilRef.current;
 
-    if (aggressive) {
+    const statusResult = await performVerifyOnPull();
+    if (statusResult !== "pending") return statusResult;
+
+    // Réconciliation solde (secours) : moins fréquent (rate limit 10/min)
+    if (aggressive ? n % 2 === 0 : n % 5 === 0) {
       const balanceResult = await performBalanceMatch();
       if (balanceResult !== "pending") return balanceResult;
     }
 
-    const res = await fetch(
-      `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/status`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) return "pending";
-    const data = await res.json();
-    if (data.paymentStatus === "paid_escrow") return "success";
-    if (data.paymentStatus === "failed" || data.paymentStatus === "cancelled") {
-      return "failed";
-    }
     return "pending";
-  }, [shopSlug, orderNumber, forcedAggressive, performBalanceMatch]);
+  }, [performVerifyOnPull, performBalanceMatch]);
 
   const handleManualCheck = async () => {
     if (isManualChecking || cancelledRef.current) return;
     setIsManualChecking(true);
-    showFeedback("info", "Vérification en cours auprès de l'opérateur...");
+    showFeedback("info", "Vérification en cours auprès de l'opérateur…", 0);
 
     try {
+      const statusResult = await performVerifyOnPull();
+      if (cancelledRef.current) return;
+
+      if (statusResult === "success") {
+        completeSuccess();
+        return;
+      }
+      if (statusResult === "failed") {
+        showFeedback("error", "Le paiement n'a pas abouti.");
+        cancelledRef.current = true;
+        setTimeout(() => onFailed("Paiement non abouti"), 1500);
+        return;
+      }
+
       const res = await fetch(
         `/api/shop/${shopSlug}/orders/${encodeURIComponent(orderNumber)}/balance-match`,
         { method: "POST", cache: "no-store" }
@@ -190,14 +261,14 @@ export default function PaymentPendingPolling({
 
       const data = await res.json();
 
-      if (data.matched && data.new_payment_status === "paid_escrow") {
+      if (data.matched && isPaidStatus(data.new_payment_status)) {
         completeSuccess();
         return;
       }
 
       if (
         data.already_finalized &&
-        data.new_payment_status === "paid_escrow"
+        isPaidStatus(data.new_payment_status)
       ) {
         completeSuccess();
         return;
@@ -214,13 +285,9 @@ export default function PaymentPendingPolling({
         return;
       }
 
-      showFeedback(
-        "info",
-        "Votre paiement est en cours de traitement. Nous vérifions automatiquement toutes les 2 secondes.",
-        0
-      );
-      aggressiveUntilRef.current = Date.now() + 60_000;
-      setForcedAggressive(true);
+      showFeedback("info", REASSURING_WAIT, 0);
+      aggressiveUntilRef.current = Date.now() + AGGRESSIVE_WINDOW_MS;
+      forcedAggressiveRef.current = true;
     } catch {
       if (!cancelledRef.current) {
         showFeedback(
@@ -236,6 +303,10 @@ export default function PaymentPendingPolling({
 
   useEffect(() => {
     cancelledRef.current = false;
+    successHandledRef.current = false;
+    mountedAtRef.current = Date.now();
+    aggressiveUntilRef.current = Date.now() + AGGRESSIVE_WINDOW_MS;
+    forcedAggressiveRef.current = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let currentCount = 0;
 
@@ -254,12 +325,12 @@ export default function PaymentPendingPolling({
           onFailed("Le paiement n'a pas pu être finalisé.");
           return;
         }
-        setFeedback((f) => (f === "idle" ? "pending" : f));
-        if (!feedbackText) {
-          setFeedbackText(
-            "Nous vérifions automatiquement votre paiement Mobile Money."
-          );
-        }
+
+        const elapsed = Date.now() - mountedAtRef.current;
+        setFeedback("pending");
+        setFeedbackText(
+          elapsed >= LONG_WAIT_MS ? LONG_WAIT_MESSAGE : REASSURING_WAIT
+        );
       } catch {
         // retry on network error
       }
@@ -267,26 +338,41 @@ export default function PaymentPendingPolling({
       currentCount += 1;
       setPollCount(currentCount);
 
-      const aggressive =
-        forcedAggressive || Date.now() < aggressiveUntilRef.current;
-      if (Date.now() >= aggressiveUntilRef.current && forcedAggressive) {
-        setForcedAggressive(false);
+      if (Date.now() >= aggressiveUntilRef.current) {
+        forcedAggressiveRef.current = false;
       }
 
       if (!cancelledRef.current) {
+        const aggressive =
+          forcedAggressiveRef.current ||
+          Date.now() < aggressiveUntilRef.current;
         const delay = getNextDelayMs(currentCount, aggressive);
         timeoutId = setTimeout(loop, delay);
       }
     };
 
-    timeoutId = setTimeout(loop, 2000);
+    // Verify-on-pull dès l'arrivée, puis polling agressif (2,5 s pendant ~90 s).
+    void performVerifyOnPull().then((r) => {
+      if (cancelledRef.current) return;
+      if (r === "success") {
+        completeSuccess();
+        return;
+      }
+      if (r === "failed") {
+        cancelledRef.current = true;
+        setFeedback("failed");
+        onFailed("Le paiement n'a pas pu être finalisé.");
+        return;
+      }
+      timeoutId = setTimeout(loop, 800);
+    });
 
     return () => {
       cancelledRef.current = true;
       if (timeoutId) clearTimeout(timeoutId);
       if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
-  }, [performPoll, completeSuccess, onFailed, forcedAggressive]);
+  }, [performPoll, performVerifyOnPull, completeSuccess, onFailed]);
 
   const handleCancelClick = () => {
     if (cancelledRef.current) return;
@@ -294,106 +380,103 @@ export default function PaymentPendingPolling({
     onCancel();
   };
 
+  const isWaiting =
+    !redirecting &&
+    (feedback === "pending" || feedback === "checking" || feedback === "idle");
+
+  const statusClass =
+    feedback === "success"
+      ? styles.statusSuccess
+      : feedback === "failed"
+        ? styles.statusFailed
+        : feedback === "checking"
+          ? styles.statusChecking
+          : styles.statusPending;
+
   return (
     <>
-    {redirecting && (
-      <div className={styles.redirectOverlay} role="status" aria-live="polite">
-        <div className={styles.redirectContent}>
-          <div className={styles.redirectSuccess}>
-            <svg width="64" height="64" viewBox="0 0 64 64" className={styles.redirectCheck} aria-hidden>
-              <circle cx="32" cy="32" r="28" stroke="#16A34A" strokeWidth="3" fill="none" />
-              <path d="M20 32 L28 40 L44 24" stroke="#16A34A" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+      {redirecting && (
+        <div className={styles.redirectOverlay} role="status" aria-live="polite">
+          <div className={styles.redirectCard}>
+            <div className={styles.checkWrap}>
+              <CheckCircle size={32} color="#16A34A" strokeWidth={2} />
+            </div>
+            <div className={styles.redirectTitle}>Paiement confirmé</div>
+            <div className={styles.redirectSub}>Mise à jour en cours…</div>
           </div>
-          <div className={styles.redirectTitle}>Paiement confirmé</div>
-          <div className={styles.redirectSubtitle}>Préparation de votre commande...</div>
         </div>
-      </div>
-    )}
-    <div className={styles.wrap}>
-      <div className={styles.card}>
-        <div className={styles.dots} aria-hidden="true">
-          <span className={styles.dot} style={{ background: primaryColor }} />
-          <span className={styles.dot} style={{ background: primaryColor }} />
-          <span className={styles.dot} style={{ background: primaryColor }} />
-        </div>
+      )}
+      <div className={styles.wrap}>
+        <div className={styles.card}>
+          {isWaiting && (
+            <div className={styles.spinnerWrap} aria-hidden>
+              <div className={styles.pulse} />
+              <div className={styles.spinner} />
+            </div>
+          )}
 
-        <h2 className={styles.title}>Paiement en cours de vérification</h2>
+          <h2 className={styles.title}>
+            {feedback === "failed"
+              ? "Paiement non confirmé"
+              : "Confirmez le paiement sur votre téléphone"}
+          </h2>
 
-        <p className={styles.subtitle}>
-          Confirmez le paiement de{" "}
-          <strong>
-            {total.toLocaleString("fr-FR")} {currency}
-          </strong>{" "}
-          sur votre téléphone via <strong>{operatorName}</strong>.
-          <br />
-          Nous vérifions automatiquement.
-        </p>
+          {feedback !== "failed" && !redirecting && (
+            <p className={styles.hint}>
+              Saisissez votre code {operatorName} — la confirmation est automatique.
+            </p>
+          )}
 
-        {feedbackText && (
-          <div
-            className={`${styles.feedback} ${
-              feedback === "success"
-                ? styles.feedbackSuccess
-                : feedback === "failed"
-                  ? styles.feedbackFailed
-                  : feedback === "checking"
-                    ? styles.feedbackChecking
-                    : styles.feedbackPending
-            }`}
-            role="status"
-          >
-            {feedbackText}
+          <div className={styles.amount}>
+            {total.toLocaleString("fr-FR")}{" "}
+            <span className={styles.amountCurrency}>{currency}</span>
           </div>
-        )}
 
-        <div className={styles.orderRef}>
-          Référence&nbsp;: <span>{orderNumber}</span>
-        </div>
+          {feedbackText && !redirecting && (
+            <p className={`${styles.status} ${statusClass}`} role="status" aria-live="polite">
+              {feedbackText}
+            </p>
+          )}
 
-        {ussd && (
-          <div className={styles.ussdHint}>
-            Pas reçu de notification ? Composez{" "}
-            <span className={styles.ussdCode}>{ussd}</span> sur votre téléphone.
-          </div>
-        )}
+          <p className={styles.ref}>
+            Réf. <span>{orderNumber}</span>
+          </p>
 
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={handleManualCheck}
-            disabled={isManualChecking}
-            style={{ borderColor: primaryColor, color: primaryColor }}
-          >
-            {isManualChecking ? (
-              <>
-                <RotateCw size={14} className={styles.spinIcon} />
-                Vérification...
-              </>
-            ) : (
-              <>
-                <CheckCircle size={14} />
-                J&apos;ai payé, vérifier
-              </>
+          <div className={styles.actions}>
+            {feedback !== "failed" && !redirecting && (
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={handleManualCheck}
+                disabled={isManualChecking}
+                style={{ borderColor: primaryColor, color: primaryColor }}
+              >
+                {isManualChecking ? (
+                  <>
+                    <RotateCw size={14} className={styles.spinIcon} />
+                    Vérification…
+                  </>
+                ) : (
+                  "J'ai payé — Vérifier"
+                )}
+              </button>
             )}
-          </button>
+            <button
+              type="button"
+              className={styles.ghostBtn}
+              onClick={handleCancelClick}
+              disabled={redirecting}
+            >
+              <X size={13} />
+              {feedback === "failed" ? "Retour à la boutique" : "Annuler"}
+            </button>
+          </div>
 
-          <button
-            type="button"
-            className={styles.secondaryBtn}
-            onClick={handleCancelClick}
-          >
-            <X size={13} />
-            Annuler
-          </button>
+          {process.env.NODE_ENV === "development" && (
+            <div className={styles.debug}>polls: {pollCount}</div>
+          )}
         </div>
-
-        {process.env.NODE_ENV === "development" && (
-          <div className={styles.debug}>polls: {pollCount}</div>
-        )}
       </div>
-    </div>
     </>
   );
 }

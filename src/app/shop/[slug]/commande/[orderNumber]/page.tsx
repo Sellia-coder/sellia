@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { getOrderTypeKind, orderHasPhysicalItems } from "@/lib/order-status";
 import OrderConfirmationClient from "./OrderConfirmationClient";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,9 @@ export default async function OrderConfirmationPage({ params }: Props) {
           slug: true,
           name: true,
           primaryColor: true,
+          contactEmail: true,
+          whatsappNumber: true,
+          phone: true,
         },
       },
       cartevoTransaction: {
@@ -70,13 +74,35 @@ export default async function OrderConfirmationPage({ params }: Props) {
   const isPurelyDigital =
     allItems.length > 0 &&
     allItems.every((i) => (i.type || "physical") === "digital");
+  const hasPhysicalItems = orderHasPhysicalItems(
+    allItems.map((i) => ({
+      type: i.type || "physical",
+      name: "",
+      price: 0,
+      quantity: 1,
+    }))
+  );
+  const orderKind = getOrderTypeKind(
+    allItems.map((i) => ({
+      type: i.type || "physical",
+      name: "",
+      price: 0,
+      quantity: 1,
+    }))
+  );
 
   // url peut être null si le marchand n'a pas (encore) renseigné digitalFileUrl :
   // on affiche quand même le produit côté client avec un état "bientôt".
   let digitalDownloads: { name: string; url: string | null }[] = [];
+  let serviceItems: { name: string; description: string | null }[] = [];
   if (paymentConfirmed) {
     const digitalItemProductIds = allItems
       .filter((i) => (i.type || "physical") === "digital")
+      .map((i) => i.productId)
+      .filter((id): id is string => Boolean(id));
+
+    const serviceItemProductIds = allItems
+      .filter((i) => (i.type || "physical") === "service")
       .map((i) => i.productId)
       .filter((id): id is string => Boolean(id));
 
@@ -88,6 +114,17 @@ export default async function OrderConfirmationPage({ params }: Props) {
       digitalDownloads = products.map((p) => ({
         name: p.name,
         url: p.digitalFileUrl || null,
+      }));
+    }
+
+    if (serviceItemProductIds.length > 0) {
+      const products = await db.product.findMany({
+        where: { id: { in: serviceItemProductIds } },
+        select: { id: true, name: true, description: true, shortDescription: true },
+      });
+      serviceItems = products.map((p) => ({
+        name: p.name,
+        description: p.shortDescription || p.description || null,
       }));
     }
   }
@@ -107,8 +144,9 @@ export default async function OrderConfirmationPage({ params }: Props) {
     order.paymentMethod === "online_escrow";
   const showPaymentPolling =
     isMoMoOnline &&
-    (order.paymentStatus === "awaiting_confirmation" ||
-      order.paymentStatus === "pending");
+    !paymentConfirmed &&
+    order.paymentStatus !== "failed" &&
+    order.paymentStatus !== "cancelled";
 
   return (
     <OrderConfirmationClient
@@ -134,6 +172,14 @@ export default async function OrderConfirmationPage({ params }: Props) {
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
         digitalDownloads,
         isPurelyDigital,
+        hasPhysicalItems,
+        orderKind,
+        serviceItems,
+        shopContact: {
+          email: order.shop.contactEmail,
+          whatsapp: order.shop.whatsappNumber,
+          phone: order.shop.phone,
+        },
       }}
       paymentPolling={
         showPaymentPolling

@@ -40,6 +40,7 @@ export default async function ProductEditPage({
           category: true,
           primaryColor: true,
           ownerId: true,
+          featureUnlocks: { where: { feature: "COD" }, select: { id: true } },
         },
       },
       variants: { orderBy: { position: "asc" } },
@@ -109,6 +110,7 @@ export default async function ProductEditPage({
         shopCategory={product.shop.category}
         shopPrimaryColor={product.shop.primaryColor || "#E84B1F"}
         isActive={product.status === "active"}
+        codUnlocked={product.shop.featureUnlocks.length > 0}
       />
     </Suspense>
   );

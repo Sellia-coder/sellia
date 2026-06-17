@@ -15,6 +15,7 @@ import {
   WarningOctagon,
   Eye,
   EyeSlash,
+  Truck,
 } from "@phosphor-icons/react";
 import {
   toggleProductActiveAction,
@@ -136,6 +137,12 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
           </p>
         </div>
         <div className={styles.headerActions}>
+          <Link
+            href="/dashboard/produits/livraisons"
+            className={styles.btnSecondary}
+          >
+            <Truck size={15} weight="bold" /> Configurer les livraisons
+          </Link>
           <button
             type="button"
             className={styles.btnSecondary}

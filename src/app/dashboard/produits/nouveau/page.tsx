@@ -9,7 +9,14 @@ export default async function NewProductPage() {
 
   const shop = await db.shop.findFirst({
     where: { ownerId: user.id },
-    select: { id: true, slug: true, name: true, category: true, primaryColor: true },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      category: true,
+      primaryColor: true,
+      featureUnlocks: { where: { feature: "COD" }, select: { id: true } },
+    },
   });
 
   if (!shop) {
@@ -28,6 +35,7 @@ export default async function NewProductPage() {
       shopName={shop.name}
       shopCategory={shop.category}
       shopPrimaryColor={shop.primaryColor || "#E84B1F"}
+      codUnlocked={shop.featureUnlocks.length > 0}
     />
   );
 }

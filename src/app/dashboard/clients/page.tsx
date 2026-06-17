@@ -64,6 +64,8 @@ export default async function CustomersListPage() {
             content: true,
             flagged: true,
             blockedReason: true,
+            deliveredAt: true,
+            readAt: true,
             createdAt: true,
           },
         },
@@ -126,6 +128,8 @@ export default async function CustomersListPage() {
       content: m.content,
       flagged: m.flagged,
       blockedReason: m.blockedReason,
+      deliveredAt: m.deliveredAt?.toISOString() ?? null,
+      readAt: m.readAt?.toISOString() ?? null,
       createdAt: m.createdAt.toISOString(),
     })),
   }));

@@ -1,203 +1,179 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
-import {
-  verifyTransactionWithCartevo,
-  compareWithExpected,
-} from "@/lib/cartevo/verify";
+import { verifyTransactionWithCartevo } from "@/lib/cartevo/verify";
+import { healOrderPaymentDesync } from "@/lib/cartevo/sync-order-payment";
 import {
   PAYMENT_STATUS,
   ORDER_STATUS,
   computeRefundDeadline,
+  isOrderPaid,
 } from "@/lib/cartevo/order-status";
-import { safeLogger } from "@/lib/security/redact";
 import { settlePaidOrderPayout } from "@/lib/payouts";
+import { safeLogger } from "@/lib/security/redact";
+import { trySendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
 
+export const dynamic = "force-dynamic";
+
+/**
+ * GET /api/shop/[slug]/orders/[orderNumber]/status
+ * Polling léger : répare la désync locale, puis verify-on-pull si besoin.
+ */
 export async function GET(
-  request: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ slug: string; orderNumber: string }> }
 ) {
-  const ip = getClientIp(request.headers);
+  const { slug, orderNumber } = await params;
 
-  const limit = rateLimit(`payment_status:${ip}`, 60, 60_000);
-  if (!limit.allowed) {
-    return NextResponse.json(
-      {
-        error: "Too many requests",
-        retryAfter: Math.ceil(limit.resetIn / 1000),
-      },
-      { status: 429 }
-    );
+  const order = await db.order.findFirst({
+    where: {
+      orderNumber,
+      shop: { slug },
+    },
+    include: { cartevoTransaction: true },
+  });
+
+  if (!order) {
+    return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
   }
 
-  try {
-    const { slug, orderNumber } = await params;
-
-    const order = await db.order.findFirst({
-      where: { orderNumber, shop: { slug } },
-      include: {
-        shop: { select: { slug: true, currency: true } },
-        cartevoTransaction: true,
-      },
-    });
-
-    if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
-    }
-
-    if (!order.cartevoTransaction) {
-      return NextResponse.json({
-        orderNumber: order.orderNumber,
-        paymentStatus: order.paymentStatus,
-        orderStatus: order.status,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        qrCode: order.qrCode,
-        verifiedAt: new Date().toISOString(),
-      });
-    }
-
-    const cartevoTx = order.cartevoTransaction;
-
-    if (cartevoTx.status === "SUCCESS" || cartevoTx.status === "FAILED") {
-      return NextResponse.json({
-        orderNumber: order.orderNumber,
-        paymentStatus: order.paymentStatus,
-        orderStatus: order.status,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        qrCode: order.qrCode,
-        verifiedAt: new Date().toISOString(),
-      });
-    }
-
-    const verified = await verifyTransactionWithCartevo(cartevoTx.cartevoTxId);
-
-    if (!verified.found) {
-      return NextResponse.json({
-        orderNumber: order.orderNumber,
-        paymentStatus: order.paymentStatus,
-        orderStatus: order.status,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        qrCode: order.qrCode,
-        verifiedAt: new Date().toISOString(),
-      });
-    }
-
-    const comparison = compareWithExpected(verified, {
-      expectedAmount: Number(cartevoTx.amount),
-      expectedCurrency: cartevoTx.currency,
-    });
-
-    if (!comparison.match) {
-      safeLogger.error("Amount/currency mismatch in status poll", {
-        orderNumber: order.orderNumber,
-        comparison,
-      });
-      return NextResponse.json({
-        orderNumber: order.orderNumber,
-        paymentStatus: order.paymentStatus,
-        orderStatus: order.status,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        qrCode: order.qrCode,
-        verifiedAt: new Date().toISOString(),
-      });
-    }
-
-    if (verified.status === "SUCCESS") {
-      await db.$transaction(async (tx) => {
-        await tx.cartevoTransaction.update({
-          where: { id: cartevoTx.id },
-          data: {
-            status: "SUCCESS",
-            completedAt: new Date(),
-            rawResponse: verified as unknown as Prisma.InputJsonValue,
-          },
-        });
-
-        await tx.order.update({
-          where: { id: order.id },
-          data: {
-            paymentStatus: PAYMENT_STATUS.PAID_ESCROW,
-            status: ORDER_STATUS.PAID_ESCROW,
-            paidAt: new Date(),
-            refundDeadline: computeRefundDeadline(),
-          },
-        });
-      });
-
-      safeLogger.info("Order marked PAID_ESCROW via status polling", {
-        orderNumber: order.orderNumber,
-      });
-
-      // G4.B — Crée le payout (escrow physique / libération instantanée digital+service).
-      // Idempotent : sûr même si le webhook l'a déjà réglé.
-      await settlePaidOrderPayout(order.id).catch((err) => {
-        safeLogger.error("settlePaidOrderPayout failed (status polling)", {
-          orderNumber: order.orderNumber,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      });
-
-      return NextResponse.json({
-        orderNumber: order.orderNumber,
-        paymentStatus: PAYMENT_STATUS.PAID_ESCROW,
-        orderStatus: ORDER_STATUS.PAID_ESCROW,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        qrCode: order.qrCode,
-        verifiedAt: new Date().toISOString(),
-      });
-    }
-
-    if (verified.status === "FAILED" || verified.status === "CANCELLED") {
-      await db.$transaction(async (tx) => {
-        await tx.cartevoTransaction.update({
-          where: { id: cartevoTx.id },
-          data: {
-            status: verified.status,
-            errorMessage: verified.errorMessage,
-            completedAt: new Date(),
-            rawResponse: verified as unknown as Prisma.InputJsonValue,
-          },
-        });
-
-        await tx.order.update({
-          where: { id: order.id },
-          data: {
-            paymentStatus: PAYMENT_STATUS.FAILED,
-            status: ORDER_STATUS.FAILED,
-          },
-        });
-      });
-
-      return NextResponse.json({
-        orderNumber: order.orderNumber,
-        paymentStatus: PAYMENT_STATUS.FAILED,
-        orderStatus: ORDER_STATUS.FAILED,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        qrCode: order.qrCode,
-        verifiedAt: new Date().toISOString(),
-      });
-    }
-
+  if (isOrderPaid(order.paymentStatus)) {
     return NextResponse.json({
-      orderNumber: order.orderNumber,
       paymentStatus: order.paymentStatus,
       orderStatus: order.status,
-      total: order.total,
-      paymentMethod: order.paymentMethod,
-      qrCode: order.qrCode,
-      verifiedAt: new Date().toISOString(),
+      paidAt: order.paidAt?.toISOString() ?? null,
     });
-  } catch (err) {
-    safeLogger.error("Status polling error", {
-      error: err instanceof Error ? err.message : String(err),
-    });
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
+
+  const cartevoTx = order.cartevoTransaction;
+
+  if (!cartevoTx) {
+    return NextResponse.json({
+      paymentStatus: order.paymentStatus,
+      orderStatus: order.status,
+      paidAt: order.paidAt?.toISOString() ?? null,
+    });
+  }
+
+  // Réparer désync : tx locale SUCCESS mais commande pas encore payée
+  if (cartevoTx.status === "SUCCESS") {
+    const healed = await healOrderPaymentDesync(order.id);
+    if (healed?.healed || isOrderPaid(healed?.paymentStatus ?? "")) {
+      const fresh = await db.order.findUnique({
+        where: { id: order.id },
+        select: { paymentStatus: true, status: true, paidAt: true },
+      });
+      return NextResponse.json({
+        paymentStatus: fresh?.paymentStatus ?? PAYMENT_STATUS.PAID_ESCROW,
+        orderStatus: fresh?.status ?? ORDER_STATUS.PAID_ESCROW,
+        paidAt: fresh?.paidAt?.toISOString() ?? null,
+      });
+    }
+  }
+
+  if (cartevoTx.status === "FAILED" || cartevoTx.status === "CANCELLED") {
+    if (
+      order.paymentStatus !== PAYMENT_STATUS.FAILED &&
+      order.paymentStatus !== PAYMENT_STATUS.CANCELLED
+    ) {
+      await db.order.update({
+        where: { id: order.id },
+        data: {
+          paymentStatus: PAYMENT_STATUS.FAILED,
+          status: ORDER_STATUS.CANCELLED,
+        },
+      });
+    }
+    return NextResponse.json({
+      paymentStatus: PAYMENT_STATUS.FAILED,
+      orderStatus: ORDER_STATUS.CANCELLED,
+      paidAt: null,
+    });
+  }
+
+  // Verify-on-pull : interroger Cartevo si la tx locale n'est pas terminale
+  const verified = await verifyTransactionWithCartevo(cartevoTx.cartevoTxId);
+
+  if (!verified.found) {
+    return NextResponse.json({
+      paymentStatus: order.paymentStatus,
+      orderStatus: order.status,
+      paidAt: order.paidAt?.toISOString() ?? null,
+    });
+  }
+
+  if (verified.status === "SUCCESS") {
+    await db.cartevoTransaction.update({
+      where: { id: cartevoTx.id },
+      data: {
+        status: "SUCCESS",
+        completedAt: new Date(),
+      },
+    });
+
+    await db.order.update({
+      where: { id: order.id },
+      data: {
+        paymentStatus: PAYMENT_STATUS.PAID_ESCROW,
+        status: ORDER_STATUS.PAID_ESCROW,
+        paidAt: new Date(),
+        refundDeadline: computeRefundDeadline(),
+      },
+    });
+
+    await settlePaidOrderPayout(order.id).catch((err) => {
+      safeLogger.error("settlePaidOrderPayout failed (verify-on-pull)", {
+        orderId: order.id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    });
+
+    trySendOrderConfirmationEmail(order.id).catch((err) => {
+      safeLogger.error("Order confirmation email failed (verify-on-pull)", {
+        orderId: order.id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    });
+
+    const fresh = await db.order.findUnique({
+      where: { id: order.id },
+      select: { paymentStatus: true, status: true, paidAt: true },
+    });
+
+    return NextResponse.json({
+      paymentStatus: fresh?.paymentStatus ?? PAYMENT_STATUS.PAID_ESCROW,
+      orderStatus: fresh?.status ?? ORDER_STATUS.PAID_ESCROW,
+      paidAt: fresh?.paidAt?.toISOString() ?? new Date().toISOString(),
+    });
+  }
+
+  if (verified.status === "FAILED" || verified.status === "CANCELLED") {
+    await db.cartevoTransaction.update({
+      where: { id: cartevoTx.id },
+      data: {
+        status: verified.status,
+        errorMessage: verified.errorMessage,
+        completedAt: new Date(),
+      },
+    });
+
+    await db.order.update({
+      where: { id: order.id },
+      data: {
+        paymentStatus: PAYMENT_STATUS.FAILED,
+        status: ORDER_STATUS.CANCELLED,
+      },
+    });
+
+    return NextResponse.json({
+      paymentStatus: PAYMENT_STATUS.FAILED,
+      orderStatus: ORDER_STATUS.CANCELLED,
+      paidAt: null,
+    });
+  }
+
+  return NextResponse.json({
+    paymentStatus: order.paymentStatus,
+    orderStatus: order.status,
+    paidAt: order.paidAt?.toISOString() ?? null,
+  });
 }

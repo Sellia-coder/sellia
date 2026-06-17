@@ -11,11 +11,15 @@ import {
   Copy,
   Check,
   ArrowLeft,
+  FileText,
+  MessageCircle,
+  Wrench,
 } from "lucide-react";
 import { usePixelTracking } from "@/lib/use-pixel-tracking";
 import styles from "./confirmation.module.css";
 import PaymentPendingPolling from "@/components/shop/PaymentPendingPolling";
 import TrustSection from "@/components/shop/TrustSection";
+import ShopCustomerAuthModal from "@/components/shop/ShopCustomerAuthModal";
 
 export interface OrderConfirmationItem {
   id: string;
@@ -47,6 +51,14 @@ export interface OrderConfirmationProps {
   deliveredAt?: string | null;
   digitalDownloads?: { name: string; url: string | null }[];
   isPurelyDigital?: boolean;
+  hasPhysicalItems?: boolean;
+  orderKind?: "physical" | "digital" | "service" | "mixed";
+  serviceItems?: { name: string; description: string | null }[];
+  shopContact?: {
+    email?: string | null;
+    whatsapp?: string | null;
+    phone?: string | null;
+  };
 }
 
 interface PaymentPollingProps {
@@ -70,6 +82,7 @@ export default function OrderConfirmationClient({
   const primary = order.shopPrimaryColor || "#E84B1F";
   const isPaid =
     order.paymentStatus === "paid_escrow" ||
+    order.paymentStatus === "paid_released" ||
     order.paymentStatus === "delivered";
   const isCashOnDelivery = order.paymentMethod === "cash_on_delivery";
   const showConfirmation = isPaid || isCashOnDelivery;
@@ -79,16 +92,28 @@ export default function OrderConfirmationClient({
     !order.deliveredAt;
   const digitalDownloads = order.digitalDownloads ?? [];
   const hasDigitalDownloads = digitalDownloads.length > 0;
-  // Le digital pur n'a pas de QR de livraison physique.
-  const showQrCard = !isCashOnDelivery && !order.isPurelyDigital;
+  const hasPhysicalItems = order.hasPhysicalItems ?? !order.isPurelyDigital;
+  const showQrCard =
+    !isCashOnDelivery && hasPhysicalItems;
 
   const [copied, setCopied] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [customerAuthOpen, setCustomerAuthOpen] = useState(false);
 
   const rootStyle = { "--shop-primary": primary } as CSSProperties;
+  const orderKind = order.orderKind ?? "physical";
+  const isDigitalOrService =
+    !hasPhysicalItems && orderKind !== "physical";
+  const isFailed =
+    order.paymentStatus === "failed" ||
+    order.paymentStatus === "cancelled";
+  const serviceItems = order.serviceItems ?? [];
+  const shopContact = order.shopContact ?? {};
+  const primaryProductName =
+    order.items[0]?.productName ?? "Votre achat";
 
   useEffect(() => {
     if (!showConfirmation) return;
@@ -131,6 +156,31 @@ export default function OrderConfirmationClient({
   }
 
   if (!showConfirmation) {
+    if (isFailed) {
+      return (
+        <div className={styles.wrap} style={rootStyle}>
+          <div className={styles.failedCard}>
+            <div className={styles.failedIcon} aria-hidden>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+            </div>
+            <h1 className={styles.failedTitle}>Paiement non abouti</h1>
+            <p className={styles.failedDesc}>
+              La transaction n&apos;a pas pu être confirmée. Aucun débit définitif n&apos;a été
+              enregistré. Vous pouvez réessayer depuis la boutique.
+            </p>
+            <Link href={`/shop/${order.shopSlug}`} className={styles.backLink}>
+              <ArrowLeft size={14} />
+              Retour à {order.shopName}
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={styles.wrap} style={rootStyle}>
         <div className={styles.container}>
@@ -213,12 +263,347 @@ export default function OrderConfirmationClient({
       })
     : null;
 
+  const handleDownloadReceipt = () => {
+    const paidLabel = order.paidAt
+      ? new Date(order.paidAt).toLocaleString("fr-FR")
+      : new Date().toLocaleString("fr-FR");
+    const lines = [
+      "REÇU SELLIA",
+      "─────────────",
+      `Boutique : ${order.shopName}`,
+      `Commande : ${order.orderNumber}`,
+      `Date : ${paidLabel}`,
+      "",
+      "Articles :",
+      ...order.items.map(
+        (i) =>
+          `  · ${i.productName} × ${i.quantity} — ${formatPrice(i.unitPrice * i.quantity)} ${order.currency}`
+      ),
+      "",
+      `Sous-total : ${formatPrice(order.subTotal)} ${order.currency}`,
+      ...(order.shipping != null && order.shipping > 0
+        ? [`Livraison : ${formatPrice(order.shipping)} ${order.currency}`]
+        : []),
+      ...(order.operatorFee != null && order.operatorFee > 0
+        ? [`Frais opérateur : +${formatPrice(order.operatorFee)} ${order.currency}`]
+        : []),
+      `TOTAL : ${formatPrice(order.total + (order.operatorFee ?? 0))} ${order.currency}`,
+      "",
+      "Paiement sécurisé via Sellia — getsellia.com",
+    ];
+    const blob = new Blob([lines.join("\n")], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sellia-recu-${order.orderNumber}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const merchantEmail =
+    shopContact.email?.trim() || null;
+  const merchantWhatsapp = shopContact.whatsapp?.trim() || null;
+  const merchantPhone = shopContact.phone?.trim() || null;
+
+  if (isDigitalOrService && !isCashOnDelivery) {
+    const hasDownloadableFiles = digitalDownloads.some((d) => d.url);
+    const showDigitalBlock =
+      orderKind === "digital" ||
+      orderKind === "mixed" ||
+      digitalDownloads.length > 0;
+    const showServiceBlock =
+      orderKind === "service" ||
+      orderKind === "mixed" ||
+      serviceItems.length > 0;
+
+    return (
+      <div className={styles.digitalWrap} style={rootStyle}>
+        <div className={styles.digitalContainer}>
+          <div className={styles.digitalHero}>
+            <div className={styles.digitalCheckWrap}>
+              <svg
+                className={styles.digitalCheckSvg}
+                viewBox="0 0 24 24"
+                width="36"
+                height="36"
+                fill="none"
+                aria-hidden
+              >
+                <circle cx="12" cy="12" r="11" stroke="#16A34A" strokeWidth="2" />
+                <path
+                  d="M7 12 L11 16 L17 9"
+                  stroke="#16A34A"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h1 className={styles.digitalHeroTitle}>Merci pour votre achat</h1>
+            <p className={styles.digitalHeroSubtitle}>
+              {orderKind === "service"
+                ? "Prestation confirmée — le marchand vous recontacte."
+                : hasDownloadableFiles
+                  ? "Téléchargez vos fichiers ci-dessous."
+                  : "Accès envoyé par email dès que le fichier est prêt."}
+            </p>
+            <span className={styles.digitalProductName}>{primaryProductName}</span>
+          </div>
+
+          {showDigitalBlock && (
+            <div className={styles.accessCard}>
+              <div className={styles.accessCardHeader}>
+                <div className={styles.accessCardIcon}>
+                  <DownloadCloud size={22} />
+                </div>
+                <h2 className={styles.accessCardTitle}>Vos fichiers</h2>
+              </div>
+              <p className={styles.accessCardDesc}>
+                {hasDownloadableFiles
+                  ? "Téléchargement immédiat. Retrouvez aussi vos achats dans votre espace client."
+                  : "Lien en cours de préparation — consultez « Mes achats » ou votre email."}
+              </p>
+              {digitalDownloads.length > 0 ? (
+                <div className={styles.downloadList}>
+                  {digitalDownloads.map((d, i) =>
+                    d.url ? (
+                      <a
+                        key={i}
+                        href={d.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.downloadRow}
+                      >
+                        <span className={styles.downloadName}>{d.name}</span>
+                        <span className={styles.downloadAction}>
+                          <Download size={16} />
+                          Télécharger
+                        </span>
+                      </a>
+                    ) : (
+                      <div
+                        key={i}
+                        className={`${styles.downloadRow} ${styles.downloadRowPending}`}
+                      >
+                        <span className={styles.downloadName}>{d.name}</span>
+                        <span className={styles.downloadPendingNote}>
+                          En préparation
+                        </span>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : (
+                <p className={styles.accessCardDesc} style={{ marginBottom: 0 }}>
+                  Aucun fichier digital associé à cette commande pour le moment.
+                </p>
+              )}
+              {order.customerEmail && hasDownloadableFiles && (
+                <div className={styles.emailNote}>
+                  <Mail size={16} color="#64748b" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span>
+                    Copie envoyée à <strong>{order.customerEmail}</strong>
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {showServiceBlock && (
+            <div className={styles.accessCard}>
+              <div className={styles.accessCardHeader}>
+                <div className={styles.accessCardIcon}>
+                  <Wrench size={22} />
+                </div>
+                <h2 className={styles.accessCardTitle}>Prochaines étapes</h2>
+              </div>
+              <ol className={styles.serviceSteps}>
+                <li className={styles.serviceStep}>
+                  <span className={styles.serviceStepNum}>1</span>
+                  <span className={styles.serviceStepText}>
+                    <strong>Confirmation reçue</strong> — le marchand a été notifié de votre
+                    commande.
+                  </span>
+                </li>
+                <li className={styles.serviceStep}>
+                  <span className={styles.serviceStepNum}>2</span>
+                  <span className={styles.serviceStepText}>
+                    <strong>Prise de contact</strong> — attendez les instructions d&apos;accès
+                    (email, appel ou message).
+                  </span>
+                </li>
+                <li className={styles.serviceStep}>
+                  <span className={styles.serviceStepNum}>3</span>
+                  <span className={styles.serviceStepText}>
+                    <strong>Profitez du service</strong> — selon les modalités indiquées par{" "}
+                    {order.shopName}.
+                  </span>
+                </li>
+              </ol>
+              {serviceItems.length > 0 && (
+                <div className={styles.downloadList} style={{ marginTop: 16 }}>
+                  {serviceItems.map((s, i) => (
+                    <div key={i} className={styles.downloadRow}>
+                      <div>
+                        <div className={styles.downloadName}>{s.name}</div>
+                        {s.description && (
+                          <div
+                            style={{
+                              fontSize: 12.5,
+                              color: "#6b7280",
+                              marginTop: 4,
+                              lineHeight: 1.45,
+                            }}
+                          >
+                            {s.description.replace(/<[^>]+>/g, "").slice(0, 200)}
+                            {s.description.length > 200 ? "…" : ""}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {(merchantEmail || merchantWhatsapp || merchantPhone) && (
+                <div className={styles.merchantContact}>
+                  {merchantWhatsapp && (
+                    <a
+                      href={`https://wa.me/${merchantWhatsapp.replace(/\D/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.contactLink}
+                    >
+                      <MessageCircle size={14} />
+                      WhatsApp
+                    </a>
+                  )}
+                  {merchantEmail && (
+                    <a href={`mailto:${merchantEmail}`} className={styles.contactLink}>
+                      <Mail size={14} />
+                      Email
+                    </a>
+                  )}
+                  {merchantPhone && !merchantWhatsapp && (
+                    <a href={`tel:${merchantPhone}`} className={styles.contactLink}>
+                      {merchantPhone}
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className={styles.twoCol}>
+            <div className={styles.receiptCard}>
+              <div className={styles.receiptCardTitle}>Récapitulatif</div>
+              <div className={styles.receiptMeta}>
+                <div className={styles.receiptRow}>
+                  <span className={styles.receiptLabel}>N° commande</span>
+                  <span className={styles.receiptValue}>
+                    {order.orderNumber}
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className={styles.copyBtn}
+                      title="Copier"
+                      style={{ marginLeft: 6, verticalAlign: "middle" }}
+                    >
+                      {copied ? (
+                        <Check size={12} color="#16A34A" />
+                      ) : (
+                        <Copy size={12} />
+                      )}
+                    </button>
+                  </span>
+                </div>
+                {order.paidAt && (
+                  <div className={styles.receiptRow}>
+                    <span className={styles.receiptLabel}>Date</span>
+                    <span className={styles.receiptValue}>
+                      {new Date(order.paidAt).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                )}
+                {order.items.map((item) => (
+                  <div key={item.id} className={styles.receiptRow}>
+                    <span className={styles.receiptLabel}>
+                      {item.productName} × {item.quantity}
+                    </span>
+                    <span className={styles.receiptValue}>
+                      {formatPrice(item.unitPrice * item.quantity)} {order.currency}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.receiptTotal}>
+                <span className={styles.receiptTotalLabel}>Total payé</span>
+                <span
+                  className={styles.receiptTotalValue}
+                  style={{ color: primary }}
+                >
+                  {formatPrice(order.total + (order.operatorFee ?? 0))}{" "}
+                  {order.currency}
+                </span>
+              </div>
+              <button
+                type="button"
+                className={styles.receiptBtn}
+                onClick={handleDownloadReceipt}
+              >
+                <FileText size={15} />
+                Télécharger le reçu
+              </button>
+            </div>
+
+            <div className={styles.helpCard}>
+              <h3 className={styles.helpTitle}>Une réclamation ?</h3>
+              <p className={styles.helpDesc}>
+                Connectez-vous à « Mes achats » avec l&apos;email de commande pour ouvrir un litige.
+              </p>
+              <button
+                type="button"
+                className={styles.helpBtn}
+                onClick={() => setCustomerAuthOpen(true)}
+              >
+                <ShieldCheck size={16} />
+                Mes achats &amp; litiges
+              </button>
+              <Link href={`/shop/${order.shopSlug}`} className={styles.backLink}>
+                <ArrowLeft size={14} />
+                Retour à {order.shopName}
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {customerAuthOpen && (
+          <ShopCustomerAuthModal
+            shopSlug={order.shopSlug}
+            shopName={order.shopName}
+            primaryColor={primary}
+            onClose={() => setCustomerAuthOpen(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
   const title = isCashOnDelivery
     ? "Commande confirmée"
     : "Paiement confirmé";
   const subtitle = isCashOnDelivery
     ? "Le marchand vous contactera pour la livraison."
-    : "Vos fonds sont protégés par Sellia jusqu'à la livraison";
+    : hasPhysicalItems
+      ? "Vos fonds sont protégés par Sellia jusqu'à la livraison"
+      : "Votre achat est confirmé. Pour toute réclamation, connectez-vous à votre espace sur la boutique et ouvrez un litige.";
 
   return (
     <div className={styles.wrap} style={rootStyle}>
@@ -487,7 +872,7 @@ export default function OrderConfirmationClient({
           )}
 
           <div className={styles.summaryCol}>
-            {!isCashOnDelivery && (
+            {!isCashOnDelivery && hasPhysicalItems && (
               <div className={styles.protectionCard}>
                 <div className={styles.protectionIcon}>
                   <ShieldCheck size={16} color="#15803D" />
@@ -502,6 +887,23 @@ export default function OrderConfirmationClient({
                       <strong>{refundDate}</strong>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {!isCashOnDelivery && !hasPhysicalItems && (
+              <div
+                className={styles.protectionCard}
+                style={{ background: "#F8FAFC", borderColor: "#E2E8F0" }}
+              >
+                <div>
+                  <div className={styles.protectionTitle} style={{ color: "#334155" }}>
+                    Une réclamation ?
+                  </div>
+                  <div className={styles.protectionSubtitle}>
+                    Connectez-vous à votre espace sur la boutique et ouvrez un litige
+                    depuis « Mes achats ».
+                  </div>
                 </div>
               </div>
             )}

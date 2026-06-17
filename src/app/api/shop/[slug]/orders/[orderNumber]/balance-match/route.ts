@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { tryMatchPendingByBalance } from "@/lib/cartevo/balance-delta";
+import { healOrderPaymentDesync } from "@/lib/cartevo/sync-order-payment";
+import { isOrderPaid } from "@/lib/cartevo/order-status";
 import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { z } from "zod/v3";
 
@@ -37,6 +39,7 @@ export async function POST(
 
   if (
     order.paymentStatus === "paid_escrow" ||
+    order.paymentStatus === "paid_released" ||
     order.paymentStatus === "delivered"
   ) {
     return NextResponse.json({
@@ -63,6 +66,19 @@ export async function POST(
       still_pending: true,
       reason: "no_cartevo_tx",
     });
+  }
+
+  // Tx locale déjà SUCCESS mais commande pas synchronisée
+  if (order.cartevoTransaction.status === "SUCCESS") {
+    const healed = await healOrderPaymentDesync(order.id);
+    if (healed && isOrderPaid(healed.paymentStatus)) {
+      return NextResponse.json({
+        ok: true,
+        matched: true,
+        healed: healed.healed,
+        new_payment_status: healed.paymentStatus,
+      });
+    }
   }
 
   const country = order.cartevoTransaction.country || "CM";
