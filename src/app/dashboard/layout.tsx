@@ -4,6 +4,10 @@ import { isAdminRole } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { getSidebarCounts, type SidebarCounts } from "@/lib/sidebar-counts";
 import DashboardLayoutClient from "./DashboardLayoutClient";
+import {
+  formatMerchantDisplayName,
+  merchantInitial,
+} from "@/lib/utils/capitalize-name";
 import MerchantBanner from "@/components/dashboard/MerchantBanner";
 import { getPlatformSettings } from "@/lib/admin/platform-settings";
 import { refreshMoneyConfigCache } from "@/lib/admin/money-config";
@@ -45,14 +49,12 @@ export default async function DashboardLayout({
     ? await getSidebarCounts(shop.id)
     : emptySidebarCounts;
 
-  const displayName =
-    [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-    user.email.split("@")[0];
-  const initial = (
-    user.firstName?.charAt(0) ||
-    user.email.charAt(0) ||
-    "?"
-  ).toUpperCase();
+  const displayName = formatMerchantDisplayName(
+    user.firstName,
+    user.lastName,
+    user.email
+  );
+  const initial = merchantInitial(user.firstName, user.email);
 
   return (
     <DashboardLayoutClient

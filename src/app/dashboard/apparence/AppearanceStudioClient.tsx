@@ -672,7 +672,7 @@ function HeroCoverSection({
       <h2 className={styles.sectionTitle}>Image de couverture</h2>
       <p className={styles.sectionSubtitle}>
         La bannière affichée en haut de votre boutique. Téléversez votre visuel ou
-        régénérez-en une avec l&apos;IA (max 3 / 24h).
+        régénérez-en une avec l&apos;IA (limites anti-abus applicables).
       </p>
 
       <div className={styles.heroCoverPreview}>

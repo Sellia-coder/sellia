@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateHeroImage } from "@/lib/ai/generate-hero-image";
+import { nextGenerationCount } from "@/lib/ai/hero-rate-limit";
 import {
-  MAX_HERO_GENERATIONS_PER_24H,
-  canGenerateHero,
-  nextGenerationCount,
-} from "@/lib/ai/hero-rate-limit";
+  enforceAiRateLimit,
+  merchantKeyForUser,
+  planToTier,
+} from "@/lib/ai/merchant-rate-limit";
 import { getCurrentUser } from "@/lib/auth/session";
 import { verifyShopOwnershipBySlug } from "@/lib/security/shop-auth";
 
@@ -35,6 +36,7 @@ export async function POST(
       primaryColor: true,
       heroImageGenerations: true,
       heroImageGeneratedAt: true,
+      plan: true,
     },
   });
 
@@ -42,18 +44,18 @@ export async function POST(
     return NextResponse.json({ error: "Shop not found" }, { status: 404 });
   }
 
-  if (
-    !canGenerateHero(shop.heroImageGeneratedAt, shop.heroImageGenerations)
-  ) {
-    const nextAt = shop.heroImageGeneratedAt
-      ? new Date(shop.heroImageGeneratedAt.getTime() + 24 * 60 * 60 * 1000)
-      : null;
+  const rate = enforceAiRateLimit(
+    merchantKeyForUser(user.id),
+    "image_hero",
+    planToTier(shop.plan)
+  );
+  if (!rate.allowed) {
     return NextResponse.json(
       {
-        error: "Limite atteinte (3 générations / 24h). Réessayez demain.",
-        nextAvailableAt: nextAt,
+        error: rate.message,
+        retryAfterSec: rate.retryAfterSec,
       },
-      { status: 429 }
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } }
     );
   }
 
@@ -91,6 +93,5 @@ export async function POST(
     ok: true,
     imageUrl: result.imageUrl,
     generationsUsed: newGenerations,
-    generationsRemaining: MAX_HERO_GENERATIONS_PER_24H - newGenerations,
   });
 }

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { merchantInitial } from "@/lib/utils/capitalize-name";
 import {
   updateProfileAction,
   updateShopBasicsAction,
@@ -262,7 +263,7 @@ function ProfilTab({ user: initialUser }: { user: ReglagesUser }) {
     }
   };
 
-  const initials = (user.firstName?.[0] || user.email[0] || "?").toUpperCase();
+  const initials = merchantInitial(user.firstName, user.email);
 
   return (
     <div className="dash-settings-section dash-animate-fade-up">

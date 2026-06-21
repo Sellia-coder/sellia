@@ -1,11 +1,16 @@
 import { notFound } from "next/navigation";
-import { getPublishedShopBySlug } from "@/lib/shop-data";
+import {
+  getPublishedShopBySlug,
+  getProductReviewStatsForShop,
+} from "@/lib/shop-data";
 import {
   currencyDisplay,
-  mapShopProductToCard,
+  mapShopProductToHomeCard,
 } from "@/lib/shopProductCard";
 import ShopSearchPanel from "@/components/shop/ShopSearchPanel";
-import ProductCard from "@/components/shop/ProductCard";
+import ShopHomeProductCard, {
+  ShopHomeProductsGrid,
+} from "@/components/shop/ShopHomeProductCard";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +25,13 @@ export default async function RecherchePage({ params, searchParams }: Props) {
   const shop = await getPublishedShopBySlug(slug);
   if (!shop) notFound();
 
+  const [reviewStats] = await Promise.all([
+    getProductReviewStatsForShop(shop.id),
+  ]);
+
   const currency = currencyDisplay(shop.currency);
   const query = (q ?? "").trim().toLowerCase();
+  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
   const filtered =
     query.length === 0
       ? shop.products
@@ -30,13 +40,17 @@ export default async function RecherchePage({ params, searchParams }: Props) {
           return hay.includes(query);
         });
 
+  const title = query.length === 0 ? "Tous les produits" : "Recherche";
+  const tagline =
+    query.length === 0
+      ? "Parcourez l'ensemble de notre catalogue."
+      : "Trouve un produit par nom ou mot-clé.";
+
   return (
     <section className="shop-page">
       <div className="shop-container">
-        <h1 className="shop-page-title">Recherche</h1>
-        <p className="shop-page-tagline">
-          Trouve un produit par nom ou mot-clé.
-        </p>
+        <h1 className="shop-page-title">{title}</h1>
+        <p className="shop-page-tagline">{tagline}</p>
         <ShopSearchPanel slug={slug} initialQuery={q ?? ""} />
 
         {filtered.length === 0 ? (
@@ -44,16 +58,21 @@ export default async function RecherchePage({ params, searchParams }: Props) {
             <p>Aucun résultat pour « {query} ».</p>
           </div>
         ) : (
-          <div className="shop-products-grid" style={{ marginTop: 28 }}>
+          <ShopHomeProductsGrid variant="catalog" style={{ marginTop: 28 }}>
             {filtered.map((p) => (
-              <ProductCard
+              <ShopHomeProductCard
                 key={p.id}
                 shopSlug={shop.slug}
-                product={mapShopProductToCard(p, currency)}
+                currency={currency}
                 primaryColor={shop.primaryColor ?? undefined}
+                product={mapShopProductToHomeCard(
+                  p,
+                  reviewStats.get(p.id),
+                  { isNew: new Date(p.createdAt).getTime() > twoWeeksAgo }
+                )}
               />
             ))}
-          </div>
+          </ShopHomeProductsGrid>
         )}
       </div>
     </section>

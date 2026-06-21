@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { callClaude } from "@/lib/ai/anthropic";
+import {
+  enforceAiRateLimit,
+  getMerchantPlanForUser,
+  merchantKeyForUser,
+} from "@/lib/ai/merchant-rate-limit";
 
 type ToneKey = "commerce" | "story" | "tech";
 
@@ -48,6 +53,19 @@ export async function POST(req: Request) {
   const productName = (body.productName ?? "").trim();
   if (!productName) {
     return NextResponse.json({ ok: false, error: "Nom du produit requis" }, { status: 400 });
+  }
+
+  const plan = await getMerchantPlanForUser(user.id);
+  const rate = enforceAiRateLimit(
+    merchantKeyForUser(user.id),
+    "text_description",
+    plan
+  );
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { ok: false, error: rate.message, retryAfterSec: rate.retryAfterSec },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } }
+    );
   }
 
   const ctx = `

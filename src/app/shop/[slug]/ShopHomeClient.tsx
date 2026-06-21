@@ -1,11 +1,15 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowRight, Truck, Star, ShoppingBag, Heart } from "lucide-react";
+import { ArrowRight, ShieldCheck, Star } from "lucide-react";
 import styles from "./shop-home.module.css";
 import TrustSection from "@/components/shop/TrustSection";
-import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import BuyerProtectionModal from "@/components/shop/BuyerProtectionModal";
+import ShopHomeProductCard, {
+  ShopHomeProductsGrid,
+  type ShopHomeProductCardData,
+} from "@/components/shop/ShopHomeProductCard";
 import { getHeroBackground } from "@/components/shop/HeroTemplate";
 import { MomoLogosBar } from "@/components/icons/momo-operators";
 
@@ -15,19 +19,7 @@ export interface ShopHomeCategory {
   count: number;
 }
 
-export interface ShopHomeProduct {
-  id: string;
-  slug: string;
-  name: string;
-  price: number;
-  comparePrice: number | null;
-  imageUrl: string | null;
-  emoji: string;
-  type?: string;
-  isNew?: boolean;
-  ratingAvg?: number | null;
-  ratingCount?: number | null;
-}
+export type ShopHomeProduct = ShopHomeProductCardData & { emoji: string };
 
 export interface ShopHomeTestimonial {
   name: string;
@@ -58,8 +50,8 @@ function stripHtml(s: string): string {
 }
 
 export default function ShopHomeClient(props: Props) {
+  const [protectionOpen, setProtectionOpen] = useState(false);
   const primary = props.shopPrimaryColor || "#E84B1F";
-  const formatPrice = (n: number) => n.toLocaleString("fr-FR");
   const showCategories = props.categories.length >= 3;
   const showTestimonials = props.testimonials.length >= 2;
 
@@ -69,8 +61,6 @@ export default function ShopHomeClient(props: Props) {
       ? `${descriptionPlain.slice(0, 177)}...`
       : descriptionPlain ||
         "Une expérience d'achat premium, des produits soigneusement sélectionnés, livrés rapidement chez vous.";
-
-  const waDigits = props.shopWhatsapp?.replace(/[^0-9]/g, "") ?? "";
 
   const heroStyle: CSSProperties = {
     background: getHeroBackground({
@@ -106,17 +96,14 @@ export default function ShopHomeClient(props: Props) {
               Découvrir la collection
               <ArrowRight size={14} />
             </Link>
-            {waDigits && (
-              <a
-                href={`https://wa.me/${waDigits}`}
-                className={styles.heroCtaSecondary}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Truck size={14} />
-                Livraison express
-              </a>
-            )}
+            <button
+              type="button"
+              className={styles.heroCtaSecondary}
+              onClick={() => setProtectionOpen(true)}
+            >
+              <ShieldCheck size={14} />
+              Acheter en confiance
+            </button>
           </div>
           <div className={styles.heroBadge}>
             <span className={styles.heroBadgeText}>Paiements acceptés</span>
@@ -170,99 +157,17 @@ export default function ShopHomeClient(props: Props) {
             Voir tous les produits <ArrowRight size={12} />
           </Link>
         </div>
-        <div className={styles.productsGrid}>
-          {props.products.slice(0, 8).map((product) => {
-            const rating = product.ratingAvg ?? 0;
-            const reviewsCount = product.ratingCount ?? 0;
-            return (
-              <Link
-                key={product.id}
-                href={`/shop/${props.shopSlug}/produit/${product.slug}`}
-                className={styles.productCard}
-              >
-                {product.isNew && (
-                  <div
-                    className={styles.productBadge}
-                    style={{ background: primary }}
-                  >
-                    Nouveau
-                  </div>
-                )}
-                <span className={styles.productFav} aria-hidden>
-                  <Heart size={14} />
-                </span>
-                <div className={styles.productImageWrap}>
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className={styles.productImage}
-                    />
-                  ) : (
-                    <ProductImagePlaceholder size="lg" />
-                  )}
-                </div>
-                <div className={styles.productInfo}>
-                  <div className={styles.productName}>{product.name}</div>
-                  {product.type && (
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#9CA3AF",
-                        fontWeight: 500,
-                        letterSpacing: "0.2px",
-                        display: "inline-block",
-                        marginTop: "2px",
-                      }}
-                    >
-                      {product.type === "digital"
-                        ? "Produit numérique"
-                        : product.type === "service"
-                          ? "Service"
-                          : "Produit physique"}
-                    </span>
-                  )}
-                  {reviewsCount > 0 && (
-                    <div className={styles.productRating}>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          size={12}
-                          fill={i < Math.round(rating) ? "#F5A623" : "none"}
-                          color="#F5A623"
-                        />
-                      ))}
-                      <span className={styles.productRatingCount}>
-                        {rating.toFixed(1)} ({reviewsCount})
-                      </span>
-                    </div>
-                  )}
-                  <div className={styles.productPriceRow}>
-                    <span
-                      className={styles.productPrice}
-                      style={{ color: primary }}
-                    >
-                      {formatPrice(product.price)}{" "}
-                      <span className={styles.productCurrency}>
-                        {props.shopCurrency}
-                      </span>
-                    </span>
-                    {product.comparePrice != null &&
-                      product.comparePrice > product.price && (
-                        <span className={styles.productComparePrice}>
-                          {formatPrice(product.comparePrice)}
-                        </span>
-                      )}
-                  </div>
-                </div>
-                <div className={styles.productCardCta}>
-                  <ShoppingBag size={13} />
-                  <span>Voir le produit</span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <ShopHomeProductsGrid>
+          {props.products.slice(0, 8).map((product) => (
+            <ShopHomeProductCard
+              key={product.id}
+              shopSlug={props.shopSlug}
+              currency={props.shopCurrency}
+              primaryColor={primary}
+              product={product}
+            />
+          ))}
+        </ShopHomeProductsGrid>
       </section>
 
       <TrustSection />
@@ -293,6 +198,11 @@ export default function ShopHomeClient(props: Props) {
           </div>
         </section>
       )}
+
+      <BuyerProtectionModal
+        open={protectionOpen}
+        onClose={() => setProtectionOpen(false)}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { ShopWithProducts } from "@/lib/shop-data";
 import type { ProductCardProduct } from "@/components/shop/ProductCard";
+import type { ShopHomeProductCardData } from "@/components/shop/ShopHomeProductCard";
 
 export function categoryLabel(
   p: ShopWithProducts["products"][number]
@@ -46,5 +47,25 @@ export function mapShopProductToCard(
     stock,
     comparePrice: p.comparePrice,
     productType: p.type,
+  };
+}
+
+export function mapShopProductToHomeCard(
+  p: ShopWithProducts["products"][number],
+  reviewStats?: { avg: number; count: number } | null,
+  options?: { isNew?: boolean }
+): ShopHomeProductCardData {
+  const stats = reviewStats;
+  return {
+    id: p.id,
+    slug: p.slug ?? p.id,
+    name: p.name,
+    price: p.price,
+    comparePrice: p.comparePrice,
+    imageUrl: p.imageUrl,
+    type: p.type,
+    isNew: options?.isNew ?? false,
+    ratingAvg: stats && stats.count > 0 ? stats.avg : null,
+    ratingCount: stats && stats.count > 0 ? stats.count : null,
   };
 }

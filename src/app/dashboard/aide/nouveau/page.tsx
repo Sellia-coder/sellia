@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { formatMerchantDisplayName } from "@/lib/utils/capitalize-name";
 import NouveauTicketClient from "./NouveauTicketClient";
 
 export default async function NouveauTicketPage() {
@@ -14,7 +15,7 @@ export default async function NouveauTicketPage() {
 
   return (
     <NouveauTicketClient
-      userName={[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email.split("@")[0]}
+      userName={formatMerchantDisplayName(user.firstName, user.lastName, user.email)}
       userEmail={user.email}
       shopName={shop?.name ?? null}
     />

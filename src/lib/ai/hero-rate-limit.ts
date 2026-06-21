@@ -1,3 +1,8 @@
+/**
+ * Compteurs persistants hero (statistiques draft/shop).
+ * Le blocage quota est géré par @/lib/ai/merchant-rate-limit (fenêtres min/heure/jour).
+ */
+
 export const MAX_HERO_GENERATIONS_PER_24H = 3;
 
 export function isWithin24hWindow(generatedAt: Date | null): boolean {
@@ -6,6 +11,7 @@ export function isWithin24hWindow(generatedAt: Date | null): boolean {
   return generatedAt > last24h;
 }
 
+/** @deprecated Utiliser merchant-rate-limit pour le blocage. Conservé pour compat. */
 export function canGenerateHero(
   generatedAt: Date | null,
   generations: number

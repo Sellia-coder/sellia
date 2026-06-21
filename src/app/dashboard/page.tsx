@@ -12,6 +12,7 @@ import {
 } from "@/lib/analytics";
 import { getShopBalances } from "@/lib/payouts";
 import DashboardHomeClient from "./DashboardHomeClient";
+import { formatMerchantDisplayName } from "@/lib/utils/capitalize-name";
 
 export const dynamic = "force-dynamic";
 
@@ -66,9 +67,11 @@ export default async function DashboardHomePage() {
     redirect("/personnaliser-ma-boutique");
   }
 
-  const displayName =
-    [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-    user.email.split("@")[0];
+  const displayName = formatMerchantDisplayName(
+    user.firstName,
+    user.lastName,
+    user.email
+  );
 
   const [
     kpis,

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
+import { capitalizePersonalName } from "@/lib/utils/capitalize-name";
 import "./home-stripe.css";
 
 export interface SetupStep {
@@ -410,7 +411,7 @@ export default function HomeClient({
             })}
           </div>
           <h1 className="dash-str-page-title">
-            {firstName ? `Bonjour ${firstName}` : "Bonjour"}
+            {firstName ? `Bonjour ${capitalizePersonalName(firstName)}` : "Bonjour"}
           </h1>
           <p className="dash-str-page-subtitle">
             Voici un aperçu de votre activité aujourd&apos;hui.

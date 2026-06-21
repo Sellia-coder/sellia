@@ -318,7 +318,7 @@ export default function StepAppearance({
                 {generatingHero
                   ? "10-15 secondes"
                   : shopSlug
-                    ? "Régénérer la bannière (max 3 / 24h)"
+                    ? "Régénérer la bannière (limites IA)"
                     : "Image unique pour votre boutique"}
               </div>
             </button>

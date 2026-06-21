@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateShop } from "@/lib/ai/generateShop";
+import {
+  enforceAiRateLimit,
+  getMerchantPlanForUser,
+  merchantKeyForIp,
+  merchantKeyForUser,
+} from "@/lib/ai/merchant-rate-limit";
+import { getClientIp } from "@/lib/security/rate-limit";
+import { getCurrentUser } from "@/lib/auth/session";
 
 const DRAFT_TTL_HOURS = 24;
 const MIN_PROMPT_LENGTH = 30;
@@ -8,7 +16,7 @@ const MAX_PROMPT_LENGTH = 2000;
 const MIN_SHOP_NAME_LENGTH = 2;
 const MAX_SHOP_NAME_LENGTH = 60;
 
-// Rate limiting basique : max 5 générations par IP par heure
+// Rate limiting legacy IP (draft count) — complété par quotas IA marchand/IP
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_HOURS = 1;
 
@@ -47,11 +55,27 @@ export async function POST(req: NextRequest) {
     }
 
     // Récupérer IP pour rate limiting
-    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim()
-      || req.headers.get("x-real-ip")
-      || "unknown";
+    const ipAddress = getClientIp(req.headers);
 
-    // Rate limiting
+    const user = await getCurrentUser();
+    const merchantKey = user?.id
+      ? merchantKeyForUser(user.id)
+      : merchantKeyForIp(ipAddress);
+    const plan = user?.id ? await getMerchantPlanForUser(user.id) : "free";
+
+    const aiRate = enforceAiRateLimit(merchantKey, "text_shop_generate", plan);
+    if (!aiRate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: aiRate.message,
+          retryAfterSec: aiRate.retryAfterSec,
+        },
+        { status: 429, headers: { "Retry-After": String(aiRate.retryAfterSec) } }
+      );
+    }
+
+    // Rate limiting legacy (compteur drafts par IP)
     const oneHourAgo = new Date(Date.now() - RATE_LIMIT_WINDOW_HOURS * 60 * 60 * 1000);
     const recentCount = await db.draftShop.count({
       where: {

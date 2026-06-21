@@ -11,6 +11,11 @@ import {
   type PublishShopInput,
 } from "@/lib/validations/personnalisation";
 import { generateHeroImage } from "@/lib/ai/generate-hero-image";
+import {
+  enforceAiRateLimit,
+  merchantKeyForUser,
+  planToTier,
+} from "@/lib/ai/merchant-rate-limit";
 import { generateLegalPagesForShop } from "@/lib/shop/legal-pages";
 import { getPlatformSettings } from "@/lib/admin/platform-settings";
 import { assertShopNameAvailable } from "@/lib/shop-name";
@@ -360,27 +365,38 @@ export async function publishShopAction(input: PublishShopInput) {
     });
 
     if (!appearance.heroImageUrl) {
-      const aiResult = await generateHeroImage({
-        shopId: shop.id,
-        shopName: shop.name,
-        tagline: shop.tagline,
-        category: shop.category,
-        primaryColor: shop.primaryColor,
-      });
-
-      if (aiResult.success && aiResult.imageUrl) {
-        await db.shop.update({
-          where: { id: shop.id },
-          data: {
-            heroImageUrl: aiResult.imageUrl,
-            heroImagePrompt: aiResult.prompt ?? null,
-            heroImageGenerations: 1,
-            heroImageGeneratedAt: new Date(),
-          },
+      const rate = enforceAiRateLimit(
+        merchantKeyForUser(userId),
+        "image_hero",
+        planToTier(shop.plan)
+      );
+      if (rate.allowed) {
+        const aiResult = await generateHeroImage({
+          shopId: shop.id,
+          shopName: shop.name,
+          tagline: shop.tagline,
+          category: shop.category,
+          primaryColor: shop.primaryColor,
         });
+
+        if (aiResult.success && aiResult.imageUrl) {
+          await db.shop.update({
+            where: { id: shop.id },
+            data: {
+              heroImageUrl: aiResult.imageUrl,
+              heroImagePrompt: aiResult.prompt ?? null,
+              heroImageGenerations: 1,
+              heroImageGeneratedAt: new Date(),
+            },
+          });
+        } else {
+          console.warn(
+            `[publishShop] Hero AI failed (${aiResult.error}), fallback template`
+          );
+        }
       } else {
         console.warn(
-          `[publishShop] Hero AI failed (${aiResult.error}), fallback template`
+          `[publishShop] Hero AI skipped (rate limit): ${rate.message}`
         );
       }
     }

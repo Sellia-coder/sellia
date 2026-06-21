@@ -4,6 +4,11 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getShopKpis, getTopProducts } from "@/lib/analytics";
 import { getShopBalances } from "@/lib/payouts";
+import {
+  enforceAiRateLimit,
+  merchantKeyForUser,
+  planToTier,
+} from "@/lib/ai/merchant-rate-limit";
 
 interface Advice {
   titre: string;
@@ -21,9 +26,18 @@ export async function generateMerchantAdviceAction(): Promise<
 
     const shop = await db.shop.findFirst({
       where: { ownerId: user.id },
-      select: { id: true, name: true, category: true, currency: true },
+      select: { id: true, name: true, category: true, currency: true, plan: true },
     });
     if (!shop) return { ok: false, error: "Boutique introuvable" };
+
+    const rate = enforceAiRateLimit(
+      merchantKeyForUser(user.id),
+      "text_advice",
+      planToTier(shop.plan)
+    );
+    if (!rate.allowed) {
+      return { ok: false, error: rate.message };
+    }
 
     const [kpis, topProducts, balances, productCount, orderCount] =
       await Promise.all([

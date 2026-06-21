@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateHeroImage } from "@/lib/ai/generate-hero-image";
+import { nextGenerationCount } from "@/lib/ai/hero-rate-limit";
 import {
-  MAX_HERO_GENERATIONS_PER_24H,
-  canGenerateHero,
-  nextGenerationCount,
-} from "@/lib/ai/hero-rate-limit";
+  enforceAiRateLimit,
+  getMerchantPlanForUser,
+  merchantKeyForUser,
+} from "@/lib/ai/merchant-rate-limit";
 import { getCurrentUser } from "@/lib/auth/session";
 
 type DraftHeroMeta = {
@@ -41,12 +42,16 @@ export async function POST() {
     : null;
   const heroAiGenerations = generatedData.heroAiGenerations ?? 0;
 
-  if (!canGenerateHero(heroAiGeneratedAt, heroAiGenerations)) {
+  const plan = await getMerchantPlanForUser(user.id);
+  const rate = enforceAiRateLimit(
+    merchantKeyForUser(user.id),
+    "image_hero",
+    plan
+  );
+  if (!rate.allowed) {
     return NextResponse.json(
-      {
-        error: "Limite atteinte (3 générations / 24h). Réessayez demain.",
-      },
-      { status: 429 }
+      { error: rate.message, retryAfterSec: rate.retryAfterSec },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } }
     );
   }
 
@@ -95,6 +100,5 @@ export async function POST() {
     ok: true,
     imageUrl: result.imageUrl,
     generationsUsed: newGenerations,
-    generationsRemaining: MAX_HERO_GENERATIONS_PER_24H - newGenerations,
   });
 }

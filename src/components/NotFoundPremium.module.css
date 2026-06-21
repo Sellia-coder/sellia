@@ -1,0 +1,224 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  background: #fafaf7;
+  position: relative;
+  overflow: hidden;
+}
+
+.bgOrb1,
+.bgOrb2 {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.bgOrb1 {
+  width: 420px;
+  height: 420px;
+  top: -120px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(232, 75, 31, 0.12) 0%, transparent 68%);
+  animation: orbFloat 9s ease-in-out infinite;
+}
+
+.bgOrb2 {
+  width: 320px;
+  height: 320px;
+  bottom: -100px;
+  left: -60px;
+  background: radial-gradient(circle, rgba(14, 17, 22, 0.06) 0%, transparent 70%);
+  animation: orbFloat 11s ease-in-out infinite reverse;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+}
+
+.visual {
+  position: relative;
+  width: 148px;
+  height: 148px;
+  margin: 0 auto 28px;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(14, 17, 22, 0.08);
+  animation: ringPulse 4s ease-in-out infinite;
+}
+
+.ringInner {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 1px dashed rgba(232, 75, 31, 0.28);
+  animation: ringSpin 18s linear infinite;
+}
+
+.iconWrap {
+  position: absolute;
+  inset: 28px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #ece9e2;
+  box-shadow: 0 16px 40px rgba(14, 17, 22, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e84b1f;
+}
+
+.code {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-size: clamp(72px, 14vw, 108px);
+  font-weight: 700;
+  letter-spacing: -4px;
+  line-height: 0.92;
+  color: #0e1116;
+  margin: 0 0 12px;
+}
+
+.title {
+  font-family: var(--font-display), "Manrope", sans-serif;
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: #0e1116;
+  margin: 0 0 12px;
+}
+
+.message {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #6b6e76;
+  margin: 0 auto 32px;
+  max-width: 38ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.15s, border-color 0.15s;
+}
+
+.primaryBtn {
+  background: #0e1116;
+  color: #ffffff;
+  border: 1px solid #0e1116;
+}
+
+.primaryBtn:hover {
+  background: #e84b1f;
+  border-color: #e84b1f;
+  transform: translateY(-1px);
+}
+
+.secondaryBtn {
+  background: #ffffff;
+  color: #0e1116;
+  border: 1px solid #ece9e2;
+}
+
+.secondaryBtn:hover {
+  border-color: #0e1116;
+  transform: translateY(-1px);
+}
+
+@keyframes orbFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(14px);
+  }
+}
+
+@keyframes ringPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.85;
+  }
+}
+
+@keyframes ringSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 32px 16px;
+  }
+
+  .visual {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 22px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bgOrb1,
+  .bgOrb2,
+  .ring,
+  .ringInner {
+    animation: none;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    transition: none;
+  }
+
+  .primaryBtn:hover,
+  .secondaryBtn:hover {
+    transform: none;
+  }
+}
