@@ -114,7 +114,7 @@ export default function AideClient({ currentUserId, initialTickets }: Props) {
       {tickets.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="dash-animate-fade-up" style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "0", border: "1px solid var(--dash-border)", borderRadius: "12px", overflow: "hidden", background: "white", height: "calc(100vh - 240px)", minHeight: "560px" }}>
+        <div className="dash-animate-fade-up dash-aide-layout">
           <div style={{ borderRight: "1px solid var(--dash-border)", overflowY: "auto", background: "var(--dash-bg-active)" }}>
             <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--dash-border)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--dash-text-secondary)", fontWeight: 600 }}>
               {tickets.length} ticket{tickets.length > 1 ? "s" : ""}

@@ -354,38 +354,14 @@ export default function DashboardLayoutClient({
               {notifOpen && (
                 <>
                   <div
-                    style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                    className="dash-notif-backdrop"
                     onClick={() => setNotifOpen(false)}
                   />
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 8px)",
-                      right: 0,
-                      width: "340px",
-                      background: "white",
-                      border: "1px solid var(--dash-border)",
-                      borderRadius: "14px",
-                      boxShadow: "0 16px 48px rgba(0,0,0,0.14)",
-                      zIndex: 50,
-                      overflow: "hidden",
-                      maxHeight: "440px",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <div
-                      style={{
-                        padding: "14px 16px",
-                        borderBottom: "1px solid var(--dash-border)",
-                        fontWeight: 600,
-                        fontSize: "14px",
-                        color: "var(--dash-text-primary)",
-                      }}
-                    >
+                  <div className="dash-notif-panel">
+                    <div className="dash-notif-panel-head">
                       Notifications
                     </div>
-                    <div style={{ overflowY: "auto", flex: 1 }}>
+                    <div className="dash-notif-panel-body">
                       {notifs.length === 0 ? (
                         <div
                           style={{

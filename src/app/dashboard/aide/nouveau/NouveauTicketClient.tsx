@@ -86,7 +86,7 @@ export default function NouveauTicketClient({ userName, userEmail, shopName }: P
         </div>
       </div>
 
-      <div className="dash-animate-fade-up dash-animate-delay-1" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "24px", alignItems: "flex-start" }}>
+      <div className="dash-animate-fade-up dash-animate-delay-1 dash-aide-form-layout">
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div className="dash-settings-card">
             <div className="dash-settings-card-header">

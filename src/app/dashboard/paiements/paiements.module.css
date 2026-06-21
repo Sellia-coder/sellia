@@ -453,11 +453,13 @@
 
 .tableWrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 720px;
 }
 
 .table th {
@@ -749,10 +751,10 @@
 
 @media (max-width: 768px) {
   .wrap {
-    padding: 20px;
+    padding: 20px 16px 48px;
   }
   .balanceValue {
-    font-size: 40px;
+    font-size: 36px;
   }
   .header {
     flex-direction: column;
