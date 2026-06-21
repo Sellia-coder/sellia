@@ -664,6 +664,56 @@
   color: var(--sellia-danger);
 }
 
+.duplicateToast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #15803d;
+}
+
+.duplicateToastActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.duplicateToastLink {
+  font-weight: 600;
+  color: #e84b1f;
+  text-decoration: none;
+}
+
+.duplicateToastLink:hover {
+  text-decoration: underline;
+}
+
+.duplicateToastClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #15803d;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.duplicateToastClose:hover {
+  background: rgba(22, 163, 74, 0.1);
+}
+
 @media (max-width: 1024px) {
   .wrap {
     padding: 24px 20px 48px;

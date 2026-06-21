@@ -11,6 +11,7 @@ import {
   ListBullets,
   PencilSimple,
   Trash,
+  Copy,
   ArrowSquareOut,
   WarningOctagon,
   Eye,
@@ -20,6 +21,7 @@ import {
 import {
   toggleProductActiveAction,
   deleteProductAction,
+  duplicateProductAction,
 } from "@/app/actions/product";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 import ImportCsvModal from "@/components/dashboard/ImportCsvModal";
@@ -77,6 +79,10 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
   const [search, setSearch] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [duplicateToast, setDuplicateToast] = useState<{
+    productId: string;
+    name: string;
+  } | null>(null);
 
   const currency = shop.defaultCurrency || "FCFA";
 
@@ -125,6 +131,19 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
     setBusyId(null);
   };
 
+  const handleDuplicate = async (p: ProductItem) => {
+    setBusyId(p.id);
+    setDuplicateToast(null);
+    const res = await duplicateProductAction(p.id);
+    if (res.ok) {
+      setDuplicateToast({ productId: res.productId, name: res.name });
+      router.refresh();
+    } else {
+      alert(res.error || "Impossible de dupliquer le produit.");
+    }
+    setBusyId(null);
+  };
+
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
@@ -155,6 +174,28 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
           </Link>
         </div>
       </div>
+
+      {duplicateToast && (
+        <div className={styles.duplicateToast}>
+          <span>Produit dupliqué — {duplicateToast.name}</span>
+          <div className={styles.duplicateToastActions}>
+            <Link
+              href={`/dashboard/produits/${duplicateToast.productId}`}
+              className={styles.duplicateToastLink}
+            >
+              Éditer la copie
+            </Link>
+            <button
+              type="button"
+              className={styles.duplicateToastClose}
+              onClick={() => setDuplicateToast(null)}
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={styles.stats}>
         <div className={styles.statCard}>
@@ -350,6 +391,15 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                   >
                     <PencilSimple size={14} weight="regular" />
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDuplicate(p)}
+                    disabled={busyId === p.id}
+                    className={styles.cardActionBtn}
+                    title="Dupliquer"
+                  >
+                    <Copy size={14} weight="regular" />
+                  </button>
                   <a
                     href={`/shop/${shop.slug}/produit/${p.slug || p.id}`}
                     target="_blank"
@@ -503,6 +553,15 @@ export default function ProductsListClient({ shop, products, stats }: Props) {
                         >
                           <PencilSimple size={14} weight="regular" />
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDuplicate(p)}
+                          disabled={busyId === p.id}
+                          className={styles.tableActionBtn}
+                          title="Dupliquer"
+                        >
+                          <Copy size={14} weight="regular" />
+                        </button>
                         <a
                           href={`/shop/${shop.slug}/produit/${p.slug || p.id}`}
                           target="_blank"

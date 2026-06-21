@@ -1,5 +1,6 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -143,6 +144,143 @@ function revalidateShopPaths(slug: string | null) {
     revalidatePath(`/shop/${slug}/recherche`, "page");
   }
   revalidatePath("/dashboard/produits", "page");
+}
+
+async function generateUniqueDuplicateSlug(
+  shopId: string,
+  sourceName: string,
+  sourceSlug: string | null
+): Promise<string> {
+  const baseFromSlug = sourceSlug?.trim()
+    ? `${sourceSlug.trim().toLowerCase()}-copie`
+    : `${generateProductSlug(sourceName, 0)}-copie`;
+
+  let candidate = baseFromSlug.slice(0, 80);
+  let suffix = 1;
+
+  while (true) {
+    const exists = await db.product.findFirst({
+      where: { shopId, slug: candidate },
+      select: { id: true },
+    });
+    if (!exists) return candidate;
+    suffix += 1;
+    const extra = `-${suffix}`;
+    candidate = `${baseFromSlug.slice(0, Math.max(1, 80 - extra.length))}${extra}`;
+  }
+}
+
+function cloneGalleryUrls(galleryUrls: unknown): string[] | undefined {
+  if (!Array.isArray(galleryUrls)) return undefined;
+  const list = galleryUrls.filter((u): u is string => typeof u === "string" && u.length > 0);
+  return list.length > 0 ? list : undefined;
+}
+
+export async function duplicateProductAction(
+  productId: string
+): Promise<
+  | { ok: true; productId: string; slug: string; name: string }
+  | { ok: false; error: string }
+> {
+  try {
+    const user = await getCurrentUser();
+    if (!user?.id) return { ok: false, error: "Non autorisé" };
+
+    const source = await db.product.findUnique({
+      where: { id: productId },
+      include: {
+        variants: { orderBy: { position: "asc" } },
+        shop: { select: { id: true, slug: true, ownerId: true } },
+      },
+    });
+
+    if (!source) return { ok: false, error: "Produit introuvable" };
+    if (source.shop.ownerId !== user.id) {
+      return { ok: false, error: "Accès refusé" };
+    }
+
+    const duplicateName = `${source.name.trim()} (copie)`;
+    const slug = await generateUniqueDuplicateSlug(
+      source.shopId,
+      duplicateName,
+      source.slug
+    );
+
+    const count = await db.product.count({ where: { shopId: source.shopId } });
+
+    const duplicateStatus =
+      source.status === "active" ? "draft" : source.status;
+
+    const created = await db.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data: {
+          shopId: source.shopId,
+          name: duplicateName,
+          slug,
+          description: source.description,
+          shortDescription: source.shortDescription,
+          emoji: source.emoji,
+          price: source.price,
+          comparePrice: source.comparePrice,
+          promoEndsAt: source.promoEndsAt,
+          currency: source.currency,
+          category: source.category,
+          customCategory: source.customCategory,
+          tags: [...source.tags],
+          type: source.type,
+          sku: source.sku ? `${source.sku}-copie` : null,
+          stock: source.stock,
+          unlimitedStock: source.unlimitedStock,
+          weight: source.weight,
+          digitalFileUrl: source.digitalFileUrl,
+          downloadLimit: source.downloadLimit,
+          imageUrl: source.imageUrl,
+          galleryUrls: cloneGalleryUrls(source.galleryUrls),
+          metaTitle: source.metaTitle,
+          metaDescription: source.metaDescription,
+          hasVariants: source.hasVariants,
+          variantAxes: source.variantAxes ?? undefined,
+          feeMode: source.feeMode,
+          codAvailable: source.codAvailable,
+          status: duplicateStatus,
+          position: count,
+          views: 0,
+        },
+      });
+
+      if (source.hasVariants && source.variants.length > 0) {
+        await tx.productVariant.createMany({
+          data: source.variants.map((v, idx) => ({
+            productId: product.id,
+            attributes: (v.attributes ?? {}) as Prisma.InputJsonValue,
+            label: v.label,
+            stock: v.stock,
+            priceDelta: v.priceDelta,
+            imageUrl: v.imageUrl,
+            sku: v.sku ? `${v.sku}-copie` : null,
+            isActive: v.isActive,
+            position: idx,
+          })),
+        });
+      }
+
+      return product;
+    });
+
+    revalidateShopPaths(source.shop.slug);
+    revalidatePath(`/dashboard/produits/${created.id}`, "page");
+
+    return {
+      ok: true,
+      productId: created.id,
+      slug: created.slug ?? created.id,
+      name: created.name,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[duplicateProductAction]", message);
+    return { ok: false, error: message || "Erreur serveur" };
+  }
 }
 
 export async function createProductAction(input: {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { verifyOTPAction, resendOTPAction } from "@/app/actions/auth";
+import AuthPostOtpTransition from "@/components/auth/AuthPostOtpTransition";
 
 function VerifierEmailContent() {
   const router = useRouter();
@@ -405,22 +406,7 @@ function VerifierEmailContent() {
         </div>
       </main>
 
-      {transitioning && (
-        <div className="auth-transition-overlay" role="status" aria-live="polite">
-          <div className="auth-transition-content">
-            <div className="auth-transition-logo">SELLIA</div>
-            <div className="auth-transition-title">Préparation de votre boutique</div>
-            <div className="auth-transition-subtitle">
-              Un instant, nous configurons votre espace...
-            </div>
-            <div className="auth-transition-spinner">
-              <span className="auth-transition-dot" />
-              <span className="auth-transition-dot" />
-              <span className="auth-transition-dot" />
-            </div>
-          </div>
-        </div>
-      )}
+      {transitioning && <AuthPostOtpTransition />}
     </div>
   );
 }

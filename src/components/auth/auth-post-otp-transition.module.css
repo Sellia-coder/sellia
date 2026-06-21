@@ -1,0 +1,236 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  background: linear-gradient(180deg, #fafaf7 0%, #f5f2ec 100%);
+  animation: otpFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes otpFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.inner {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.visual {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 32px;
+}
+
+.glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(232, 75, 31, 0.12) 0%,
+    transparent 70%
+  );
+  animation: otpGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes otpGlow {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ringArc {
+  animation: otpRing 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes otpRing {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 0.85;
+  }
+  50% {
+    stroke-dashoffset: -60;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -120;
+    opacity: 0.85;
+  }
+}
+
+.logoMark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  margin: 0 0 10px;
+  font-family: var(--font-display, "Manrope"), sans-serif;
+  font-size: clamp(26px, 5vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  color: #0e1116;
+  line-height: 1.15;
+}
+
+.subtitle {
+  margin: 0 0 28px;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(14, 17, 22, 0.55);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(14, 17, 22, 0.06);
+  background: rgba(255, 255, 255, 0.6);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    opacity 0.25s ease;
+  opacity: 0.55;
+}
+
+.stepActive {
+  opacity: 1;
+  border-color: rgba(232, 75, 31, 0.2);
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(14, 17, 22, 0.04);
+}
+
+.stepDone {
+  opacity: 1;
+  border-color: rgba(22, 163, 74, 0.15);
+  background: rgba(240, 253, 244, 0.7);
+}
+
+.stepIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 17, 22, 0.05);
+  color: #16a34a;
+}
+
+.stepActive .stepIcon {
+  background: rgba(232, 75, 31, 0.1);
+  color: #e84b1f;
+}
+
+.stepDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(14, 17, 22, 0.25);
+}
+
+.stepPulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e84b1f;
+  animation: otpPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes otpPulse {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.stepLabel {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0e1116;
+  line-height: 1.35;
+}
+
+@media (max-width: 480px) {
+  .inner {
+    max-width: 100%;
+  }
+
+  .visual {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 24px;
+  }
+
+  .step {
+    padding: 11px 12px;
+  }
+
+  .stepLabel {
+    font-size: 13.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+
+  .glow,
+  .ringArc,
+  .stepPulse {
+    animation: none !important;
+  }
+
+  .stepPulse {
+    opacity: 1;
+    transform: none;
+  }
+}
